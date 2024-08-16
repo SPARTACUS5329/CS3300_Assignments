@@ -1,0 +1,5 @@
+#!/bin/bash
+flex a1.l
+bison -d a1.y
+gcc lex.yy.c a1.tab.c -o a1 -ll -ly
+./a1 < sample.lang
