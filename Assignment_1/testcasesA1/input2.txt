@@ -1,0 +1,17 @@
+int main(){
+    int  switch ;
+    int    union;
+
+
+    switch=   10;
+
+    union=  3;
+
+    int     double;
+
+    double= switch ** union;
+
+    printf("Result is--> %d", double);
+
+    return 0;
+}

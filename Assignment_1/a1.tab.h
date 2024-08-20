@@ -51,12 +51,16 @@
      MINUS = 267,
      MULTIPLY = 268,
      DIVIDE = 269,
-     VALID_TYPE = 270,
-     IDENTIFIER = 271,
-     NUMBER = 272,
-     IF = 273,
-     ELSE = 274,
-     UMINUS = 275
+     EXPONENT = 270,
+     VALID_TYPE = 271,
+     IDENTIFIER = 272,
+     NUMBER = 273,
+     STRING = 274,
+     IF = 275,
+     ELSE = 276,
+     WHILE = 277,
+     RETURN = 278,
+     UMINUS = 279
    };
 #endif
 /* Tokens.  */
@@ -72,25 +76,29 @@
 #define MINUS 267
 #define MULTIPLY 268
 #define DIVIDE 269
-#define VALID_TYPE 270
-#define IDENTIFIER 271
-#define NUMBER 272
-#define IF 273
-#define ELSE 274
-#define UMINUS 275
+#define EXPONENT 270
+#define VALID_TYPE 271
+#define IDENTIFIER 272
+#define NUMBER 273
+#define STRING 274
+#define IF 275
+#define ELSE 276
+#define WHILE 277
+#define RETURN 278
+#define UMINUS 279
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 23 "a1.y"
+#line 26 "a1.y"
 {
     char *str;
     int val;
 }
 /* Line 1529 of yacc.c.  */
-#line 94 "a1.tab.h"
+#line 102 "a1.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

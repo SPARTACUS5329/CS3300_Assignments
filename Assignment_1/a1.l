@@ -17,6 +17,7 @@ extern char mytext[];
 "-"		{ return MINUS; }
 "*"		{ return MULTIPLY; }
 "/"		{ return DIVIDE; }
+"**"		{ return EXPONENT; }
 ";"		{ return SEMI_COLON; }
 
 int		{ return VALID_TYPE; }
@@ -32,7 +33,12 @@ float		{ return VALID_TYPE; }
 if		{ return IF; }
 else		{ return ELSE; }
 
+while		{ return WHILE; }
+
+return		{ return RETURN; }
+
 [0-9]+         { strcpy(mytext, yytext); return NUMBER; }
+\"[^\"]*\"          { strcpy(mytext, yytext); return STRING; }
 [a-zA-Z][a-zA-Z0-9]* { strcpy(mytext, yytext); return IDENTIFIER; }
 
 [ \n\t]	{ }

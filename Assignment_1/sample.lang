@@ -1,9 +1,5 @@
-int main (int a, int b) {
-	if (3 < 5) {
-		int a = 0;
-		char b;
-		c = 5 + a;
-	} else {
-		int a = 1;
-	}
+int main(){
+	int b = 2;
+	int a = (5 + 3) ** b;
+    return 0;
 }
