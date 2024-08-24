@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #define MAX_IDENTIFIERS 2000
 #define MAX_IDENTIFIER_LENGTH 200
+#define streq(str1, str2, n) (strncmp(str1, str2, n) == 0)
 void yyerror(char *);
 int yylex(void);
 char mytext[100];
@@ -30,14 +31,14 @@ void insertSymbol(char *key, identifier_t data, hash_table_item_t* hashTable[]);
 %token EQ PLUS MINUS MULTIPLY DIVIDE EXPONENT
 %token VALID_TYPE IDENTIFIER NUMBER STRING
 %token IF ELSE
-%token WHILE
+%token WHILE FOR
 %token RETURN
 
 %left PLUS MINUS COMPAR
 %left MULTIPLY DIVIDE
 %right UMINUS EXPONENT
 %left OPEN_PAREN CLOSE_PAREN
-%right ELSE
+%left ELSE
 
 %union {
     char *str;
@@ -54,47 +55,27 @@ lines: line
      | line lines
 ;
 
-line: declaration
+line: declarationStatement
     | assignment
     | expression SEMI_COLON
-    | block
+    | returnStatement
+    | ifStatement
+    | loopStatement
+    | functionBlock
 ;
 
-block: functionBlock
-     | ifBlock
-     | loopBlock
+declarationStatement: validType declarations SEMI_COLON
 ;
 
-declaration: validType assignable SEMI_COLON {
-               if (searchSymbol($2, symbolTable) == NULL) {
-		    identifier_t id;
-		    strncpy(id.type, (char*)$1, sizeof(id.type) - 1);
-		    id.type[sizeof(id.type) - 1] = '\0';
-		    strncpy(id.name, (char*)$2, sizeof(id.name) - 1);
-		    id.name[sizeof(id.name) - 1] = '\0';
-		    insertSymbol($2, id, symbolTable);
-	       }
-               else
-                   yyerror("Redeclaration of variable");
-           }
-	   | validType assignable EQ expression SEMI_COLON {
-               if (searchSymbol($2, symbolTable) == NULL) {
-		    identifier_t id;
-		    strncpy(id.type, (char*)$1, sizeof(id.type) - 1);
-		    id.type[sizeof(id.type) - 1] = '\0';
-		    strncpy(id.name, (char*)$2, sizeof(id.name) - 1);
-		    id.name[sizeof(id.name) - 1] = '\0';
-		    insertSymbol($2, id, symbolTable);
-	       }
-               else
-                   yyerror("Redeclaration of variable");
-           }
+declarations: declaration
+	    | declaration COMMA declarations
 ;
 
-assignment: assignable EQ expression SEMI_COLON {
-               if (searchSymbol($1, symbolTable) == NULL)
-                   yyerror("Undeclared variable");
-           }
+declaration: assignment
+	   | assignable
+;
+
+assignment: assignable EQ expression SEMI_COLON
 ;
 
 assignable: identifier {
@@ -119,7 +100,7 @@ arguments:| argument
 	 | argument COMMA arguments
 ;
 
-argument: term | STRING
+argument: expression | STRING
 ;
 
 expression:
@@ -135,43 +116,38 @@ expression:
     | term
 ;
 
-functionBlock: validType identifier OPEN_PAREN parameters CLOSE_PAREN
-	     OPEN_BRACE
-		lines
-		returnStatement
-	     CLOSE_BRACE
+functionBlock: validType identifier OPEN_PAREN parameters CLOSE_PAREN body
 ;
 
-returnStatement: | RETURN term SEMI_COLON
+returnStatement: RETURN expression SEMI_COLON
+	       | RETURN SEMI_COLON;
 ;
 
 parameters:| parameter
 	 | parameter COMMA parameters
 ;
 
-parameter: validType identifier
+parameter: validType assignable
 ;
 
-ifBlock: ifStatement elsePart
+ifStatement: IF OPEN_PAREN expression CLOSE_PAREN body ELSE body
+	   | IF OPEN_PAREN expression CLOSE_PAREN body
 ;
 
-ifStatement: IF OPEN_PAREN expression CLOSE_PAREN
-             OPEN_BRACE lines CLOSE_BRACE
-           ;
-
-elsePart:
-        | ELSE ifBlock
-        | ELSE OPEN_BRACE lines CLOSE_BRACE
+loopStatement: whileStatement | forStatement
 ;
 
-loopBlock: whileStatement
+whileStatement: WHILE OPEN_PAREN expression CLOSE_PAREN body
 ;
 
-whileStatement: WHILE OPEN_PAREN expression CLOSE_PAREN
-	      OPEN_BRACE
-		lines
-	      CLOSE_BRACE
+forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable EQ expression CLOSE_PAREN
 ;
+
+
+body: line
+      | OPEN_BRACE lines CLOSE_BRACE
+;
+
 
 term: identifier
     | identifier subscripts

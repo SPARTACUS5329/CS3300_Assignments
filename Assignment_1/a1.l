@@ -30,6 +30,7 @@ float		{ strcpy(mytext, yytext); return VALID_TYPE; }
 "=="		{ return COMPAR; }
 "!="		{ return COMPAR; }
 "<"		{ return COMPAR; }
+">"		{ return COMPAR; }
 "<="		{ return COMPAR; }
 ">="		{ return COMPAR; }
 
@@ -37,12 +38,13 @@ if		{ return IF; }
 else		{ return ELSE; }
 
 while		{ return WHILE; }
+for		{ return FOR; }
 
 return		{ return RETURN; }
 
 [0-9]+         { strcpy(mytext, yytext); return NUMBER; }
 \"[^\"]*\"          { strcpy(mytext, yytext); return STRING; }
-[a-zA-Z][a-zA-Z0-9]* { strcpy(mytext, yytext); return IDENTIFIER; }
+[a-zA-Z_][a-zA-Z0-9_]* { strcpy(mytext, yytext); return IDENTIFIER; }
 
 [ \t]	{ }
 [\n]	{ lineNumber++; }
