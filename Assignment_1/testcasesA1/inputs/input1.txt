@@ -1,11 +1,11 @@
-int main(int a)
+int main()
 {
     int b;
     
     b=72;
 
 
-    int a;
+    const int a;
     a=10;
     return 0;
 

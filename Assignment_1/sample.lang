@@ -1,5 +1,8 @@
 int main(){
-	int b = 2;
-	int a = (5 + 3) ** b;
+	int c = foo(3, 5);
+	c + 3;
+	printf("Reaching", 1);
+	int d = arr[1];
+	arr[2] = d;
     return 0;
 }

@@ -43,24 +43,26 @@
      CLOSE_PAREN = 259,
      OPEN_BRACE = 260,
      CLOSE_BRACE = 261,
-     COMMA = 262,
-     COMPAR = 263,
-     SEMI_COLON = 264,
-     EQ = 265,
-     PLUS = 266,
-     MINUS = 267,
-     MULTIPLY = 268,
-     DIVIDE = 269,
-     EXPONENT = 270,
-     VALID_TYPE = 271,
-     IDENTIFIER = 272,
-     NUMBER = 273,
-     STRING = 274,
-     IF = 275,
-     ELSE = 276,
-     WHILE = 277,
-     RETURN = 278,
-     UMINUS = 279
+     OPEN_SQUARE = 262,
+     CLOSE_SQUARE = 263,
+     COMMA = 264,
+     COMPAR = 265,
+     SEMI_COLON = 266,
+     EQ = 267,
+     PLUS = 268,
+     MINUS = 269,
+     MULTIPLY = 270,
+     DIVIDE = 271,
+     EXPONENT = 272,
+     VALID_TYPE = 273,
+     IDENTIFIER = 274,
+     NUMBER = 275,
+     STRING = 276,
+     IF = 277,
+     ELSE = 278,
+     WHILE = 279,
+     RETURN = 280,
+     UMINUS = 281
    };
 #endif
 /* Tokens.  */
@@ -68,37 +70,39 @@
 #define CLOSE_PAREN 259
 #define OPEN_BRACE 260
 #define CLOSE_BRACE 261
-#define COMMA 262
-#define COMPAR 263
-#define SEMI_COLON 264
-#define EQ 265
-#define PLUS 266
-#define MINUS 267
-#define MULTIPLY 268
-#define DIVIDE 269
-#define EXPONENT 270
-#define VALID_TYPE 271
-#define IDENTIFIER 272
-#define NUMBER 273
-#define STRING 274
-#define IF 275
-#define ELSE 276
-#define WHILE 277
-#define RETURN 278
-#define UMINUS 279
+#define OPEN_SQUARE 262
+#define CLOSE_SQUARE 263
+#define COMMA 264
+#define COMPAR 265
+#define SEMI_COLON 266
+#define EQ 267
+#define PLUS 268
+#define MINUS 269
+#define MULTIPLY 270
+#define DIVIDE 271
+#define EXPONENT 272
+#define VALID_TYPE 273
+#define IDENTIFIER 274
+#define NUMBER 275
+#define STRING 276
+#define IF 277
+#define ELSE 278
+#define WHILE 279
+#define RETURN 280
+#define UMINUS 281
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 26 "a1.y"
+#line 25 "a1.y"
 {
     char *str;
     int val;
 }
 /* Line 1529 of yacc.c.  */
-#line 102 "a1.tab.h"
+#line 106 "a1.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

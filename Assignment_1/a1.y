@@ -6,11 +6,10 @@
 void yyerror(char *);
 int yylex(void);
 char mytext[100];
-char var[100];
-int num = 0;
+int lineNumber = 0;
 %}
 
-%token OPEN_PAREN CLOSE_PAREN OPEN_BRACE CLOSE_BRACE COMMA COMPAR SEMI_COLON
+%token OPEN_PAREN CLOSE_PAREN OPEN_BRACE CLOSE_BRACE OPEN_SQUARE CLOSE_SQUARE COMMA COMPAR SEMI_COLON
 %token EQ PLUS MINUS MULTIPLY DIVIDE EXPONENT
 %token VALID_TYPE
 %token IDENTIFIER NUMBER STRING
@@ -18,7 +17,7 @@ int num = 0;
 %token WHILE
 %token RETURN
 
-%left PLUS MINUS
+%left PLUS MINUS COMPAR
 %left MULTIPLY DIVIDE
 %right UMINUS EXPONENT
 %left OPEN_PAREN CLOSE_PAREN
@@ -51,17 +50,21 @@ lines: line
 
 line: declaration
     | assignment
-    | functionCall
+    | expression SEMI_COLON
 ;
 
-declaration: VALID_TYPE identifier SEMI_COLON
-	   | VALID_TYPE identifier EQ expression SEMI_COLON;
+declaration: VALID_TYPE assignable SEMI_COLON
+	   | VALID_TYPE assignable EQ expression SEMI_COLON;
 ;
 
-assignment: identifier EQ expression SEMI_COLON
+assignment: assignable EQ expression SEMI_COLON
 ;
 
-functionCall: identifier OPEN_PAREN arguments CLOSE_PAREN SEMI_COLON
+assignable: identifier
+	  | identifier OPEN_SQUARE index CLOSE_SQUARE 
+;
+
+functionCall: identifier OPEN_PAREN arguments CLOSE_PAREN
 ;
 
 arguments:| argument
@@ -74,11 +77,13 @@ argument: term | STRING
 expression:
     expression PLUS expression
     | expression MINUS expression
+    | expression COMPAR expression
     | expression MULTIPLY expression
     | expression DIVIDE expression
     | expression EXPONENT expression
     | MINUS expression %prec UMINUS
     | OPEN_PAREN expression CLOSE_PAREN
+    | functionCall
     | term
 ;
 
@@ -102,7 +107,7 @@ parameter: VALID_TYPE identifier
 ifBlock: ifStatement elseStatement
 ;
 
-ifStatement: IF OPEN_PAREN term COMPAR term CLOSE_PAREN
+ifStatement: IF OPEN_PAREN expression CLOSE_PAREN
        OPEN_BRACE
 	blocks
        CLOSE_BRACE
@@ -116,14 +121,19 @@ elseStatement: | ELSE OPEN_BRACE
 loopBlock: whileStatement
 ;
 
-whileStatement: WHILE OPEN_PAREN term COMPAR term CLOSE_PAREN
+whileStatement: WHILE OPEN_PAREN expression CLOSE_PAREN
 	      OPEN_BRACE
 		blocks
 	      CLOSE_BRACE
 ;
 
 term: identifier
+    | identifier OPEN_SQUARE index CLOSE_SQUARE
     | NUMBER
+;
+
+index: identifier
+     | NUMBER
 ;
 
 identifier: IDENTIFIER {
@@ -132,8 +142,8 @@ identifier: IDENTIFIER {
 ;
 %%
 
-void yyerror(char *s) {
-    fprintf(stderr, "%s\n", s);
+void yyerror(char *message) {
+    fprintf(stderr, "%d\n", lineNumber);
     exit(1);
 }
 

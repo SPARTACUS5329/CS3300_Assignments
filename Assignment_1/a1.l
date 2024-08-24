@@ -3,6 +3,7 @@
 #include <stdlib.h>
 void yyerror(char *);
 extern char mytext[];
+extern int lineNumber;
 %}
 
 %%
@@ -10,6 +11,8 @@ extern char mytext[];
 ")"		{ return CLOSE_PAREN; }
 "{"		{ return OPEN_BRACE; }
 "}"		{ return CLOSE_BRACE; }
+"["		{ return OPEN_SQUARE; }
+"]"		{ return CLOSE_SQUARE; }
 ","		{ return COMMA; }
 
 "="		{ return EQ; }
@@ -41,7 +44,8 @@ return		{ return RETURN; }
 \"[^\"]*\"          { strcpy(mytext, yytext); return STRING; }
 [a-zA-Z][a-zA-Z0-9]* { strcpy(mytext, yytext); return IDENTIFIER; }
 
-[ \n\t]	{ }
+[ \t]	{ }
+[\n]	{ lineNumber++; }
 
 .	{yyerror("unknown character");}
 %%
