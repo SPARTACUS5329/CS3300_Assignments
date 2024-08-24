@@ -7,29 +7,28 @@
 void yyerror(char *);
 int yylex(void);
 char mytext[100];
-int lineNumber = 0;
-
-typedef struct hashTableItem {
-    int data;
-    int key;
-} hash_table_item_t;
+int lineNumber = 1;
 
 typedef struct Identifier {
     char type[5];
     char name[MAX_IDENTIFIER_LENGTH];
 } identifier_t;
 
-hash_table_item_t *symbolTable[500];
+typedef struct hashTableItem {
+    identifier_t data;
+    int key;
+} hash_table_item_t;
+
+hash_table_item_t *symbolTable[MAX_IDENTIFIERS];
 
 unsigned long hash(char *str);
 hash_table_item_t *searchSymbol(char *key, hash_table_item_t* hashTable[]);
-void insertSymbol(char *key, int data, hash_table_item_t* hashTable[]);
+void insertSymbol(char *key, identifier_t data, hash_table_item_t* hashTable[]);
 %}
 
 %token OPEN_PAREN CLOSE_PAREN OPEN_BRACE CLOSE_BRACE OPEN_SQUARE CLOSE_SQUARE COMMA COMPAR SEMI_COLON
 %token EQ PLUS MINUS MULTIPLY DIVIDE EXPONENT
-%token VALID_TYPE
-%token IDENTIFIER NUMBER STRING
+%token VALID_TYPE IDENTIFIER NUMBER STRING
 %token IF ELSE
 %token WHILE
 %token RETURN
@@ -42,10 +41,9 @@ void insertSymbol(char *key, int data, hash_table_item_t* hashTable[]);
 
 %union {
     char *str;
-    int val;
 }
 
-%type <str> identifier
+%type <str> identifier assignable validType
 
 %%
 
@@ -67,15 +65,44 @@ block: functionBlock
      | loopBlock
 ;
 
-declaration: VALID_TYPE assignable SEMI_COLON
-	   | VALID_TYPE assignable EQ expression SEMI_COLON;
+declaration: validType assignable SEMI_COLON {
+               if (searchSymbol($2, symbolTable) == NULL) {
+		    identifier_t id;
+		    strncpy(id.type, (char*)$1, sizeof(id.type) - 1);
+		    id.type[sizeof(id.type) - 1] = '\0';
+		    strncpy(id.name, (char*)$2, sizeof(id.name) - 1);
+		    id.name[sizeof(id.name) - 1] = '\0';
+		    insertSymbol($2, id, symbolTable);
+	       }
+               else
+                   yyerror("Redeclaration of variable");
+           }
+	   | validType assignable EQ expression SEMI_COLON {
+               if (searchSymbol($2, symbolTable) == NULL) {
+		    identifier_t id;
+		    strncpy(id.type, (char*)$1, sizeof(id.type) - 1);
+		    id.type[sizeof(id.type) - 1] = '\0';
+		    strncpy(id.name, (char*)$2, sizeof(id.name) - 1);
+		    id.name[sizeof(id.name) - 1] = '\0';
+		    insertSymbol($2, id, symbolTable);
+	       }
+               else
+                   yyerror("Redeclaration of variable");
+           }
 ;
 
-assignment: assignable EQ expression SEMI_COLON
+assignment: assignable EQ expression SEMI_COLON {
+               if (searchSymbol($1, symbolTable) == NULL)
+                   yyerror("Undeclared variable");
+           }
 ;
 
-assignable: identifier
-	  | identifier subscripts
+assignable: identifier {
+	    $$ = $1;
+	  }
+	  | identifier subscripts {
+	    $$ = $1;
+	  }
 ;
 
 subscripts: subscript
@@ -108,7 +135,7 @@ expression:
     | term
 ;
 
-functionBlock: VALID_TYPE identifier OPEN_PAREN parameters CLOSE_PAREN
+functionBlock: validType identifier OPEN_PAREN parameters CLOSE_PAREN
 	     OPEN_BRACE
 		lines
 		returnStatement
@@ -122,7 +149,7 @@ parameters:| parameter
 	 | parameter COMMA parameters
 ;
 
-parameter: VALID_TYPE identifier
+parameter: validType identifier
 ;
 
 ifBlock: ifStatement elsePart
@@ -155,6 +182,11 @@ index: identifier
      | NUMBER
 ;
 
+validType: VALID_TYPE {
+		$$ = strdup(mytext);
+	  }
+;
+
 identifier: IDENTIFIER {
 		$$ = strdup(mytext);
 	  }
@@ -162,7 +194,7 @@ identifier: IDENTIFIER {
 %%
 
 void yyerror(char *message) {
-    fprintf(stderr, "%d\n", lineNumber);
+    fprintf(stderr, "%s: %d\n", message, lineNumber);
     exit(1);
 }
 
@@ -182,6 +214,7 @@ unsigned long hash(char *str) {
 }
 
 hash_table_item_t *searchSymbol(char *key, hash_table_item_t* hashTable[]) {
+
 	int hashIndex = hash(key);
 
 	while(hashTable[hashIndex] != NULL) {
@@ -195,7 +228,7 @@ hash_table_item_t *searchSymbol(char *key, hash_table_item_t* hashTable[]) {
 	return NULL;        
 }
 
-void insertSymbol(char *key, int data, hash_table_item_t* hashTable[]) {
+void insertSymbol(char *key, identifier_t data, hash_table_item_t* hashTable[]) {
 	hash_table_item_t *item;
 	item = searchSymbol(key, hashTable);
 	if (item != NULL) {

@@ -23,9 +23,9 @@ extern int lineNumber;
 "**"		{ return EXPONENT; }
 ";"		{ return SEMI_COLON; }
 
-int		{ return VALID_TYPE; }
-char		{ return VALID_TYPE; }
-float		{ return VALID_TYPE; }
+int		{ strcpy(mytext, yytext); return VALID_TYPE; }
+char		{ strcpy(mytext, yytext); return VALID_TYPE; }
+float		{ strcpy(mytext, yytext); return VALID_TYPE; }
 
 "=="		{ return COMPAR; }
 "!="		{ return COMPAR; }

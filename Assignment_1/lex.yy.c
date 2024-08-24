@@ -837,17 +837,17 @@ YY_RULE_SETUP
 case 15:
 YY_RULE_SETUP
 #line 26 "a1.l"
-{ return VALID_TYPE; }
+{ strcpy(mytext, yytext); return VALID_TYPE; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 27 "a1.l"
-{ return VALID_TYPE; }
+{ strcpy(mytext, yytext); return VALID_TYPE; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 28 "a1.l"
-{ return VALID_TYPE; }
+{ strcpy(mytext, yytext); return VALID_TYPE; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
