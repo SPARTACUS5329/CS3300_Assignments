@@ -38,6 +38,7 @@ void insertSymbol(char *key, int data, hash_table_item_t* hashTable[]);
 %left MULTIPLY DIVIDE
 %right UMINUS EXPONENT
 %left OPEN_PAREN CLOSE_PAREN
+%right ELSE
 
 %union {
     char *str;
@@ -48,17 +49,7 @@ void insertSymbol(char *key, int data, hash_table_item_t* hashTable[]);
 
 %%
 
-program: blocks
-;
-
-blocks: block
-	 | block blocks
-	 | lines
-;
-
-block: functionBlock
-     | ifBlock
-     | loopBlock
+program: lines
 ;
 
 lines: line
@@ -68,6 +59,12 @@ lines: line
 line: declaration
     | assignment
     | expression SEMI_COLON
+    | block
+;
+
+block: functionBlock
+     | ifBlock
+     | loopBlock
 ;
 
 declaration: VALID_TYPE assignable SEMI_COLON
@@ -113,7 +110,7 @@ expression:
 
 functionBlock: VALID_TYPE identifier OPEN_PAREN parameters CLOSE_PAREN
 	     OPEN_BRACE
-		blocks
+		lines
 		returnStatement
 	     CLOSE_BRACE
 ;
@@ -128,18 +125,16 @@ parameters:| parameter
 parameter: VALID_TYPE identifier
 ;
 
-ifBlock: ifStatement elseStatement
+ifBlock: ifStatement elsePart
 ;
 
 ifStatement: IF OPEN_PAREN expression CLOSE_PAREN
-       OPEN_BRACE
-	blocks
-       CLOSE_BRACE
-;
+             OPEN_BRACE lines CLOSE_BRACE
+           ;
 
-elseStatement: | ELSE OPEN_BRACE
-		    blocks
-		CLOSE_BRACE
+elsePart:
+        | ELSE ifBlock
+        | ELSE OPEN_BRACE lines CLOSE_BRACE
 ;
 
 loopBlock: whileStatement
@@ -147,7 +142,7 @@ loopBlock: whileStatement
 
 whileStatement: WHILE OPEN_PAREN expression CLOSE_PAREN
 	      OPEN_BRACE
-		blocks
+		lines
 	      CLOSE_BRACE
 ;
 

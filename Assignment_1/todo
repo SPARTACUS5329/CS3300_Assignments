@@ -1,5 +1,4 @@
 printf() should get supported
-Support n-dimensional arrays
-Support elseIfStatements
 Support for loops
 Return only primitive data types
+Report undeclared/redeclared variables
