@@ -109,10 +109,10 @@ assignable: identifier {
 ;
 
 subscripts: subscript {
-	    $$ = 1
+	    $$ = 1;
 	  }
        | subscript subscripts {
-	$$ = 1 + $2
+	    $$ = 1 + $2;
        }
 ;
 
@@ -239,7 +239,7 @@ identifier: IDENTIFIER {
 %%
 
 void yyerror(char *message) {
-    fprintf(stderr, "%s: %d\n", message, lineNumber);
+    fprintf(stderr, "%d\n", lineNumber);
     exit(1);
 }
 

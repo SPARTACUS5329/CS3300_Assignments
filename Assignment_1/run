@@ -1,5 +1,6 @@
-#!/bin/bash
 flex a1.l
-bison -d -v a1.y
-gcc lex.yy.c a1.tab.c -o a1 -ll -ly
-./a1 < sample.lang
+bison -d a1.y
+mv a1.tab.h y.tab.h
+mv a1.tab.c y.tab.c
+gcc lex.yy.c y.tab.c -ll -ly
+./a.out < sample.txt

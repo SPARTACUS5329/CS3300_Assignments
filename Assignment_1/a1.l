@@ -8,7 +8,7 @@ typedef struct {
   int depth;
 } identifier_t;
 
-#include "a1.tab.h"
+#include "y.tab.h"
 
 void yyerror(char *);
 extern char mytext[];
