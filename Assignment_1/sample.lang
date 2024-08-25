@@ -1,10 +1,33 @@
+int arr[10];
+int x;
+float fun(int switchh[20], int mytypedef[30]) {
+	for (ii = 0; ii < switchh[5]; ii = ii+mytypedef[jj], jj=jj-2)
+		if (mytypedef[ii] < switchh[jj])
+			printf("Life is much more than a number.\n");
+	else {
+		life = CGPA + 1;
+	}
+	if (cgpa >= 10)
+		printf("Ma! PGM!!!\n");
+	else if (cgpa < arr[0])
+		printf("Chetan, what is five point someone?\n");
+	else printf("Appa, I am confused what to do in my life.\n");
+
+	return;
+}
+int fun (char fun) {
+	float funny, funnier, funniest;
+	char CS3300[20];
+
+	while (CS3300[MyRollNumber] >= 40)
+		Lab = Lab + 1;
+		Assign = Assign + 2**fun;
+		Exam = Exam - fun;
+}
 int main() {
-	int mat[10][10];
-	for (i = 0; i < 10; i=i+1)
-		for (j = 0; j < 10; j=j+1)
-			mat[i][j] = 0;
-	fun_fun2(mat[i]);
-	mat[9][9] = 9;
-	fun_fun2(mat[8][8], mat[8][9]);
-	return 1;
+	int fun; 
+	arr[5] = 10;
+	fun = fun(20 - x - 20, 30-4*y*z**power**power_ful4, arr);
+	while (dowhile < 5)
+		dowhile = dowhile + fun;
 }

@@ -1,6 +1,15 @@
 %{
-#include "a1.tab.h"
 #include <stdlib.h>
+#define MAX_IDENTIFIERS 2000
+#define MAX_IDENTIFIER_LENGTH 200
+
+typedef struct {
+  char name[MAX_IDENTIFIER_LENGTH];
+  int depth;
+} identifier_t;
+
+#include "a1.tab.h"
+
 void yyerror(char *);
 extern char mytext[];
 extern int lineNumber;

@@ -2,29 +2,30 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#define streq(str1, str2, n) (strncmp(str1, str2, n) == 0)
 #define MAX_IDENTIFIERS 2000
 #define MAX_IDENTIFIER_LENGTH 200
-#define streq(str1, str2, n) (strncmp(str1, str2, n) == 0)
+
+typedef struct {
+  char name[MAX_IDENTIFIER_LENGTH];
+  int depth;
+} identifier_t;
+
+typedef struct hashTableItem {
+  int data;
+  int key;
+} hash_table_item_t;
+
+unsigned long hash(char *str);
+hash_table_item_t *searchSymbol(char *key, hash_table_item_t *hashTable[]);
+void insertSymbol(char *key, int data, hash_table_item_t *hashTable[]);
+
 void yyerror(char *);
 int yylex(void);
 char mytext[100];
 int lineNumber = 1;
 
-typedef struct Identifier {
-    char type[5];
-    char name[MAX_IDENTIFIER_LENGTH];
-} identifier_t;
-
-typedef struct hashTableItem {
-    identifier_t data;
-    int key;
-} hash_table_item_t;
-
 hash_table_item_t *symbolTable[MAX_IDENTIFIERS];
-
-unsigned long hash(char *str);
-hash_table_item_t *searchSymbol(char *key, hash_table_item_t* hashTable[]);
-void insertSymbol(char *key, identifier_t data, hash_table_item_t* hashTable[]);
 %}
 
 %token OPEN_PAREN CLOSE_PAREN OPEN_BRACE CLOSE_BRACE OPEN_SQUARE CLOSE_SQUARE COMMA COMPAR SEMI_COLON
@@ -42,9 +43,13 @@ void insertSymbol(char *key, identifier_t data, hash_table_item_t* hashTable[]);
 
 %union {
     char *str;
+    int val;
+    identifier_t id;
 }
 
-%type <str> identifier assignable validType
+%type <str> identifier
+%type <val> subscripts expression
+%type <id> assignable term
 
 %%
 
@@ -71,23 +76,44 @@ declarations: declaration
 	    | declaration COMMA declarations
 ;
 
-declaration: assignment
-	   | assignable
+declaration: assignable EQ expression SEMI_COLON {
+		insertSymbol($1.name, $1.depth, symbolTable);
+	  }
+	   | assignable {
+		insertSymbol($1.name, $1.depth, symbolTable);
+	  }
 ;
 
-assignment: assignable EQ expression SEMI_COLON
+assignment: assignable EQ expression SEMI_COLON {
+	    hash_table_item_t *item = searchSymbol($1.name, symbolTable);
+	    if (item != NULL)
+		if (item->data != $1.depth)
+		    yyerror("Invalid location");
+	  }
 ;
 
 assignable: identifier {
-	    $$ = $1;
+	    identifier_t id;
+	    strncpy(id.name, (char *) $1, sizeof(id.name) - 1);
+	    id.name[sizeof(id.name) - 1] = '\0';
+	    id.depth = 0;
+	    $$ = id;
 	  }
 	  | identifier subscripts {
-	    $$ = $1;
+	    identifier_t id;
+	    strncpy(id.name, (char *) $1, sizeof(id.name) - 1);
+	    id.name[sizeof(id.name) - 1] = '\0';
+	    id.depth = $2;
+	    $$ = id;
 	  }
 ;
 
-subscripts: subscript
-       | subscript subscripts
+subscripts: subscript {
+	    $$ = 1
+	  }
+       | subscript subscripts {
+	$$ = 1 + $2
+       }
 ;
 
 subscript: OPEN_SQUARE index CLOSE_SQUARE 
@@ -104,16 +130,44 @@ argument: expression | STRING
 ;
 
 expression:
-    expression PLUS expression
-    | expression MINUS expression
-    | expression COMPAR expression
-    | expression MULTIPLY expression
-    | expression DIVIDE expression
-    | expression EXPONENT expression
-    | MINUS expression %prec UMINUS
-    | OPEN_PAREN expression CLOSE_PAREN
-    | functionCall
-    | term
+    expression PLUS expression {
+	if ($1 != $3) yyerror("Invalid location");
+	$$ = $1;
+    }
+    | expression MINUS expression {
+	if ($1 != $3) yyerror("Invalid location");
+	$$ = $1;
+    }
+    | expression COMPAR expression {
+	if ($1 != $3) yyerror("Invalid location");
+	$$ = $1;
+    }
+    | expression MULTIPLY expression {
+	if ($1 != $3) yyerror("Invalid location");
+	$$ = $1;
+    }
+    | expression DIVIDE expression {
+	if ($1 != $3) yyerror("Invalid location");
+	$$ = $1;
+    }
+    | expression EXPONENT expression {
+	if ($1 != $3) yyerror("Invalid location");
+	$$ = $1;
+    }
+    | MINUS expression %prec UMINUS {
+	$$ = $2;
+    }
+    | OPEN_PAREN expression CLOSE_PAREN {
+	$$ = $2;
+    }
+    | functionCall {
+	$$ = 0;
+    }
+    | term {
+	hash_table_item_t *item = searchSymbol($1.name, symbolTable);
+	if (item != NULL) $$ = item->data - $1.depth;
+	else $$ = 0;
+      }
 ;
 
 functionBlock: validType identifier OPEN_PAREN parameters CLOSE_PAREN body
@@ -140,7 +194,7 @@ loopStatement: whileStatement | forStatement
 whileStatement: WHILE OPEN_PAREN expression CLOSE_PAREN body
 ;
 
-forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable EQ expression CLOSE_PAREN
+forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable EQ expression CLOSE_PAREN body
 ;
 
 
@@ -149,18 +203,33 @@ body: line
 ;
 
 
-term: identifier
-    | identifier subscripts
-    | NUMBER
+term: identifier {
+	identifier_t id;
+	strncpy(id.name, (char *) $1, sizeof(id.name) - 1);
+	id.name[sizeof(id.name) - 1] = '\0';
+	id.depth = 0;
+	$$ = id;
+      }
+    | identifier subscripts {
+	identifier_t id;
+	strncpy(id.name, (char *) $1, sizeof(id.name) - 1);
+	id.name[sizeof(id.name) - 1] = '\0';
+	id.depth = $2;
+	$$ = id;
+      }
+    | NUMBER {
+	identifier_t id;
+	id.name[0] = '\0';
+	id.depth = 0;
+	$$ = id;
+      }
 ;
 
 index: identifier
      | NUMBER
 ;
 
-validType: VALID_TYPE {
-		$$ = strdup(mytext);
-	  }
+validType: VALID_TYPE
 ;
 
 identifier: IDENTIFIER {
@@ -204,7 +273,7 @@ hash_table_item_t *searchSymbol(char *key, hash_table_item_t* hashTable[]) {
 	return NULL;        
 }
 
-void insertSymbol(char *key, identifier_t data, hash_table_item_t* hashTable[]) {
+void insertSymbol(char *key, int data, hash_table_item_t* hashTable[]) {
 	hash_table_item_t *item;
 	item = searchSymbol(key, hashTable);
 	if (item != NULL) {

@@ -20,7 +20,7 @@ Grammar
    12 declarations: declaration
    13             | declaration COMMA declarations
 
-   14 declaration: assignment
+   14 declaration: assignable EQ expression SEMI_COLON
    15            | assignable
 
    16 assignment: assignable EQ expression SEMI_COLON
@@ -72,7 +72,7 @@ Grammar
 
    49 whileStatement: WHILE OPEN_PAREN expression CLOSE_PAREN body
 
-   50 forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable EQ expression CLOSE_PAREN
+   50 forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable EQ expression CLOSE_PAREN body
 
    51 body: line
    52     | OPEN_BRACE lines CLOSE_BRACE
@@ -101,8 +101,8 @@ OPEN_SQUARE (262) 21
 CLOSE_SQUARE (263) 21
 COMMA (264) 13 25 43
 COMPAR (265) 30
-SEMI_COLON (266) 6 11 16 39 40 50
-EQ (267) 16 50
+SEMI_COLON (266) 6 11 14 16 39 40 50
+EQ (267) 14 16 50
 PLUS (268) 28
 MINUS (269) 29 34
 MULTIPLY (270) 31
@@ -137,9 +137,9 @@ declarations (33)
 declaration (34)
     on left: 14 15, on right: 12 13
 assignment (35)
-    on left: 16, on right: 5 14 50
+    on left: 16, on right: 5 50
 assignable (36)
-    on left: 17 18, on right: 15 16 44 50
+    on left: 17 18, on right: 14 15 16 44 50
 subscripts (37)
     on left: 19 20, on right: 18 20 54
 subscript (38)
@@ -151,8 +151,8 @@ arguments (40)
 argument (41)
     on left: 26 27, on right: 24 25
 expression (42)
-    on left: 28 29 30 31 32 33 34 35 36 37, on right: 6 16 26 28 29
-    30 31 32 33 34 35 39 45 46 49 50
+    on left: 28 29 30 31 32 33 34 35 36 37, on right: 6 14 16 26 28
+    29 30 31 32 33 34 35 39 45 46 49 50
 functionBlock (43)
     on left: 38, on right: 10
 returnStatement (44)
@@ -170,7 +170,7 @@ whileStatement (49)
 forStatement (50)
     on left: 50, on right: 48
 body (51)
-    on left: 51 52, on right: 38 45 46 49
+    on left: 51 52, on right: 38 45 46 49 50
 term (52)
     on left: 53 54 55, on right: 37
 index (53)
@@ -282,7 +282,7 @@ state 7
 
 state 8
 
-   50 forStatement: FOR . OPEN_PAREN assignment expression SEMI_COLON assignable EQ expression CLOSE_PAREN
+   50 forStatement: FOR . OPEN_PAREN assignment expression SEMI_COLON assignable EQ expression CLOSE_PAREN body
 
     OPEN_PAREN  shift, and go to state 32
 
@@ -458,9 +458,8 @@ state 25
 
     declarations  go to state 45
     declaration   go to state 46
-    assignment    go to state 47
-    assignable    go to state 48
-    identifier    go to state 49
+    assignable    go to state 47
+    identifier    go to state 48
 
 
 state 26
@@ -471,14 +470,14 @@ state 26
    53 term: identifier .
    54     | identifier . subscripts
 
-    OPEN_PAREN   shift, and go to state 50
-    OPEN_SQUARE  shift, and go to state 51
+    OPEN_PAREN   shift, and go to state 49
+    OPEN_SQUARE  shift, and go to state 50
 
     EQ        reduce using rule 17 (assignable)
     $default  reduce using rule 53 (term)
 
-    subscripts  go to state 52
-    subscript   go to state 53
+    subscripts  go to state 51
+    subscript   go to state 52
 
 
 state 27
@@ -491,7 +490,7 @@ state 27
    33           | expression . EXPONENT expression
    35           | OPEN_PAREN expression . CLOSE_PAREN
 
-    CLOSE_PAREN  shift, and go to state 54
+    CLOSE_PAREN  shift, and go to state 53
     COMPAR       shift, and go to state 38
     PLUS         shift, and go to state 40
     MINUS        shift, and go to state 41
@@ -506,13 +505,13 @@ state 28
    53 term: identifier .
    54     | identifier . subscripts
 
-    OPEN_PAREN   shift, and go to state 50
-    OPEN_SQUARE  shift, and go to state 51
+    OPEN_PAREN   shift, and go to state 49
+    OPEN_SQUARE  shift, and go to state 50
 
     $default  reduce using rule 53 (term)
 
-    subscripts  go to state 55
-    subscript   go to state 53
+    subscripts  go to state 54
+    subscript   go to state 52
 
 
 state 29
@@ -541,7 +540,7 @@ state 30
     NUMBER      shift, and go to state 5
 
     functionCall  go to state 16
-    expression    go to state 56
+    expression    go to state 55
     term          go to state 24
     identifier    go to state 28
 
@@ -556,20 +555,20 @@ state 31
     NUMBER      shift, and go to state 5
 
     functionCall  go to state 16
-    expression    go to state 57
+    expression    go to state 56
     term          go to state 24
     identifier    go to state 28
 
 
 state 32
 
-   50 forStatement: FOR OPEN_PAREN . assignment expression SEMI_COLON assignable EQ expression CLOSE_PAREN
+   50 forStatement: FOR OPEN_PAREN . assignment expression SEMI_COLON assignable EQ expression CLOSE_PAREN body
 
     IDENTIFIER  shift, and go to state 4
 
-    assignment  go to state 58
+    assignment  go to state 57
     assignable  go to state 15
-    identifier  go to state 59
+    identifier  go to state 58
 
 
 state 33
@@ -590,7 +589,7 @@ state 34
    39 returnStatement: RETURN expression . SEMI_COLON
 
     COMPAR      shift, and go to state 38
-    SEMI_COLON  shift, and go to state 60
+    SEMI_COLON  shift, and go to state 59
     PLUS        shift, and go to state 40
     MINUS       shift, and go to state 41
     MULTIPLY    shift, and go to state 42
@@ -622,7 +621,7 @@ state 37
     NUMBER      shift, and go to state 5
 
     functionCall  go to state 16
-    expression    go to state 61
+    expression    go to state 60
     term          go to state 24
     identifier    go to state 28
 
@@ -637,7 +636,7 @@ state 38
     NUMBER      shift, and go to state 5
 
     functionCall  go to state 16
-    expression    go to state 62
+    expression    go to state 61
     term          go to state 24
     identifier    go to state 28
 
@@ -659,7 +658,7 @@ state 40
     NUMBER      shift, and go to state 5
 
     functionCall  go to state 16
-    expression    go to state 63
+    expression    go to state 62
     term          go to state 24
     identifier    go to state 28
 
@@ -674,7 +673,7 @@ state 41
     NUMBER      shift, and go to state 5
 
     functionCall  go to state 16
-    expression    go to state 64
+    expression    go to state 63
     term          go to state 24
     identifier    go to state 28
 
@@ -689,7 +688,7 @@ state 42
     NUMBER      shift, and go to state 5
 
     functionCall  go to state 16
-    expression    go to state 65
+    expression    go to state 64
     term          go to state 24
     identifier    go to state 28
 
@@ -704,7 +703,7 @@ state 43
     NUMBER      shift, and go to state 5
 
     functionCall  go to state 16
-    expression    go to state 66
+    expression    go to state 65
     term          go to state 24
     identifier    go to state 28
 
@@ -719,7 +718,7 @@ state 44
     NUMBER      shift, and go to state 5
 
     functionCall  go to state 16
-    expression    go to state 67
+    expression    go to state 66
     term          go to state 24
     identifier    go to state 28
 
@@ -728,7 +727,7 @@ state 45
 
    11 declarationStatement: validType declarations . SEMI_COLON
 
-    SEMI_COLON  shift, and go to state 68
+    SEMI_COLON  shift, and go to state 67
 
 
 state 46
@@ -736,44 +735,37 @@ state 46
    12 declarations: declaration .
    13             | declaration . COMMA declarations
 
-    COMMA  shift, and go to state 69
+    COMMA  shift, and go to state 68
 
     $default  reduce using rule 12 (declarations)
 
 
 state 47
 
-   14 declaration: assignment .
+   14 declaration: assignable . EQ expression SEMI_COLON
+   15            | assignable .
 
-    $default  reduce using rule 14 (declaration)
-
-
-state 48
-
-   15 declaration: assignable .
-   16 assignment: assignable . EQ expression SEMI_COLON
-
-    EQ  shift, and go to state 37
+    EQ  shift, and go to state 69
 
     $default  reduce using rule 15 (declaration)
 
 
-state 49
+state 48
 
    17 assignable: identifier .
    18           | identifier . subscripts
    38 functionBlock: validType identifier . OPEN_PAREN parameters CLOSE_PAREN body
 
     OPEN_PAREN   shift, and go to state 70
-    OPEN_SQUARE  shift, and go to state 51
+    OPEN_SQUARE  shift, and go to state 50
 
     $default  reduce using rule 17 (assignable)
 
     subscripts  go to state 71
-    subscript   go to state 53
+    subscript   go to state 52
 
 
-state 50
+state 49
 
    22 functionCall: identifier OPEN_PAREN . arguments CLOSE_PAREN
 
@@ -793,7 +785,7 @@ state 50
     identifier    go to state 28
 
 
-state 51
+state 50
 
    21 subscript: OPEN_SQUARE . index CLOSE_SQUARE
 
@@ -804,7 +796,7 @@ state 51
     identifier  go to state 78
 
 
-state 52
+state 51
 
    18 assignable: identifier subscripts .
    54 term: identifier subscripts .
@@ -813,34 +805,34 @@ state 52
     $default  reduce using rule 54 (term)
 
 
-state 53
+state 52
 
    19 subscripts: subscript .
    20           | subscript . subscripts
 
-    OPEN_SQUARE  shift, and go to state 51
+    OPEN_SQUARE  shift, and go to state 50
 
     $default  reduce using rule 19 (subscripts)
 
     subscripts  go to state 79
-    subscript   go to state 53
+    subscript   go to state 52
 
 
-state 54
+state 53
 
    35 expression: OPEN_PAREN expression CLOSE_PAREN .
 
     $default  reduce using rule 35 (expression)
 
 
-state 55
+state 54
 
    54 term: identifier subscripts .
 
     $default  reduce using rule 54 (term)
 
 
-state 56
+state 55
 
    28 expression: expression . PLUS expression
    29           | expression . MINUS expression
@@ -860,7 +852,7 @@ state 56
     EXPONENT     shift, and go to state 44
 
 
-state 57
+state 56
 
    28 expression: expression . PLUS expression
    29           | expression . MINUS expression
@@ -879,9 +871,9 @@ state 57
     EXPONENT     shift, and go to state 44
 
 
-state 58
+state 57
 
-   50 forStatement: FOR OPEN_PAREN assignment . expression SEMI_COLON assignable EQ expression CLOSE_PAREN
+   50 forStatement: FOR OPEN_PAREN assignment . expression SEMI_COLON assignable EQ expression CLOSE_PAREN body
 
     OPEN_PAREN  shift, and go to state 1
     MINUS       shift, and go to state 2
@@ -894,27 +886,27 @@ state 58
     identifier    go to state 28
 
 
-state 59
+state 58
 
    17 assignable: identifier .
    18           | identifier . subscripts
 
-    OPEN_SQUARE  shift, and go to state 51
+    OPEN_SQUARE  shift, and go to state 50
 
     $default  reduce using rule 17 (assignable)
 
     subscripts  go to state 71
-    subscript   go to state 53
+    subscript   go to state 52
 
 
-state 60
+state 59
 
    39 returnStatement: RETURN expression SEMI_COLON .
 
     $default  reduce using rule 39 (returnStatement)
 
 
-state 61
+state 60
 
    16 assignment: assignable EQ expression . SEMI_COLON
    28 expression: expression . PLUS expression
@@ -933,7 +925,7 @@ state 61
     EXPONENT    shift, and go to state 44
 
 
-state 62
+state 61
 
    28 expression: expression . PLUS expression
    29           | expression . MINUS expression
@@ -950,7 +942,7 @@ state 62
     $default  reduce using rule 30 (expression)
 
 
-state 63
+state 62
 
    28 expression: expression . PLUS expression
    28           | expression PLUS expression .
@@ -967,7 +959,7 @@ state 63
     $default  reduce using rule 28 (expression)
 
 
-state 64
+state 63
 
    28 expression: expression . PLUS expression
    29           | expression . MINUS expression
@@ -984,7 +976,7 @@ state 64
     $default  reduce using rule 29 (expression)
 
 
-state 65
+state 64
 
    28 expression: expression . PLUS expression
    29           | expression . MINUS expression
@@ -999,7 +991,7 @@ state 65
     $default  reduce using rule 31 (expression)
 
 
-state 66
+state 65
 
    28 expression: expression . PLUS expression
    29           | expression . MINUS expression
@@ -1014,7 +1006,7 @@ state 66
     $default  reduce using rule 32 (expression)
 
 
-state 67
+state 66
 
    28 expression: expression . PLUS expression
    29           | expression . MINUS expression
@@ -1029,14 +1021,14 @@ state 67
     $default  reduce using rule 33 (expression)
 
 
-state 68
+state 67
 
    11 declarationStatement: validType declarations SEMI_COLON .
 
     $default  reduce using rule 11 (declarationStatement)
 
 
-state 69
+state 68
 
    13 declarations: declaration COMMA . declarations
 
@@ -1044,9 +1036,23 @@ state 69
 
     declarations  go to state 84
     declaration   go to state 46
-    assignment    go to state 47
-    assignable    go to state 48
-    identifier    go to state 59
+    assignable    go to state 47
+    identifier    go to state 58
+
+
+state 69
+
+   14 declaration: assignable EQ . expression SEMI_COLON
+
+    OPEN_PAREN  shift, and go to state 1
+    MINUS       shift, and go to state 2
+    IDENTIFIER  shift, and go to state 4
+    NUMBER      shift, and go to state 5
+
+    functionCall  go to state 16
+    expression    go to state 85
+    term          go to state 24
+    identifier    go to state 28
 
 
 state 70
@@ -1057,9 +1063,9 @@ state 70
 
     $default  reduce using rule 41 (parameters)
 
-    parameters  go to state 85
-    parameter   go to state 86
-    validType   go to state 87
+    parameters  go to state 86
+    parameter   go to state 87
+    validType   go to state 88
 
 
 state 71
@@ -1080,7 +1086,7 @@ state 73
 
    22 functionCall: identifier OPEN_PAREN arguments . CLOSE_PAREN
 
-    CLOSE_PAREN  shift, and go to state 88
+    CLOSE_PAREN  shift, and go to state 89
 
 
 state 74
@@ -1088,7 +1094,7 @@ state 74
    24 arguments: argument .
    25          | argument . COMMA arguments
 
-    COMMA  shift, and go to state 89
+    COMMA  shift, and go to state 90
 
     $default  reduce using rule 24 (arguments)
 
@@ -1124,7 +1130,7 @@ state 77
 
    21 subscript: OPEN_SQUARE index . CLOSE_SQUARE
 
-    CLOSE_SQUARE  shift, and go to state 90
+    CLOSE_SQUARE  shift, and go to state 91
 
 
 state 78
@@ -1147,7 +1153,7 @@ state 80
    46            | IF OPEN_PAREN expression CLOSE_PAREN . body
 
     OPEN_PAREN  shift, and go to state 1
-    OPEN_BRACE  shift, and go to state 91
+    OPEN_BRACE  shift, and go to state 92
     MINUS       shift, and go to state 2
     VALID_TYPE  shift, and go to state 3
     IDENTIFIER  shift, and go to state 4
@@ -1157,40 +1163,7 @@ state 80
     FOR         shift, and go to state 8
     RETURN      shift, and go to state 9
 
-    line                  go to state 92
-    declarationStatement  go to state 13
-    assignment            go to state 14
-    assignable            go to state 15
-    functionCall          go to state 16
-    expression            go to state 17
-    functionBlock         go to state 18
-    returnStatement       go to state 19
-    ifStatement           go to state 20
-    loopStatement         go to state 21
-    whileStatement        go to state 22
-    forStatement          go to state 23
-    body                  go to state 93
-    term                  go to state 24
-    validType             go to state 25
-    identifier            go to state 26
-
-
-state 81
-
-   49 whileStatement: WHILE OPEN_PAREN expression CLOSE_PAREN . body
-
-    OPEN_PAREN  shift, and go to state 1
-    OPEN_BRACE  shift, and go to state 91
-    MINUS       shift, and go to state 2
-    VALID_TYPE  shift, and go to state 3
-    IDENTIFIER  shift, and go to state 4
-    NUMBER      shift, and go to state 5
-    IF          shift, and go to state 6
-    WHILE       shift, and go to state 7
-    FOR         shift, and go to state 8
-    RETURN      shift, and go to state 9
-
-    line                  go to state 92
+    line                  go to state 93
     declarationStatement  go to state 13
     assignment            go to state 14
     assignable            go to state 15
@@ -1208,6 +1181,39 @@ state 81
     identifier            go to state 26
 
 
+state 81
+
+   49 whileStatement: WHILE OPEN_PAREN expression CLOSE_PAREN . body
+
+    OPEN_PAREN  shift, and go to state 1
+    OPEN_BRACE  shift, and go to state 92
+    MINUS       shift, and go to state 2
+    VALID_TYPE  shift, and go to state 3
+    IDENTIFIER  shift, and go to state 4
+    NUMBER      shift, and go to state 5
+    IF          shift, and go to state 6
+    WHILE       shift, and go to state 7
+    FOR         shift, and go to state 8
+    RETURN      shift, and go to state 9
+
+    line                  go to state 93
+    declarationStatement  go to state 13
+    assignment            go to state 14
+    assignable            go to state 15
+    functionCall          go to state 16
+    expression            go to state 17
+    functionBlock         go to state 18
+    returnStatement       go to state 19
+    ifStatement           go to state 20
+    loopStatement         go to state 21
+    whileStatement        go to state 22
+    forStatement          go to state 23
+    body                  go to state 95
+    term                  go to state 24
+    validType             go to state 25
+    identifier            go to state 26
+
+
 state 82
 
    28 expression: expression . PLUS expression
@@ -1216,10 +1222,10 @@ state 82
    31           | expression . MULTIPLY expression
    32           | expression . DIVIDE expression
    33           | expression . EXPONENT expression
-   50 forStatement: FOR OPEN_PAREN assignment expression . SEMI_COLON assignable EQ expression CLOSE_PAREN
+   50 forStatement: FOR OPEN_PAREN assignment expression . SEMI_COLON assignable EQ expression CLOSE_PAREN body
 
     COMPAR      shift, and go to state 38
-    SEMI_COLON  shift, and go to state 95
+    SEMI_COLON  shift, and go to state 96
     PLUS        shift, and go to state 40
     MINUS       shift, and go to state 41
     MULTIPLY    shift, and go to state 42
@@ -1243,39 +1249,58 @@ state 84
 
 state 85
 
-   38 functionBlock: validType identifier OPEN_PAREN parameters . CLOSE_PAREN body
+   14 declaration: assignable EQ expression . SEMI_COLON
+   28 expression: expression . PLUS expression
+   29           | expression . MINUS expression
+   30           | expression . COMPAR expression
+   31           | expression . MULTIPLY expression
+   32           | expression . DIVIDE expression
+   33           | expression . EXPONENT expression
 
-    CLOSE_PAREN  shift, and go to state 96
+    COMPAR      shift, and go to state 38
+    SEMI_COLON  shift, and go to state 97
+    PLUS        shift, and go to state 40
+    MINUS       shift, and go to state 41
+    MULTIPLY    shift, and go to state 42
+    DIVIDE      shift, and go to state 43
+    EXPONENT    shift, and go to state 44
 
 
 state 86
 
+   38 functionBlock: validType identifier OPEN_PAREN parameters . CLOSE_PAREN body
+
+    CLOSE_PAREN  shift, and go to state 98
+
+
+state 87
+
    42 parameters: parameter .
    43           | parameter . COMMA parameters
 
-    COMMA  shift, and go to state 97
+    COMMA  shift, and go to state 99
 
     $default  reduce using rule 42 (parameters)
 
 
-state 87
+state 88
 
    44 parameter: validType . assignable
 
     IDENTIFIER  shift, and go to state 4
 
-    assignable  go to state 98
-    identifier  go to state 59
+    assignable  go to state 100
+    identifier  go to state 58
 
 
-state 88
+state 89
 
    22 functionCall: identifier OPEN_PAREN arguments CLOSE_PAREN .
 
     $default  reduce using rule 22 (functionCall)
 
 
-state 89
+state 90
 
    25 arguments: argument COMMA . arguments
 
@@ -1288,21 +1313,21 @@ state 89
     $default  reduce using rule 23 (arguments)
 
     functionCall  go to state 16
-    arguments     go to state 99
+    arguments     go to state 101
     argument      go to state 74
     expression    go to state 75
     term          go to state 24
     identifier    go to state 28
 
 
-state 90
+state 91
 
    21 subscript: OPEN_SQUARE index CLOSE_SQUARE .
 
     $default  reduce using rule 21 (subscript)
 
 
-state 91
+state 92
 
    52 body: OPEN_BRACE . lines CLOSE_BRACE
 
@@ -1316,7 +1341,7 @@ state 91
     FOR         shift, and go to state 8
     RETURN      shift, and go to state 9
 
-    lines                 go to state 100
+    lines                 go to state 102
     line                  go to state 12
     declarationStatement  go to state 13
     assignment            go to state 14
@@ -1334,46 +1359,53 @@ state 91
     identifier            go to state 26
 
 
-state 92
+state 93
 
    51 body: line .
 
     $default  reduce using rule 51 (body)
 
 
-state 93
+state 94
 
    45 ifStatement: IF OPEN_PAREN expression CLOSE_PAREN body . ELSE body
    46            | IF OPEN_PAREN expression CLOSE_PAREN body .
 
-    ELSE  shift, and go to state 101
+    ELSE  shift, and go to state 103
 
     $default  reduce using rule 46 (ifStatement)
 
 
-state 94
+state 95
 
    49 whileStatement: WHILE OPEN_PAREN expression CLOSE_PAREN body .
 
     $default  reduce using rule 49 (whileStatement)
 
 
-state 95
+state 96
 
-   50 forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON . assignable EQ expression CLOSE_PAREN
+   50 forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON . assignable EQ expression CLOSE_PAREN body
 
     IDENTIFIER  shift, and go to state 4
 
-    assignable  go to state 102
-    identifier  go to state 59
+    assignable  go to state 104
+    identifier  go to state 58
 
 
-state 96
+state 97
+
+   14 declaration: assignable EQ expression SEMI_COLON .
+
+    $default  reduce using rule 14 (declaration)
+
+
+state 98
 
    38 functionBlock: validType identifier OPEN_PAREN parameters CLOSE_PAREN . body
 
     OPEN_PAREN  shift, and go to state 1
-    OPEN_BRACE  shift, and go to state 91
+    OPEN_BRACE  shift, and go to state 92
     MINUS       shift, and go to state 2
     VALID_TYPE  shift, and go to state 3
     IDENTIFIER  shift, and go to state 4
@@ -1383,7 +1415,7 @@ state 96
     FOR         shift, and go to state 8
     RETURN      shift, and go to state 9
 
-    line                  go to state 92
+    line                  go to state 93
     declarationStatement  go to state 13
     assignment            go to state 14
     assignable            go to state 15
@@ -1395,13 +1427,13 @@ state 96
     loopStatement         go to state 21
     whileStatement        go to state 22
     forStatement          go to state 23
-    body                  go to state 103
+    body                  go to state 105
     term                  go to state 24
     validType             go to state 25
     identifier            go to state 26
 
 
-state 97
+state 99
 
    43 parameters: parameter COMMA . parameters
 
@@ -1409,38 +1441,38 @@ state 97
 
     $default  reduce using rule 41 (parameters)
 
-    parameters  go to state 104
-    parameter   go to state 86
-    validType   go to state 87
+    parameters  go to state 106
+    parameter   go to state 87
+    validType   go to state 88
 
 
-state 98
+state 100
 
    44 parameter: validType assignable .
 
     $default  reduce using rule 44 (parameter)
 
 
-state 99
+state 101
 
    25 arguments: argument COMMA arguments .
 
     $default  reduce using rule 25 (arguments)
 
 
-state 100
+state 102
 
    52 body: OPEN_BRACE lines . CLOSE_BRACE
 
-    CLOSE_BRACE  shift, and go to state 105
+    CLOSE_BRACE  shift, and go to state 107
 
 
-state 101
+state 103
 
    45 ifStatement: IF OPEN_PAREN expression CLOSE_PAREN body ELSE . body
 
     OPEN_PAREN  shift, and go to state 1
-    OPEN_BRACE  shift, and go to state 91
+    OPEN_BRACE  shift, and go to state 92
     MINUS       shift, and go to state 2
     VALID_TYPE  shift, and go to state 3
     IDENTIFIER  shift, and go to state 4
@@ -1450,7 +1482,7 @@ state 101
     FOR         shift, and go to state 8
     RETURN      shift, and go to state 9
 
-    line                  go to state 92
+    line                  go to state 93
     declarationStatement  go to state 13
     assignment            go to state 14
     assignable            go to state 15
@@ -1462,50 +1494,50 @@ state 101
     loopStatement         go to state 21
     whileStatement        go to state 22
     forStatement          go to state 23
-    body                  go to state 106
+    body                  go to state 108
     term                  go to state 24
     validType             go to state 25
     identifier            go to state 26
 
 
-state 102
+state 104
 
-   50 forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable . EQ expression CLOSE_PAREN
+   50 forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable . EQ expression CLOSE_PAREN body
 
-    EQ  shift, and go to state 107
+    EQ  shift, and go to state 109
 
 
-state 103
+state 105
 
    38 functionBlock: validType identifier OPEN_PAREN parameters CLOSE_PAREN body .
 
     $default  reduce using rule 38 (functionBlock)
 
 
-state 104
+state 106
 
    43 parameters: parameter COMMA parameters .
 
     $default  reduce using rule 43 (parameters)
 
 
-state 105
+state 107
 
    52 body: OPEN_BRACE lines CLOSE_BRACE .
 
     $default  reduce using rule 52 (body)
 
 
-state 106
+state 108
 
    45 ifStatement: IF OPEN_PAREN expression CLOSE_PAREN body ELSE body .
 
     $default  reduce using rule 45 (ifStatement)
 
 
-state 107
+state 109
 
-   50 forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable EQ . expression CLOSE_PAREN
+   50 forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable EQ . expression CLOSE_PAREN body
 
     OPEN_PAREN  shift, and go to state 1
     MINUS       shift, and go to state 2
@@ -1513,12 +1545,12 @@ state 107
     NUMBER      shift, and go to state 5
 
     functionCall  go to state 16
-    expression    go to state 108
+    expression    go to state 110
     term          go to state 24
     identifier    go to state 28
 
 
-state 108
+state 110
 
    28 expression: expression . PLUS expression
    29           | expression . MINUS expression
@@ -1526,9 +1558,9 @@ state 108
    31           | expression . MULTIPLY expression
    32           | expression . DIVIDE expression
    33           | expression . EXPONENT expression
-   50 forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable EQ expression . CLOSE_PAREN
+   50 forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable EQ expression . CLOSE_PAREN body
 
-    CLOSE_PAREN  shift, and go to state 109
+    CLOSE_PAREN  shift, and go to state 111
     COMPAR       shift, and go to state 38
     PLUS         shift, and go to state 40
     MINUS        shift, and go to state 41
@@ -1537,8 +1569,41 @@ state 108
     EXPONENT     shift, and go to state 44
 
 
-state 109
+state 111
 
-   50 forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable EQ expression CLOSE_PAREN .
+   50 forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable EQ expression CLOSE_PAREN . body
+
+    OPEN_PAREN  shift, and go to state 1
+    OPEN_BRACE  shift, and go to state 92
+    MINUS       shift, and go to state 2
+    VALID_TYPE  shift, and go to state 3
+    IDENTIFIER  shift, and go to state 4
+    NUMBER      shift, and go to state 5
+    IF          shift, and go to state 6
+    WHILE       shift, and go to state 7
+    FOR         shift, and go to state 8
+    RETURN      shift, and go to state 9
+
+    line                  go to state 93
+    declarationStatement  go to state 13
+    assignment            go to state 14
+    assignable            go to state 15
+    functionCall          go to state 16
+    expression            go to state 17
+    functionBlock         go to state 18
+    returnStatement       go to state 19
+    ifStatement           go to state 20
+    loopStatement         go to state 21
+    whileStatement        go to state 22
+    forStatement          go to state 23
+    body                  go to state 112
+    term                  go to state 24
+    validType             go to state 25
+    identifier            go to state 26
+
+
+state 112
+
+   50 forStatement: FOR OPEN_PAREN assignment expression SEMI_COLON assignable EQ expression CLOSE_PAREN body .
 
     $default  reduce using rule 50 (forStatement)
