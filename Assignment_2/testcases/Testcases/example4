@@ -1,0 +1,17 @@
+int result;
+int flag = 0;
+
+
+int add(int x, int y) {
+    result = x + y;
+    return x + y;
+}
+
+int main() {
+    int a = 5;
+    int b = 10;
+    int c;
+
+    c = add(a, b);
+    return 0;
+}

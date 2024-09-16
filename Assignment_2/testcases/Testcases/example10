@@ -1,0 +1,16 @@
+int global_var = 10;
+
+int add(int x, int y) {
+    return x + y + global_var;
+}
+
+int main() {
+    int a;
+    a = 5;
+    int b;
+    b = 10;
+    int result;
+    result = add(a, b);
+    printf("Result: %d\n", result);
+    return 0;
+}
