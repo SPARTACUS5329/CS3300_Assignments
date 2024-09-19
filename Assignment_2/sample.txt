@@ -1,7 +1,13 @@
+int foo() {
+    int a = 4;
+    a = 4 + 2;
+    return a;
+}
+
 int main() {
     int a;
     a = 3 + 5 * (4 / 5);
     int b;
-    b = 5;
+    b = 5 + a;
     return 0;
 }

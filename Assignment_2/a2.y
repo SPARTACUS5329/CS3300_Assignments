@@ -53,7 +53,14 @@ functionBlocks:
 ;
 
 mainFunction:
-	validType MAIN OPEN_PAREN parameters CLOSE_PAREN body
+	validType mainIdentifier OPEN_PAREN parameters CLOSE_PAREN body
+;
+
+mainIdentifier:
+	MAIN {
+		printf("main:\n");
+		strcpy(currScope, "main");
+	}
 ;
 
 lines:
@@ -79,7 +86,13 @@ declarations: declaration
 	| declaration COMMA declarations
 ;
 
-declaration: assignable EQ expression SEMI_COLON
+declaration: assignable EQ expression {
+		if ($3.isConstant) {
+				printf("t%d = %s\n", tCount, $3.value);
+				printf("%s = t%d\n", $1.displayName, tCount++);
+		} else
+				printf("%s = %s\n", $1.displayName, $3.value);
+	}
 	| assignable
 ;
 
@@ -205,7 +218,8 @@ expression: expression PLUS expression {
 		expression_t exp = { "\0", 0 };
 
 		if (!$1.isConstant) {
-				hash_table_item_t *item = searchSymbol($1.name, symbolTable);
+				sprintf(mytext, "%s_%s", currScope, $1.name);
+				hash_table_item_t *item = searchSymbol(mytext, symbolTable);
 				if (item == NULL)
 						error("Undefined identifier");
 				exp.depth = item->data->depth - $1.depth;
@@ -216,17 +230,26 @@ expression: expression PLUS expression {
     }
 ;
 
-functionBlock: validType functionIdentifier OPEN_PAREN parameters CLOSE_PAREN body
+functionBlock: validType functionIdentifier OPEN_PAREN parameters CLOSE_PAREN body {
+			 strcpy(currScope, "global");
+		}
 ;
 
 functionIdentifier:
 		identifier {
+				printf("%s:\n", mytext);
 				strcpy(currScope, mytext);
 		}
+;
 
 returnStatement:
-	RETURN expression SEMI_COLON
-	| RETURN SEMI_COLON
+	RETURN expression SEMI_COLON {
+		printf("retval = %s\n", $2.value);
+		printf("return\n\n");
+	}
+	| RETURN SEMI_COLON {
+		printf("return\n\n");
+	}
 ;
 
 parameters: 
@@ -297,7 +320,7 @@ identifier: IDENTIFIER {
 %%
 
 void yyerror(char *message) {
-    fprintf(stderr, "%d\n", lineNumber);
+    fprintf(stderr, "syntax error: %d\n", lineNumber);
     exit(1);
 }
 
