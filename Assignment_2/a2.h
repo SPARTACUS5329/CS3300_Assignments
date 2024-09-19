@@ -15,6 +15,7 @@ typedef struct Identifier {
 typedef struct Expression {
   char value[MAX_EXPRESSION_LENGTH];
   int depth;
+  bool isConstant;
 } expression_t;
 
 typedef struct HashTableItem {

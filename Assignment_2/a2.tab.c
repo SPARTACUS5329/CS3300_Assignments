@@ -500,11 +500,11 @@ static const yytype_uint16 yyrline[] =
 {
        0,    48,    48,    51,    52,    56,    60,    61,    66,    67,
       68,    69,    70,    71,    72,    75,    78,    79,    82,    83,
-      86,    95,   106,   119,   122,   127,   130,   133,   134,   135,
-     138,   139,   142,   149,   156,   163,   170,   177,   184,   190,
-     195,   199,   214,   218,   223,   224,   227,   228,   229,   232,
-     235,   236,   239,   240,   243,   246,   249,   250,   253,   260,
-     267,   276,   277,   280,   287
+      86,    99,   110,   123,   126,   131,   134,   137,   138,   139,
+     142,   143,   146,   153,   160,   167,   174,   181,   188,   195,
+     200,   204,   219,   223,   228,   229,   232,   233,   234,   237,
+     240,   241,   244,   245,   248,   251,   254,   255,   258,   265,
+     272,   281,   282,   285,   292
 };
 #endif
 
@@ -1513,12 +1513,16 @@ yyreduce:
 	    if (item != NULL)
 		if (item->data->depth != (yyvsp[(1) - (4)].id).depth)
 		    yyerror("Invalid location");
-		printf("%s = %s\n", (yyvsp[(1) - (4)].id).displayName, (yyvsp[(3) - (4)].exp).value);
+		if ((yyvsp[(3) - (4)].exp).isConstant) {
+				printf("t%d = %s\n", tCount, (yyvsp[(3) - (4)].exp).value);
+				printf("%s = t%d\n", (yyvsp[(1) - (4)].id).displayName, tCount++);
+		} else
+				printf("%s = %s\n", (yyvsp[(1) - (4)].id).displayName, (yyvsp[(3) - (4)].exp).value);
 	;}
     break;
 
   case 21:
-#line 95 "a2.y"
+#line 99 "a2.y"
     {
 	    identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, currScope);
@@ -1533,7 +1537,7 @@ yyreduce:
     break;
 
   case 22:
-#line 106 "a2.y"
+#line 110 "a2.y"
     {
 	    identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, currScope);
@@ -1548,21 +1552,21 @@ yyreduce:
     break;
 
   case 23:
-#line 119 "a2.y"
+#line 123 "a2.y"
     {
 		(yyval.val) = 1;
 	;}
     break;
 
   case 24:
-#line 122 "a2.y"
+#line 126 "a2.y"
     {
 	    (yyval.val) = 1 + (yyvsp[(2) - (2)].val);
     ;}
     break;
 
   case 32:
-#line 142 "a2.y"
+#line 146 "a2.y"
     {
 		  if ((yyvsp[(1) - (3)].exp).depth != (yyvsp[(3) - (3)].exp).depth) error("Invalid operation");
 		  expression_t exp = { "\0", (yyvsp[(1) - (3)].exp).depth };
@@ -1573,7 +1577,7 @@ yyreduce:
     break;
 
   case 33:
-#line 149 "a2.y"
+#line 153 "a2.y"
     {
 		  if ((yyvsp[(1) - (3)].exp).depth != (yyvsp[(3) - (3)].exp).depth) error("Invalid operation");
 		  expression_t exp = { "\0", (yyvsp[(1) - (3)].exp).depth };
@@ -1584,7 +1588,7 @@ yyreduce:
     break;
 
   case 34:
-#line 156 "a2.y"
+#line 160 "a2.y"
     {
 		  if ((yyvsp[(1) - (3)].exp).depth != (yyvsp[(3) - (3)].exp).depth) error("Invalid operation");
 		  expression_t exp = { "\0", (yyvsp[(1) - (3)].exp).depth };
@@ -1595,7 +1599,7 @@ yyreduce:
     break;
 
   case 35:
-#line 163 "a2.y"
+#line 167 "a2.y"
     {
 		  if ((yyvsp[(1) - (3)].exp).depth != (yyvsp[(3) - (3)].exp).depth) error("Invalid operation");
 		  expression_t exp = { "\0", (yyvsp[(1) - (3)].exp).depth };
@@ -1606,7 +1610,7 @@ yyreduce:
     break;
 
   case 36:
-#line 170 "a2.y"
+#line 174 "a2.y"
     {
 		  if ((yyvsp[(1) - (3)].exp).depth != (yyvsp[(3) - (3)].exp).depth) error("Invalid operation");
 		  expression_t exp = { "\0", (yyvsp[(1) - (3)].exp).depth };
@@ -1617,7 +1621,7 @@ yyreduce:
     break;
 
   case 37:
-#line 177 "a2.y"
+#line 181 "a2.y"
     {
 		  if ((yyvsp[(1) - (3)].exp).depth != (yyvsp[(3) - (3)].exp).depth) error("Invalid operation");
 		  expression_t exp = { "\0", (yyvsp[(1) - (3)].exp).depth };
@@ -1628,17 +1632,18 @@ yyreduce:
     break;
 
   case 38:
-#line 184 "a2.y"
+#line 188 "a2.y"
     {
 		  expression_t exp = { "\0", (yyvsp[(2) - (2)].exp).depth };
 		  printf("t%d = -%s\n", tCount++, (yyvsp[(2) - (2)].exp).value);
 		  sprintf(exp.value, "%s", (yyvsp[(2) - (2)].exp).value);
+		  exp.isConstant = true;
 		  (yyval.exp) = exp;
     ;}
     break;
 
   case 39:
-#line 190 "a2.y"
+#line 195 "a2.y"
     {
 		  expression_t exp = { "\0", (yyvsp[(2) - (3)].exp).depth }; 
 		  sprintf(exp.value, "%s", (yyvsp[(2) - (3)].exp).value);
@@ -1647,7 +1652,7 @@ yyreduce:
     break;
 
   case 40:
-#line 195 "a2.y"
+#line 200 "a2.y"
     {
 		expression_t exp = { "\n", 0 };
 		(yyval.exp) = exp;
@@ -1655,7 +1660,7 @@ yyreduce:
     break;
 
   case 41:
-#line 199 "a2.y"
+#line 204 "a2.y"
     {
 		expression_t exp = { "\0", 0 };
 
@@ -1665,21 +1670,21 @@ yyreduce:
 						error("Undefined identifier");
 				exp.depth = item->data->depth - (yyvsp[(1) - (1)].id).depth;
 		}
-		printf("t%d = %s\n", tCount++, (yyvsp[(1) - (1)].id).name);
 		sprintf(exp.value, "%s", (yyvsp[(1) - (1)].id).name);
+		exp.isConstant = true;
 		(yyval.exp) = exp;
     ;}
     break;
 
   case 43:
-#line 218 "a2.y"
+#line 223 "a2.y"
     {
 				strcpy(currScope, mytext);
 		;}
     break;
 
   case 58:
-#line 253 "a2.y"
+#line 258 "a2.y"
     {
 		identifier_t id;
 		strncpy(id.name, (char *) (yyvsp[(1) - (1)].str), sizeof(id.name) - 1);
@@ -1690,7 +1695,7 @@ yyreduce:
     break;
 
   case 59:
-#line 260 "a2.y"
+#line 265 "a2.y"
     {
 		identifier_t id;
 		strncpy(id.name, (char *) (yyvsp[(1) - (2)].str), sizeof(id.name) - 1);
@@ -1701,7 +1706,7 @@ yyreduce:
     break;
 
   case 60:
-#line 267 "a2.y"
+#line 272 "a2.y"
     {
 		identifier_t id;
 		strcpy(id.name, mytext);
@@ -1712,7 +1717,7 @@ yyreduce:
     break;
 
   case 63:
-#line 280 "a2.y"
+#line 285 "a2.y"
     {
 		 (yyval.str) = malloc(5 * sizeof(char));
 		 strcpy((yyval.str), mytext);
@@ -1721,7 +1726,7 @@ yyreduce:
     break;
 
   case 64:
-#line 287 "a2.y"
+#line 292 "a2.y"
     {
 		(yyval.str) = strdup(mytext);
 	;}
@@ -1729,7 +1734,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1733 "a2.tab.c"
+#line 1738 "a2.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1943,7 +1948,7 @@ yyreturn:
 }
 
 
-#line 292 "a2.y"
+#line 297 "a2.y"
 
 
 void yyerror(char *message) {

@@ -88,7 +88,11 @@ assignment: assignable EQ expression SEMI_COLON {
 	    if (item != NULL)
 		if (item->data->depth != $1.depth)
 		    yyerror("Invalid location");
-		printf("%s = %s\n", $1.displayName, $3.value);
+		if ($3.isConstant) {
+				printf("t%d = %s\n", tCount, $3.value);
+				printf("%s = t%d\n", $1.displayName, tCount++);
+		} else
+				printf("%s = %s\n", $1.displayName, $3.value);
 	}
 ;
 
@@ -185,6 +189,7 @@ expression: expression PLUS expression {
 		  expression_t exp = { "\0", $2.depth };
 		  printf("t%d = -%s\n", tCount++, $2.value);
 		  sprintf(exp.value, "%s", $2.value);
+		  exp.isConstant = true;
 		  $$ = exp;
     }
     | OPEN_PAREN expression CLOSE_PAREN {
@@ -205,8 +210,8 @@ expression: expression PLUS expression {
 						error("Undefined identifier");
 				exp.depth = item->data->depth - $1.depth;
 		}
-		printf("t%d = %s\n", tCount++, $1.name);
 		sprintf(exp.value, "%s", $1.name);
+		exp.isConstant = true;
 		$$ = exp;
     }
 ;
