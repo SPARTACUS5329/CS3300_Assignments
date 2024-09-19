@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "a2.h"
 #define streq(str1, str2, n) (strncmp(str1, str2, n) == 0)
 
@@ -9,7 +10,10 @@ void yyerror(char *);
 int yylex(void);
 char mytext[100];
 char currType[10];
+char currScope[MAX_IDENTIFIER_LENGTH] = "global";
 int lineNumber = 1;
+static int tCount = 0;
+static int lCount = 0;
 
 hash_table_item_t *symbolTable[MAX_IDENTIFIERS];
 %}
@@ -31,11 +35,13 @@ hash_table_item_t *symbolTable[MAX_IDENTIFIERS];
     char *str;
     int val;
     identifier_t id;
+    expression_t exp;
 }
 
 %type <str> identifier validType
-%type <val> subscripts expression
+%type <val> subscripts
 %type <id> assignable term
+%type <exp> expression
 
 %%
 program:
@@ -82,23 +88,28 @@ assignment: assignable EQ expression SEMI_COLON {
 	    if (item != NULL)
 		if (item->data->depth != $1.depth)
 		    yyerror("Invalid location");
+		printf("%s = %s\n", $1.displayName, $3.value);
 	}
 ;
 
 assignable: identifier {
 	    identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
-	    strncpy(id->name, (char *) $1, sizeof(id->name) - 1);
-	    id->name[sizeof(id->name) - 1] = '\0';
-	    strncpy(id->type, (char *) currType, sizeof(id->type) - 1);
-	    id->name[sizeof(id->type) - 1] = '\0';
+		strcpy(id->name, currScope);
+	    strcat(id->name, "_");
+	    strcat(id->name, $1);
+	    strcpy(id->displayName, $1);
+	    strcpy(id->type, currType);
 	    id->depth = 0;
 		insertSymbol(id->name, id, symbolTable);
 		$$ = *id;
 	  }
 	  | identifier subscripts {
 	    identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
-	    strncpy(id->name, (char *) $1, sizeof(id->name) - 1);
-	    id->name[sizeof(id->name) - 1] = '\0';
+		strcpy(id->name, currScope);
+	    strcat(id->name, "_");
+	    strcat(id->name, $1);
+	    strcpy(id->displayName, $1);
+	    strcpy(id->type, currType);
 	    id->depth = $2;
 		insertSymbol(id->name, id, symbolTable);
 		$$ = *id;
@@ -129,49 +140,87 @@ argument: expression
 ;
 
 expression: expression PLUS expression {
-		if ($1 != $3) yyerror("Invalid location");
-		$$ = $1;
+		  if ($1.depth != $3.depth) error("Invalid operation");
+		  expression_t exp = { "\0", $1.depth };
+		  printf("t%d = %s + %s\n", tCount, $1.value, $3.value);
+		  sprintf(exp.value, "t%d", tCount++);
+		  $$ = exp;
     }
     | expression MINUS expression {
-		if ($1 != $3) yyerror("Invalid location");
-		$$ = $1;
+		  if ($1.depth != $3.depth) error("Invalid operation");
+		  expression_t exp = { "\0", $1.depth };
+		  printf("t%d = %s - %s\n", tCount, $1.value, $3.value);
+		  sprintf(exp.value, "t%d", tCount++);
+		  $$ = exp;
     }
     | expression COMPAR expression {
-		if ($1 != $3) yyerror("Invalid location");
-		$$ = $1;
+		  if ($1.depth != $3.depth) error("Invalid operation");
+		  expression_t exp = { "\0", $1.depth };
+		  printf("t%d = %s %s %s\n", tCount, $1.value, mytext, $3.value);
+		  sprintf(exp.value, "t%d", tCount++);
+		  $$ = exp;
     }
     | expression MULTIPLY expression {
-		if ($1 != $3) yyerror("Invalid location");
-		$$ = $1;
+		  if ($1.depth != $3.depth) error("Invalid operation");
+		  expression_t exp = { "\0", $1.depth };
+		  printf("t%d = %s * %s\n", tCount, $1.value, $3.value);
+		  sprintf(exp.value, "t%d", tCount++);
+		  $$ = exp;
     }
     | expression DIVIDE expression {
-		if ($1 != $3) yyerror("Invalid location");
-		$$ = $1;
+		  if ($1.depth != $3.depth) error("Invalid operation");
+		  expression_t exp = { "\0", $1.depth };
+		  printf("t%d = %s / %s\n", tCount, $1.value, $3.value);
+		  sprintf(exp.value, "t%d", tCount++);
+		  $$ = exp;
     }
     | expression EXPONENT expression {
-		if ($1 != $3) yyerror("Invalid location");
-		$$ = $1;
+		  if ($1.depth != $3.depth) error("Invalid operation");
+		  expression_t exp = { "\0", $1.depth };
+		  printf("t%d = %s ** %s\n", tCount, $1.value, $3.value);
+		  sprintf(exp.value, "t%d", tCount++);
+		  $$ = exp;
     }
     | MINUS expression %prec UMINUS {
-		$$ = $2;
+		  expression_t exp = { "\0", $2.depth };
+		  printf("t%d = -%s\n", tCount++, $2.value);
+		  sprintf(exp.value, "%s", $2.value);
+		  $$ = exp;
     }
     | OPEN_PAREN expression CLOSE_PAREN {
-		$$ = $2;
+		  expression_t exp = { "\0", $2.depth }; 
+		  sprintf(exp.value, "%s", $2.value);
+		  $$ = exp;
     }
     | functionCall {
-		$$ = 0;
+		expression_t exp = { "\n", 0 };
+		$$ = exp;
     }
     | term {
-		hash_table_item_t *item = searchSymbol($1.name, symbolTable);
-		if (item != NULL) $$ = item->data->depth - $1.depth;
-		else $$ = 0;
+		expression_t exp = { "\0", 0 };
+
+		if (!$1.isConstant) {
+				hash_table_item_t *item = searchSymbol($1.name, symbolTable);
+				if (item == NULL)
+						error("Undefined identifier");
+				exp.depth = item->data->depth - $1.depth;
+		}
+		printf("t%d = %s\n", tCount++, $1.name);
+		sprintf(exp.value, "%s", $1.name);
+		$$ = exp;
     }
 ;
 
-functionBlock: validType identifier OPEN_PAREN parameters CLOSE_PAREN body
+functionBlock: validType functionIdentifier OPEN_PAREN parameters CLOSE_PAREN body
 ;
 
-returnStatement: RETURN expression SEMI_COLON
+functionIdentifier:
+		identifier {
+				strcpy(currScope, mytext);
+		}
+
+returnStatement:
+	RETURN expression SEMI_COLON
 	| RETURN SEMI_COLON
 ;
 
@@ -217,8 +266,9 @@ term: identifier {
     }
     | NUMBER {
 		identifier_t id;
-		id.name[0] = '\0';
+		strcpy(id.name, mytext);
 		id.depth = 0;
+		id.isConstant = true;
 		$$ = id;
     }
 ;
@@ -244,6 +294,11 @@ identifier: IDENTIFIER {
 void yyerror(char *message) {
     fprintf(stderr, "%d\n", lineNumber);
     exit(1);
+}
+
+void error(char *message) {
+		perror(message);
+		exit(1);
 }
 
 int main(void) {

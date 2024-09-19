@@ -34,12 +34,12 @@ extern int lineNumber;
 
 "main"		{ strcpy(mytext, yytext); return MAIN; }
 
-"=="		{ return COMPAR; }
-"!="		{ return COMPAR; }
-"<"		{ return COMPAR; }
-">"		{ return COMPAR; }
-"<="		{ return COMPAR; }
-">="		{ return COMPAR; }
+"=="		{ strcpy(mytext, yytext); return COMPAR; }
+"!="		{ strcpy(mytext, yytext); return COMPAR; }
+"<"		{ strcpy(mytext, yytext); return COMPAR; }
+">"		{ strcpy(mytext, yytext); return COMPAR; }
+"<="		{ strcpy(mytext, yytext); return COMPAR; }
+">="		{ strcpy(mytext, yytext); return COMPAR; }
 
 "if"		{ return IF; }
 "else"		{ return ELSE; }

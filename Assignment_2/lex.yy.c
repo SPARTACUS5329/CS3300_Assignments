@@ -866,32 +866,32 @@ YY_RULE_SETUP
 case 19:
 YY_RULE_SETUP
 #line 37 "a2.l"
-{ return COMPAR; }
+{ strcpy(mytext, yytext); return COMPAR; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 38 "a2.l"
-{ return COMPAR; }
+{ strcpy(mytext, yytext); return COMPAR; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 39 "a2.l"
-{ return COMPAR; }
+{ strcpy(mytext, yytext); return COMPAR; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 40 "a2.l"
-{ return COMPAR; }
+{ strcpy(mytext, yytext); return COMPAR; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 41 "a2.l"
-{ return COMPAR; }
+{ strcpy(mytext, yytext); return COMPAR; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 42 "a2.l"
-{ return COMPAR; }
+{ strcpy(mytext, yytext); return COMPAR; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP

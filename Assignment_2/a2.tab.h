@@ -100,14 +100,15 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 30 "a2.y"
+#line 34 "a2.y"
 {
     char *str;
     int val;
     identifier_t id;
+    expression_t exp;
 }
 /* Line 1529 of yacc.c.  */
-#line 111 "a2.tab.h"
+#line 112 "a2.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
