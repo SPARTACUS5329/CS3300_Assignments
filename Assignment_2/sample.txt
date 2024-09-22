@@ -1,4 +1,4 @@
-int foo() {
+int foo(int a, int b) {
     int a = 4;
     a = 4 + 2;
     return a;
@@ -6,8 +6,6 @@ int foo() {
 
 int main() {
     int a;
-    a = 3 + 5 * (4 / 5);
-    int b;
-    b = 5 + a;
+    a = (3 + 5) * (4 + 5);
     return 0;
 }

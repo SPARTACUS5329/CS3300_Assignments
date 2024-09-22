@@ -21,11 +21,11 @@ extern int lineNumber;
 ","		{ return COMMA; }
 
 "="		{ return EQ; }
-"+"		{ return PLUS; }
-"-"		{ return MINUS; }
-"*"		{ return MULTIPLY; }
-"/"		{ return DIVIDE; }
-"**"		{ return EXPONENT; }
+"+"		{ return PLUS_TOK; }
+"-"		{ return MINUS_TOK; }
+"*"		{ return MULTIPLY_TOK; }
+"/"		{ return DIVIDE_TOK; }
+"**"		{ return EXPONENT_TOK; }
 ";"		{ return SEMI_COLON; }
 
 "int"		{ strcpy(mytext, yytext); return VALID_TYPE; }
@@ -41,16 +41,16 @@ extern int lineNumber;
 "<="		{ strcpy(mytext, yytext); return COMPAR; }
 ">="		{ strcpy(mytext, yytext); return COMPAR; }
 
-"if"		{ return IF; }
-"else"		{ return ELSE; }
+"if"		{ return IF_TOK; }
+"else"		{ return ELSE_TOK; }
 
-"while"		{ return WHILE; }
-"for"		{ return FOR; }
+"while"		{ return WHILE_TOK; }
+"for"		{ return FOR_TOK; }
 
-"return"		{ return RETURN; }
+"return"		{ return RETURN_TOK; }
 
 [0-9]+         { strcpy(mytext, yytext); return NUMBER; }
-\"[^\"]*\"          { strcpy(mytext, yytext); return STRING; }
+\"[^\"]*\"          { strcpy(mytext, yytext); return STRING_TOK; }
 [a-zA-Z_][a-zA-Z0-9_]* { strcpy(mytext, yytext); return IDENTIFIER; }
 
 [ \t]	{ }

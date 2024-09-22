@@ -49,20 +49,20 @@
      COMPAR = 265,
      SEMI_COLON = 266,
      EQ = 267,
-     PLUS = 268,
-     MINUS = 269,
-     MULTIPLY = 270,
-     DIVIDE = 271,
-     EXPONENT = 272,
+     PLUS_TOK = 268,
+     MINUS_TOK = 269,
+     MULTIPLY_TOK = 270,
+     DIVIDE_TOK = 271,
+     EXPONENT_TOK = 272,
      VALID_TYPE = 273,
      IDENTIFIER = 274,
      NUMBER = 275,
-     STRING = 276,
-     IF = 277,
-     ELSE = 278,
-     WHILE = 279,
-     FOR = 280,
-     RETURN = 281,
+     STRING_TOK = 276,
+     IF_TOK = 277,
+     ELSE_TOK = 278,
+     WHILE_TOK = 279,
+     FOR_TOK = 280,
+     RETURN_TOK = 281,
      MAIN = 282,
      UMINUS = 283
    };
@@ -78,20 +78,20 @@
 #define COMPAR 265
 #define SEMI_COLON 266
 #define EQ 267
-#define PLUS 268
-#define MINUS 269
-#define MULTIPLY 270
-#define DIVIDE 271
-#define EXPONENT 272
+#define PLUS_TOK 268
+#define MINUS_TOK 269
+#define MULTIPLY_TOK 270
+#define DIVIDE_TOK 271
+#define EXPONENT_TOK 272
 #define VALID_TYPE 273
 #define IDENTIFIER 274
 #define NUMBER 275
-#define STRING 276
-#define IF 277
-#define ELSE 278
-#define WHILE 279
-#define FOR 280
-#define RETURN 281
+#define STRING_TOK 276
+#define IF_TOK 277
+#define ELSE_TOK 278
+#define WHILE_TOK 279
+#define FOR_TOK 280
+#define RETURN_TOK 281
 #define MAIN 282
 #define UMINUS 283
 
@@ -104,11 +104,29 @@ typedef union YYSTYPE
 {
     char *str;
     int val;
-    identifier_t id;
-    expression_t exp;
+    identifier_t *id;
+    expression_t *exp;
+	line_t *line;
+	line_list_t *lineList;
+	declaration_statement_t *declarationStatement;
+	assignment_statement_t *assignmentStatement;
+	if_else_statement_t *ifElseStatement;
+	return_statement_t *returnStatement;
+	loop_statement_t *loopStatement;
+	function_def_t *funDef;
+	while_loop_t *whileLoop;
+	for_loop_t *forLoop;
+	declaration_list_t *decList;
+	declaration_t *dec;
+	function_call_t *funCall;
+	arg_t *arg;
+	param_t *param;
+	arg_list_t *argList;
+	param_list_t *paramList;
+	data_type_e dataType;
 }
 /* Line 1529 of yacc.c.  */
-#line 112 "a2.tab.h"
+#line 130 "a2.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

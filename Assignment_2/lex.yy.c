@@ -816,27 +816,27 @@ YY_RULE_SETUP
 case 9:
 YY_RULE_SETUP
 #line 24 "a2.l"
-{ return PLUS; }
+{ return PLUS_TOK; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 25 "a2.l"
-{ return MINUS; }
+{ return MINUS_TOK; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 26 "a2.l"
-{ return MULTIPLY; }
+{ return MULTIPLY_TOK; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 27 "a2.l"
-{ return DIVIDE; }
+{ return DIVIDE_TOK; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 28 "a2.l"
-{ return EXPONENT; }
+{ return EXPONENT_TOK; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
@@ -896,27 +896,27 @@ YY_RULE_SETUP
 case 25:
 YY_RULE_SETUP
 #line 44 "a2.l"
-{ return IF; }
+{ return IF_TOK; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 45 "a2.l"
-{ return ELSE; }
+{ return ELSE_TOK; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 47 "a2.l"
-{ return WHILE; }
+{ return WHILE_TOK; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 48 "a2.l"
-{ return FOR; }
+{ return FOR_TOK; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
 #line 50 "a2.l"
-{ return RETURN; }
+{ return RETURN_TOK; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
@@ -927,7 +927,7 @@ case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
 #line 53 "a2.l"
-{ strcpy(mytext, yytext); return STRING; }
+{ strcpy(mytext, yytext); return STRING_TOK; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
