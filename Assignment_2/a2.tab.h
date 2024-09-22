@@ -100,7 +100,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 34 "a2.y"
+#line 35 "a2.y"
 {
     char *str;
     int val;
@@ -114,6 +114,7 @@ typedef union YYSTYPE
 	return_statement_t *returnStatement;
 	loop_statement_t *loopStatement;
 	function_def_t *funDef;
+	function_def_list_t *funDefList;
 	while_loop_t *whileLoop;
 	for_loop_t *forLoop;
 	declaration_list_t *decList;
@@ -126,7 +127,7 @@ typedef union YYSTYPE
 	data_type_e dataType;
 }
 /* Line 1529 of yacc.c.  */
-#line 130 "a2.tab.h"
+#line 131 "a2.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

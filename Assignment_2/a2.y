@@ -16,6 +16,7 @@ static int tCount = 1;
 static int lCount = 1;
 
 hash_table_item_t *symbolTable[MAX_IDENTIFIERS];
+program_t *program;
 %}
 
 %token OPEN_PAREN CLOSE_PAREN OPEN_BRACE CLOSE_BRACE OPEN_SQUARE CLOSE_SQUARE COMMA COMPAR SEMI_COLON
@@ -44,6 +45,7 @@ hash_table_item_t *symbolTable[MAX_IDENTIFIERS];
 	return_statement_t *returnStatement;
 	loop_statement_t *loopStatement;
 	function_def_t *funDef;
+	function_def_list_t *funDefList;
 	while_loop_t *whileLoop;
 	for_loop_t *forLoop;
 	declaration_list_t *decList;
@@ -66,6 +68,7 @@ hash_table_item_t *symbolTable[MAX_IDENTIFIERS];
 %type <paramList> parameters
 %type <funCall> functionCall
 %type <funDef> functionDefinition mainFunction
+%type <funDefList> functionDefinitions
 %type <line> line
 %type <lineList> lines body
 %type <declarationStatement> declarationStatement
@@ -81,11 +84,22 @@ hash_table_item_t *symbolTable[MAX_IDENTIFIERS];
 
 %%
 program:
-	functionDefinitions mainFunction
+	functionDefinitions mainFunction {
+		program->funDefList = $1;
+		program->main = $2;
+	}
 ;
 
 functionDefinitions:
-	| functionDefinitions functionDefinition
+	functionDefinitions functionDefinition {
+		$1->functions[$1->functionCount++] = $2;
+		$$ = $1;
+	}
+	| {
+		function_def_list_t *funDefList = (function_def_list_t *)malloc(sizeof(function_def_list_t));
+		funDefList->functions = (function_def_t **)malloc(MAX_LINES * sizeof(function_def_t *));
+		$$ = funDefList;
+	}
 ;
 
 mainFunction:
@@ -582,7 +596,8 @@ void error(char *message) {
 }
 
 int main(void) {
-    yyparse();
+    program = (program_t *)malloc(sizeof(program_t));
+	yyparse();
     return 0;
 }
 

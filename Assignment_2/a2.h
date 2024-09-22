@@ -18,6 +18,7 @@ typedef struct ReturnStatement return_statement_t;
 typedef struct IfElseStatement if_else_statement_t;
 typedef struct LoopStatement loop_statement_t;
 typedef struct FunctionDefinition function_def_t;
+typedef struct FunctionDefinitionList function_def_list_t;
 typedef struct Expression expression_t;
 typedef struct FunctionCall function_call_t;
 typedef struct Parameter param_t;
@@ -28,6 +29,7 @@ typedef struct Line line_t;
 typedef struct LineList line_list_t;
 typedef struct WhileLoop while_loop_t;
 typedef struct ForLoop for_loop_t;
+typedef struct Program program_t;
 
 typedef enum {
   PLUS,
@@ -157,6 +159,11 @@ typedef struct FunctionDefinition {
   line_list_t *lineList;
 } function_def_t;
 
+typedef struct FunctionDefinitionList {
+  int functionCount;
+  function_def_t **functions;
+} function_def_list_t;
+
 typedef struct Parameter {
   data_type_e type;
   char name[MAX_IDENTIFIER_LENGTH];
@@ -186,6 +193,11 @@ typedef struct IfElseStatement {
   line_list_t *ifLineList;
   line_list_t *elseLineList;
 } if_else_statement_t;
+
+typedef struct Program {
+  function_def_list_t *funDefList;
+  function_def_t *main;
+} program_t;
 
 typedef struct HashTableItem {
   identifier_t *data;
