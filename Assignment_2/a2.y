@@ -825,7 +825,8 @@ void stringifyFunctionCall(function_call_t *fun) {
 			case EXPRESSION:
 				if (arg->value.exp->type != CONSTANT)
 					arg->value.exp->stringify(arg->value.exp);
-				strcpy(passedParams[passedParamCount++], arg->value.exp->lValue);
+				printf("t%d = %s\n", tCount, arg->value.exp->lValue);
+				sprintf(passedParams[passedParamCount++], "t%d", tCount++);
 				break;
 			default:
 				error("Invalid argument");
