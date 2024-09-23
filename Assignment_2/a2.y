@@ -58,7 +58,7 @@ program_t *program;
 	data_type_e dataType;
 }
 
-%type <str> identifier
+%type <str> identifier functionIdentifier
 %type <val> subscripts
 %type <id> assignable term
 %type <exp> expression
@@ -98,6 +98,7 @@ functionDefinitions:
 	| {
 		function_def_list_t *funDefList = (function_def_list_t *)malloc(sizeof(function_def_list_t));
 		funDefList->functions = (function_def_t **)malloc(MAX_LINES * sizeof(function_def_t *));
+		funDefList->stringify = &stringifyFunctionDefList;
 		$$ = funDefList;
 	}
 ;
@@ -108,6 +109,7 @@ mainFunction:
 		strcpy(fun->name, "main");
 		fun->paramList = $4;
 		fun->lineList = $6;
+		fun->stringify = &stringifyFunDef;
 		$$ = fun;
 	}
 ;
@@ -123,11 +125,12 @@ lines:
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
 		lineList->lines[lineList->lineCount++] = $1;
+		lineList->stringify = &stringifyLineList;
 		$$ = lineList;
 	}
-	| line lines {
-		$2->lines[$2->lineCount++] = $1;
-		$$ = $2;
+	| lines line {
+		$1->lines[$1->lineCount++] = $2;
+		$$ = $1;
 	}
 ;
 
@@ -137,42 +140,49 @@ line:
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = DECLARATION;
 		line->statement.declaration = $1;
+		line->stringify = &stringifyLine;
 		$$ = line;
 	}
     | assignmentStatement {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = ASSIGNMENT;
 		line->statement.assignment = $1;
+		line->stringify = &stringifyLine;
 		$$ = line;
 	}
     | expression SEMI_COLON {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = EXPRESSION_STATEMENT;
 		line->statement.expression = $1;
+		line->stringify = &stringifyLine;
 		$$ = line;
 	}
     | returnStatement {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = RETURN;
 		line->statement.ret = $1;
+		line->stringify = &stringifyLine;
 		$$ = line;
 	}
     | ifStatement {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = IF_ELSE;
 		line->statement.ifElse = $1;
+		line->stringify = &stringifyLine;
 		$$ = line;
 	}
     | loopStatement {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = LOOP;
 		line->statement.loop = $1;
+		line->stringify = &stringifyLine;
 		$$ = line;
 	}
     | functionDefinition {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = FUNCTION;
 		line->statement.function = $1;
+		line->stringify = &stringifyLine;
 		$$ = line;
 	}
 ;
@@ -182,6 +192,7 @@ declarationStatement:
 		declaration_statement_t *dec = (declaration_statement_t *)malloc(sizeof(declaration_statement_t));
 		dec->type = $1;
 		dec->declarationList = $2;
+		dec->stringify = &stringifyDeclarationStatement;
 		$$ = dec;
     }
 ;
@@ -222,13 +233,16 @@ assignmentStatement:
 
 		assignment_statement_t *ass = (assignment_statement_t *)malloc(sizeof(assignment_statement_t));
 		ass->type = item->data->type;
+		ass->lValue = $1;
 		ass->exp = $3;
+		ass->stringify = &stringifyAssignmentStatement;
 		$$ = ass;
 	}
 ;
 
-assignable: identifier {
-	    identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
+assignable:
+	identifier {
+		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, currScope);
 	    strcat(id->name, "_");
 	    strcat(id->name, $1);
@@ -242,8 +256,8 @@ assignable: identifier {
 	    id->depth = 0;
 		insertSymbol(id->name, id, symbolTable);
 		$$ = id;
-	  }
-	  | identifier subscripts {
+	}
+	| identifier subscripts {
 	    identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, currScope);
 	    strcat(id->name, "_");
@@ -258,10 +272,11 @@ assignable: identifier {
 	    id->depth = $2;
 		insertSymbol(id->name, id, symbolTable);
 		$$ = id;
-	  }
+	}
 ;
 
-subscripts: subscript {
+subscripts:
+	subscript {
 		$$ = 1;
 	}
 	| subscript subscripts {
@@ -269,7 +284,8 @@ subscripts: subscript {
     }
 ;
 
-subscript: OPEN_SQUARE index CLOSE_SQUARE
+subscript:
+	OPEN_SQUARE index CLOSE_SQUARE
 ;
 
 functionCall:
@@ -278,6 +294,7 @@ functionCall:
 		function_call_t *fun = (function_call_t *)malloc(sizeof(function_call_t));
 		strcpy(fun->name, $1);
 		fun->argList = $3;
+		fun->stringify = &stringifyFunctionCall;
 		$$ = fun;
 	}
 ;
@@ -288,9 +305,9 @@ arguments:
 		$$->args = (arg_t **)malloc(MAX_ARGS * sizeof(arg_t *));
 		$$->args[$$->argCount++] = $1;
 	}
-	| argument COMMA arguments {
-		$3->args[$3->argCount++] = $1;
-		$$ = $3;
+	| arguments COMMA argument {
+		$1->args[$1->argCount++] = $3;
+		$$ = $1;
 	}
 	| {
 		$$ = (arg_list_t *)malloc(sizeof(arg_list_t));
@@ -302,46 +319,50 @@ argument:
 	expression {
 		arg_t *arg = (arg_t *)malloc(sizeof(arg_t));
 		arg->type = EXPRESSION;
-		arg->value.expression = $1;
+		arg->value.exp = $1;
+		$$ = arg;
 	}
 	| STRING_TOK {
 		arg_t *arg = (arg_t *)malloc(sizeof(arg_t));
 		arg->type = STRING;
 		strcpy(arg->value.str, mytext);
+		$$ = arg;
 	}
 ;
 
 expression:
     expression PLUS_TOK expression {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
-		sprintf(exp->lValue, "t%d", tCount++);
 		exp->type = BIN_OP;
 		bin_op_t *binOp = (bin_op_t *)malloc(sizeof(bin_op_t));
 		binOp->type = PLUS;
 		binOp->left = $1;
 		binOp->right = $3;
+		binOp->stringify = &stringifyBinOp;
 		exp->child.binOp = binOp;
+		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
     | expression MINUS_TOK expression {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
-		sprintf(exp->lValue, "t%d", tCount++);
 		exp->type = BIN_OP;
 		bin_op_t *binOp = (bin_op_t *)malloc(sizeof(bin_op_t));
 		binOp->type = MINUS;
 		binOp->left = $1;
 		binOp->right = $3;
+		binOp->stringify = &stringifyBinOp;
 		exp->child.binOp = binOp;
+		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
     | expression COMPAR expression {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
-		sprintf(exp->lValue, "t%d", tCount++);
 		exp->type = BIN_OP;
 		bin_op_t *binOp = (bin_op_t *)malloc(sizeof(bin_op_t));
 		binOp->type = MINUS;
 		binOp->left = $1;
 		binOp->right = $3;
+		binOp->stringify = &stringifyBinOp;
 		if (streq(mytext, "==", 2))
 		    binOp->type = COMPAR_EQ;
 		else if (streq(mytext, "!=", 2))
@@ -355,39 +376,43 @@ expression:
 		else if (streq(mytext, ">=", 2))
 		    binOp->type = COMPAR_GE;
 		exp->child.binOp = binOp;
+		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
     | expression MULTIPLY_TOK expression {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
-		sprintf(exp->lValue, "t%d", tCount++);
 		exp->type = BIN_OP;
 		bin_op_t *binOp = (bin_op_t *)malloc(sizeof(bin_op_t));
 		binOp->type = MULTIPLY;
 		binOp->left = $1;
 		binOp->right = $3;
+		binOp->stringify = &stringifyBinOp;
 		exp->child.binOp = binOp;
+		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
     | expression DIVIDE_TOK expression {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
-		sprintf(exp->lValue, "t%d", tCount++);
 		exp->type = BIN_OP;
 		bin_op_t *binOp = (bin_op_t *)malloc(sizeof(bin_op_t));
 		binOp->type = DIVIDE;
 		binOp->left = $1;
 		binOp->right = $3;
+		binOp->stringify = &stringifyBinOp;
 		exp->child.binOp = binOp;
+		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
     | expression EXPONENT_TOK expression {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
-		sprintf(exp->lValue, "t%d", tCount++);
 		exp->type = BIN_OP;
 		bin_op_t *binOp = (bin_op_t *)malloc(sizeof(bin_op_t));
 		binOp->type = EXPONENT;
 		binOp->left = $1;
 		binOp->right = $3;
+		binOp->stringify = &stringifyBinOp;
 		exp->child.binOp = binOp;
+		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
     | MINUS_TOK expression %prec UMINUS {
@@ -395,6 +420,7 @@ expression:
 		exp->type = CONSTANT;
 		exp->child.binOp->type = EXPONENT;
 		sprintf(exp->lValue, "%s", $2->lValue);
+		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
     | OPEN_PAREN expression CLOSE_PAREN {
@@ -405,6 +431,7 @@ expression:
 		strcpy(exp->lValue, "retval");
 		exp->type = FUNCTION_CALL;
 		exp->child.functionCall = $1;
+		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
     | term {
@@ -419,28 +446,38 @@ expression:
 
 		sprintf(exp->lValue, "%s", $1->name);
 		exp->type = CONSTANT;
+		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
 ;
 
 functionDefinition:
-    validType identifier OPEN_PAREN parameters CLOSE_PAREN body {
+    validType functionIdentifier OPEN_PAREN parameters CLOSE_PAREN body {
 		function_def_t *fun = (function_def_t *)malloc(sizeof(function_def_t));
 		strcpy(fun->name, $2);
 		fun->paramList = $4;
 		fun->lineList = $6;
+		fun->stringify = &stringifyFunDef;
 		$$ = fun;
     }
 ;
+
+functionIdentifier:
+	identifier {
+		strcpy(currScope, $1);
+		$$ = $1;
+	}
 
 returnStatement:
 	RETURN_TOK expression SEMI_COLON {
 		return_statement_t *ret = (return_statement_t *)malloc(sizeof(return_statement_t));
 		ret->exp = $2;
+		ret->stringify = &stringifyReturnStatement;
 		$$ = ret;
 	}
 	| RETURN_TOK SEMI_COLON {
 		return_statement_t *ret = (return_statement_t *)malloc(sizeof(return_statement_t));
+		ret->stringify = &stringifyReturnStatement;
 		$$ = ret;
 	}
 ;
@@ -450,15 +487,17 @@ parameters:
 		param_list_t *paramList = (param_list_t *)malloc(sizeof(param_list_t));
 		paramList->params = (param_t **)malloc(MAX_ARGS * sizeof(param_t *));
 		paramList->params[paramList->paramCount++] = $1;
+		paramList->stringify = &stringifyParamList;
 		$$ = paramList;
 	 }
-	 | parameter COMMA parameters {
-		$3->params[$3->paramCount++] = $1;
-		$$ = $3;
+	 | parameters COMMA parameter {
+		$1->params[$1->paramCount++] = $3;
+		$$ = $1;
 	 }
 	 | {
 		param_list_t *paramList = (param_list_t *)malloc(sizeof(param_list_t));
 		paramList->params = (param_t **)malloc(MAX_ARGS * sizeof(param_t *));
+		paramList->stringify = &stringifyParamList;
 		$$ = paramList;
 	 }
 ;
@@ -479,6 +518,7 @@ ifStatement:
 		ifElse->condition = $3;
 		ifElse->ifLineList = $5;
 		ifElse->elseLineList = $7;
+		ifElse->stringify = &stringifyIfElseStatement;
 		$$ = ifElse;
 	}
 	| IF_TOK OPEN_PAREN expression CLOSE_PAREN body {
@@ -486,6 +526,7 @@ ifStatement:
 		ifElse->isMatched = false;
 		ifElse->condition = $3;
 		ifElse->ifLineList = $5;
+		ifElse->stringify = &stringifyIfElseStatement;
 		$$ = ifElse;
 	}
 ;
@@ -495,12 +536,14 @@ loopStatement:
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = WHILE;
 		loop->loop.whileLoop = $1;
+		loop->stringify = &stringifyLoopStatement;
 		$$ = loop;
     }
 	| forStatement {
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = FOR;
 		loop->loop.forLoop = $1;
+		loop->stringify = &stringifyLoopStatement;
 		$$ = loop;
 	}
 ;
@@ -598,7 +641,199 @@ void error(char *message) {
 int main(void) {
     program = (program_t *)malloc(sizeof(program_t));
 	yyparse();
+	stringifyProgram(program);
     return 0;
+}
+
+void stringifyProgram(program_t *program) {
+	program->funDefList->stringify(program->funDefList);
+	program->main->stringify(program->main);
+}
+
+void stringifyFunctionDefList(function_def_list_t *funDefList) {
+	function_def_t **functions = funDefList->functions;
+	int functionCount = funDefList->functionCount;
+	for (int i = 0; i < functionCount; i++)
+		functions[i]->stringify(functions[i]);
+}
+
+void stringifyFunDef(function_def_t *fun) {
+    printf("%s:\n", fun->name);
+	fun->paramList->stringify(fun->paramList);
+	fun->lineList->stringify(fun->lineList);
+}
+
+void stringifyParamList(param_list_t *paramList) {
+	param_t **params = paramList->params;
+	int paramCount = paramList->paramCount;
+	for (int i = 0; i < paramCount; i++)
+		printf("%s = param%d\n", params[i]->name, i + 1);
+}
+
+void stringifyLineList(line_list_t *lineList) {
+	line_t **lines = lineList->lines;
+	int lineCount = lineList->lineCount;
+	for (int i = 0; i < lineCount; i++)
+		lines[i]->stringify(lines[i]);
+}
+
+void stringifyLine(line_t *line) {
+    switch (line->type) {
+		case DECLARATION:
+		    line->statement.declaration->stringify(line->statement.declaration);
+			break;
+		case ASSIGNMENT:
+		    line->statement.assignment->stringify(line->statement.assignment);
+			break;
+		case EXPRESSION_STATEMENT:
+		    line->statement.expression->stringify(line->statement.expression);
+			break;
+		case RETURN:
+		    line->statement.ret->stringify(line->statement.ret);
+			break;
+		case IF_ELSE:
+		    line->statement.ifElse->stringify(line->statement.ifElse);
+			break;
+		case LOOP:
+		    line->statement.loop->stringify(line->statement.loop);
+			break;
+		case FUNCTION:
+		    line->statement.function->stringify(line->statement.function);
+			break;
+		default:
+		    error("Invalid line type");
+	} 
+}
+
+void stringifyDeclarationStatement(declaration_statement_t *decList) {
+	declaration_t **decs = decList->declarationList->declarations;
+	int decCount = decList->declarationList->decCount;
+    for (int i = 0; i < decCount; i++) {
+		declaration_t *dec = decs[i];
+		if (dec->exp == NULL)
+			continue;
+		dec->exp->stringify(dec->exp);
+		printf("%s = t%d\n", dec->lValue->displayName, tCount - 1);
+	}
+}
+
+void stringifyAssignmentStatement(assignment_statement_t *ass) {
+	ass->exp->stringify(ass->exp);
+	printf("%s = t%d\n", ass->lValue->displayName, tCount - 1);
+}
+
+void stringifyExpression(expression_t *exp) {
+    switch (exp->type) {
+		case CONSTANT:
+			printf("t%d = %s\n", tCount++, exp->lValue);
+			break;
+		case BIN_OP:
+			exp->child.binOp->stringify(exp, exp->child.binOp);
+			break;
+		case FUNCTION_CALL:
+			exp->child.functionCall->stringify(exp->child.functionCall);
+			break;
+		default:
+			error("Invalid expression");
+	}
+}
+
+void stringifyReturnStatement(return_statement_t *ret) {
+    if (ret->exp != NULL) {
+		switch (ret->exp->type) {
+			case CONSTANT:
+				printf("retval = %s\n", ret->exp->lValue);
+				break;
+			default:
+				ret->exp->stringify(ret->exp);
+				ret->exp->stringify(ret->exp);
+				printf("retval = t%d\n", tCount++);
+		}
+	}
+	printf("return\n");
+}
+
+void stringifyIfElseStatement(if_else_statement_t *ifElseStatement) {
+	printf("IF_ELSE_STATEMENT\n");
+}
+
+void stringifyLoopStatement(loop_statement_t *loopStatement) {
+	printf("LOOP_STATEMENT\n");
+}
+
+void stringifyBinOp(expression_t *exp, bin_op_t *binOp) {
+	sprintf(exp->lValue, "t%d", tCount);
+	expression_t *left = binOp->left;
+	expression_t *right = binOp->right;
+	if (left->type != CONSTANT)
+		left->stringify(left);
+	if (right->type != CONSTANT)
+		right->stringify(right);
+
+	switch (binOp->type) {
+		case PLUS:
+			printf("t%d = %s + %s\n", tCount++, left->lValue, right->lValue);
+			break;
+		case MINUS:
+			printf("t%d = %s - %s\n", tCount++, left->lValue, right->lValue);
+			break;
+		case COMPAR_EQ:
+			printf("t%d = %s == %s\n", tCount++, left->lValue, right->lValue);
+			break;
+		case COMPAR_NE:
+			printf("t%d = %s != %s\n", tCount++, left->lValue, right->lValue);
+			break;
+		case COMPAR_LT:
+			printf("t%d = %s < %s\n", tCount++, left->lValue, right->lValue);
+			break;
+		case COMPAR_GT:
+			printf("t%d = %s > %s\n", tCount++, left->lValue, right->lValue);
+			break;
+		case COMPAR_LE:
+			printf("t%d = %s <= %s\n", tCount++, left->lValue, right->lValue);
+			break;
+		case COMPAR_GE:
+			printf("t%d = %s >= %s\n", tCount++, left->lValue, right->lValue);
+			break;
+		case MULTIPLY:
+			printf("t%d = %s * %s\n", tCount++, left->lValue, right->lValue);
+			break;
+		case DIVIDE:
+			printf("t%d = %s / %s\n", tCount++, left->lValue, right->lValue);
+			break;
+		case EXPONENT:
+			printf("t%d = %s ** %s\n", tCount++, left->lValue, right->lValue);
+			break;
+		default:
+			error("Invalid binary operation");
+	}
+}
+
+void stringifyFunctionCall(function_call_t *fun) {
+	arg_t **args = fun->argList->args;
+	int argCount = fun->argList->argCount;
+	char **passedParams = (char **)malloc(MAX_ARGS * sizeof(char *));
+	int passedParamCount = 0;
+	for (int i = 0; i < argCount; i++) {
+		arg_t *arg = args[i];
+		passedParams[passedParamCount] = malloc(MAX_IDENTIFIER_LENGTH * sizeof(char));
+		switch (arg->type) {
+			case STRING:
+				printf("t%d = \"%s\"", tCount, arg->value.str);
+				sprintf(passedParams[passedParamCount++], "t%d", tCount++);
+				break;
+			case EXPRESSION:
+				if (arg->value.exp->type != CONSTANT)
+					arg->value.exp->stringify(arg->value.exp);
+				strcpy(passedParams[passedParamCount++], arg->value.exp->lValue);
+				break;
+			default:
+				error("Invalid argument");
+		}
+	}
+	for (int i = 0; i < passedParamCount; i++)
+		printf("param%d = %s\n", i + 1, passedParams[i]);
+	printf("call %s\n", fun->name);
 }
 
 unsigned long hash(char *str) {

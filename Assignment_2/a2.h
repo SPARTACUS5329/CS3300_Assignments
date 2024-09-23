@@ -25,6 +25,7 @@ typedef struct Parameter param_t;
 typedef struct ParamList param_list_t;
 typedef struct Arg arg_t;
 typedef struct ArgList arg_list_t;
+typedef struct BinOp bin_op_t;
 typedef struct Line line_t;
 typedef struct LineList line_list_t;
 typedef struct WhileLoop while_loop_t;
@@ -82,16 +83,19 @@ typedef struct Line {
     loop_statement_t *loop;
     function_def_t *function;
   } statement;
+  void (*stringify)(line_t *);
 } line_t;
 
 typedef struct LineList {
   int lineCount;
   line_t **lines;
+  void (*stringify)(line_list_t *);
 } line_list_t;
 
 typedef struct DeclarationStatement {
   data_type_e type;
   declaration_list_t *declarationList;
+  void (*stringify)(declaration_statement_t *);
 } declaration_statement_t;
 
 typedef struct DeclarationList {
@@ -106,11 +110,14 @@ typedef struct Declaration {
 
 typedef struct AssignmentStatement {
   data_type_e type;
+  identifier_t *lValue;
   expression_t *exp;
+  void (*stringify)(assignment_statement_t *);
 } assignment_statement_t;
 
 typedef struct ReturnStatement {
   expression_t *exp;
+  void (*stringify)(return_statement_t *);
 } return_statement_t;
 
 typedef struct LoopStatement {
@@ -119,11 +126,13 @@ typedef struct LoopStatement {
     while_loop_t *whileLoop;
     for_loop_t *forLoop;
   } loop;
+  void (*stringify)(loop_statement_t *);
 } loop_statement_t;
 
 typedef struct WhileLoop {
   expression_t *condition;
   line_list_t *lineList;
+  void (*stringify)(while_loop_t *);
 } while_loop_t;
 
 typedef struct ForLoop {
@@ -131,12 +140,14 @@ typedef struct ForLoop {
   expression_t *condition;
   assignment_statement_t *update;
   line_list_t *lineList;
+  void (*stringify)(for_loop_t *);
 } for_loop_t;
 
 typedef struct BinOp {
   bin_op_e type;
   expression_t *left;
   expression_t *right;
+  void (*stringify)(expression_t *, bin_op_t *);
 } bin_op_t;
 
 typedef struct Expression {
@@ -146,22 +157,26 @@ typedef struct Expression {
     bin_op_t *binOp;
     function_call_t *functionCall;
   } child;
+  void (*stringify)(expression_t *);
 } expression_t;
 
 typedef struct FunctionCall {
   char name[MAX_IDENTIFIER_LENGTH];
   arg_list_t *argList;
+  void (*stringify)(function_call_t *);
 } function_call_t;
 
 typedef struct FunctionDefinition {
   char name[MAX_IDENTIFIER_LENGTH];
   param_list_t *paramList;
   line_list_t *lineList;
+  void (*stringify)(function_def_t *);
 } function_def_t;
 
 typedef struct FunctionDefinitionList {
   int functionCount;
   function_def_t **functions;
+  void (*stringify)(function_def_list_t *);
 } function_def_list_t;
 
 typedef struct Parameter {
@@ -172,13 +187,14 @@ typedef struct Parameter {
 typedef struct ParamList {
   int paramCount;
   param_t **params;
+  void (*stringify)(param_list_t *);
 } param_list_t;
 
 typedef struct Arg {
   arg_e type;
   union {
     char *str;
-    expression_t *expression;
+    expression_t *exp;
   } value;
 } arg_t;
 
@@ -192,6 +208,7 @@ typedef struct IfElseStatement {
   expression_t *condition;
   line_list_t *ifLineList;
   line_list_t *elseLineList;
+  void (*stringify)(if_else_statement_t *);
 } if_else_statement_t;
 
 typedef struct Program {
@@ -209,3 +226,17 @@ unsigned long hash(char *str);
 hash_table_item_t *searchSymbol(char *key, hash_table_item_t *hashTable[]);
 void insertSymbol(char *key, identifier_t *data,
                   hash_table_item_t *hashTable[]);
+void stringifyProgram(program_t *program);
+void stringifyFunctionDefList(function_def_list_t *funDefList);
+void stringifyFunDef(function_def_t *fun);
+void stringifyParamList(param_list_t *paramList);
+void stringifyLineList(line_list_t *lineList);
+void stringifyDeclarationStatement(declaration_statement_t *decList);
+void stringifyAssignmentStatement(assignment_statement_t *ass);
+void stringifyExpression(expression_t *exp);
+void stringifyReturnStatement(return_statement_t *ret);
+void stringifyIfElseStatement(if_else_statement_t *ifElseStatement);
+void stringifyLoopStatement(loop_statement_t *loopStatement);
+void stringifyBinOp(expression_t *exp, bin_op_t *binOp);
+void stringifyFunctionCall(function_call_t *fun);
+void stringifyLine(line_t *line);
