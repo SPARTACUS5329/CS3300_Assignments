@@ -361,31 +361,6 @@ expression:
 		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
-    | expression compar expression {
-		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
-		exp->type = BIN_OP;
-		bin_op_t *binOp = (bin_op_t *)malloc(sizeof(bin_op_t));
-		binOp->left = $1;
-		binOp->right = $3;
-		binOp->stringify = &stringifyBinOp;
-		if (streq($2, "==", 2))
-		    binOp->type = COMPAR_EQ;
-		else if (streq($2, "!=", 2))
-		    binOp->type = COMPAR_NE;
-		else if (streq($2, "<", 1))
-		    binOp->type = COMPAR_LT;
-		else if (streq($2, ">", 1))
-		    binOp->type = COMPAR_GT;
-		else if (streq($2, "<=", 2))
-		    binOp->type = COMPAR_LE;
-		else if (streq($2, ">=", 2))
-		    binOp->type = COMPAR_GE;
-		else
-		    error("Invalid comparison operator");
-		exp->child.binOp = binOp;
-		exp->stringify = &stringifyExpression;
-		$$ = exp;
-    }
     | expression MULTIPLY_TOK expression {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -559,6 +534,34 @@ condition:
 		con->exp = $2->exp;
 		$$ = con;
 	}
+    | expression compar expression {
+		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
+		exp->type = BIN_OP;
+		bin_op_t *binOp = (bin_op_t *)malloc(sizeof(bin_op_t));
+		binOp->left = $1;
+		binOp->right = $3;
+		binOp->stringify = &stringifyBinOp;
+		if (streq($2, "==", 2))
+		    binOp->type = COMPAR_EQ;
+		else if (streq($2, "!=", 2))
+		    binOp->type = COMPAR_NE;
+		else if (streq($2, "<", 1))
+		    binOp->type = COMPAR_LT;
+		else if (streq($2, ">", 1))
+		    binOp->type = COMPAR_GT;
+		else if (streq($2, "<=", 2))
+		    binOp->type = COMPAR_LE;
+		else if (streq($2, ">=", 2))
+		    binOp->type = COMPAR_GE;
+		else
+		    error("Invalid comparison operator");
+		exp->child.binOp = binOp;
+		exp->stringify = &stringifyExpression;
+		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
+		con->op = SINGLE;
+		con->exp = exp;
+		$$ = con;
+    }
 	| expression {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = SINGLE;
@@ -837,7 +840,6 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 			printf("goto L%d\n", ifElse->falseLabel);
 			printf("L%d:\n", ifElse->trueLabel);
 			ifElse->ifLineList->stringify(ifElse->ifLineList);
-			// printf("goto L%d\n", lCount);
 			break;
 		default:
 		    error("Invalid condition chaining");
