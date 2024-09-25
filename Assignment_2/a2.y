@@ -22,6 +22,7 @@ program_t *program;
 %token OPEN_PAREN CLOSE_PAREN OPEN_BRACE CLOSE_BRACE OPEN_SQUARE CLOSE_SQUARE COMMA COMPAR SEMI_COLON
 %token EQ PLUS_TOK MINUS_TOK MULTIPLY_TOK DIVIDE_TOK EXPONENT_TOK
 %token VALID_TYPE IDENTIFIER NUMBER STRING_TOK
+%token SHORT_AND_TOK SHORT_OR_TOK NOT_TOK
 %token IF_TOK ELSE_TOK
 %token WHILE_TOK FOR_TOK
 %token RETURN_TOK MAIN
@@ -32,11 +33,14 @@ program_t *program;
 %left OPEN_PAREN CLOSE_PAREN
 %left ELSE_TOK
 
+%left SHORT_AND_TOK SHORT_OR_TOK
+%right NOT_TOK
+
 %union {
     char *str;
     int val;
     identifier_t *id;
-    expression_t *exp;
+	expression_t *exp; 
 	line_t *line;
 	line_list_t *lineList;
 	declaration_statement_t *declarationStatement;
@@ -56,9 +60,10 @@ program_t *program;
 	arg_list_t *argList;
 	param_list_t *paramList;
 	data_type_e dataType;
+	condition_t *con;
 }
 
-%type <str> identifier functionIdentifier
+%type <str> identifier functionIdentifier compar
 %type <val> subscripts
 %type <id> assignable term
 %type <exp> expression
@@ -81,6 +86,7 @@ program_t *program;
 %type <whileLoop> whileStatement
 %type <forLoop> forStatement
 %type <dataType> validType
+%type <con> condition
 
 %%
 program:
@@ -355,26 +361,27 @@ expression:
 		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
-    | expression COMPAR expression {
+    | expression compar expression {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
 		bin_op_t *binOp = (bin_op_t *)malloc(sizeof(bin_op_t));
-		binOp->type = MINUS;
 		binOp->left = $1;
 		binOp->right = $3;
 		binOp->stringify = &stringifyBinOp;
-		if (streq(mytext, "==", 2))
+		if (streq($2, "==", 2))
 		    binOp->type = COMPAR_EQ;
-		else if (streq(mytext, "!=", 2))
+		else if (streq($2, "!=", 2))
 		    binOp->type = COMPAR_NE;
-		else if (streq(mytext, "<", 1))
+		else if (streq($2, "<", 1))
 		    binOp->type = COMPAR_LT;
-		else if (streq(mytext, ">", 1))
+		else if (streq($2, ">", 1))
 		    binOp->type = COMPAR_GT;
-		else if (streq(mytext, "<=", 2))
+		else if (streq($2, "<=", 2))
 		    binOp->type = COMPAR_LE;
-		else if (streq(mytext, ">=", 2))
+		else if (streq($2, ">=", 2))
 		    binOp->type = COMPAR_GE;
+		else
+		    error("Invalid comparison operator");
 		exp->child.binOp = binOp;
 		exp->stringify = &stringifyExpression;
 		$$ = exp;
@@ -512,7 +519,7 @@ parameter:
 ;
 
 ifStatement:
-    IF_TOK OPEN_PAREN expression CLOSE_PAREN body ELSE_TOK body {
+    IF_TOK OPEN_PAREN condition CLOSE_PAREN body ELSE_TOK body {
 		if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 		ifElse->isMatched = true;
 		ifElse->condition = $3;
@@ -521,13 +528,42 @@ ifStatement:
 		ifElse->stringify = &stringifyIfElseStatement;
 		$$ = ifElse;
 	}
-	| IF_TOK OPEN_PAREN expression CLOSE_PAREN body {
+	| IF_TOK OPEN_PAREN condition CLOSE_PAREN body {
 		if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 		ifElse->isMatched = false;
 		ifElse->condition = $3;
 		ifElse->ifLineList = $5;
 		ifElse->stringify = &stringifyIfElseStatement;
 		$$ = ifElse;
+	}
+;
+
+condition:
+	condition SHORT_AND_TOK condition {
+		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
+		con->op = SHORT_AND;
+		con->exp = $1->exp;
+		con->chain = $3;
+		$$ = con;
+	}
+	| condition SHORT_OR_TOK condition {
+		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
+		con->op = SHORT_OR;
+		con->exp = $1->exp;
+		con->chain = $3;
+		$$ = con;
+	}
+	| NOT_TOK condition {
+		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
+		con->op = NOT;
+		con->exp = $2->exp;
+		$$ = con;
+	}
+	| expression {
+		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
+		con->op = SINGLE;
+		con->exp = $1;
+		$$ = con;
 	}
 ;
 
@@ -607,6 +643,12 @@ term:
 index:
     identifier
     | NUMBER
+;
+
+compar:
+    COMPAR {
+		$$ = strdup(mytext);
+	}
 ;
 
 validType:
@@ -746,15 +788,69 @@ void stringifyReturnStatement(return_statement_t *ret) {
 				break;
 			default:
 				ret->exp->stringify(ret->exp);
-				ret->exp->stringify(ret->exp);
 				printf("retval = t%d\n", tCount++);
 		}
 	}
 	printf("return\n");
 }
 
-void stringifyIfElseStatement(if_else_statement_t *ifElseStatement) {
-	printf("IF_ELSE_STATEMENT\n");
+void stringifyIfElseStatement(if_else_statement_t *ifElse) {
+	condition_t *baseCon = ifElse->condition;
+	baseCon->exp->stringify(baseCon->exp);
+	bool rootIfElse = ifElse->trueLabel == 0 && ifElse->falseLabel == 0;
+	if (ifElse->trueLabel == 0)
+		ifElse->trueLabel = lCount++;
+	if (ifElse->falseLabel == 0)
+		ifElse->falseLabel = ifElse->isMatched ? lCount++ : lCount;
+
+    if_else_statement_t *chainIfElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
+	switch (baseCon->op) {
+		case NOT:
+		    printf("t%d = not %s\n", tCount, baseCon->exp->lValue);
+			printf("if (t%d) goto L%d\n", tCount++, ifElse->trueLabel);
+			printf("goto L%d\n", ifElse->falseLabel);
+			printf("L%d:\n", ifElse->trueLabel);
+			ifElse->ifLineList->stringify(ifElse->ifLineList);
+			printf("goto L%d\n", lCount);
+			break;
+		case SHORT_AND:
+		    printf("if (%s) goto L%d\n", baseCon->exp->lValue, ifElse->trueLabel);
+			printf("goto L%d\n", ifElse->falseLabel);
+			printf("L%d:\n", ifElse->trueLabel);
+			chainIfElse->condition = baseCon->chain;
+			chainIfElse->falseLabel = ifElse->falseLabel;
+			chainIfElse->ifLineList = ifElse->ifLineList;
+			chainIfElse->stringify = &stringifyIfElseStatement;
+			chainIfElse->stringify(chainIfElse);
+			break;
+		case SHORT_OR:
+		    printf("if (%s) goto L%d\n", baseCon->exp->lValue, ifElse->trueLabel);
+			chainIfElse->condition = baseCon->chain;
+			chainIfElse->trueLabel = ifElse->trueLabel;
+			chainIfElse->falseLabel = ifElse->falseLabel;
+			chainIfElse->ifLineList = ifElse->ifLineList;
+			chainIfElse->stringify = &stringifyIfElseStatement;
+			chainIfElse->stringify(chainIfElse);
+			break;
+		case SINGLE:
+		    printf("if (%s) goto L%d\n", baseCon->exp->lValue, ifElse->trueLabel);
+			printf("goto L%d\n", ifElse->falseLabel);
+			printf("L%d:\n", ifElse->trueLabel);
+			ifElse->ifLineList->stringify(ifElse->ifLineList);
+			// printf("goto L%d\n", lCount);
+			break;
+		default:
+		    error("Invalid condition chaining");
+	}
+	int exitLabel = lCount++;
+	if (rootIfElse)
+		printf("goto L%d\n", exitLabel);
+	if (ifElse->isMatched) {
+		printf("L%d:\n", ifElse->falseLabel);
+		ifElse->elseLineList->stringify(ifElse->elseLineList);
+	}
+	if (rootIfElse)
+		printf("L%d:\n", exitLabel);
 }
 
 void stringifyLoopStatement(loop_statement_t *loopStatement) {

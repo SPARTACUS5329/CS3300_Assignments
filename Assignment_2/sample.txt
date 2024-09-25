@@ -1,11 +1,12 @@
-int foo(int a, int b) {
-    int a = 4;
-    a = 4 + 2;
-    return a;
-}
-
 int main() {
-    int a;
-    foo(foo(3, 4), foo(3, 5));
+    if (3 < 5 || 4 < 5) {
+        int a = 1;
+        if (2 < 5) {
+            int c = 3;
+        }
+        int d = 4;
+    } else {
+        int b = 2;
+    }
     return 0;
 }

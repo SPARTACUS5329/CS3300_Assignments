@@ -58,13 +58,16 @@
      IDENTIFIER = 274,
      NUMBER = 275,
      STRING_TOK = 276,
-     IF_TOK = 277,
-     ELSE_TOK = 278,
-     WHILE_TOK = 279,
-     FOR_TOK = 280,
-     RETURN_TOK = 281,
-     MAIN = 282,
-     UMINUS = 283
+     SHORT_AND_TOK = 277,
+     SHORT_OR_TOK = 278,
+     NOT_TOK = 279,
+     IF_TOK = 280,
+     ELSE_TOK = 281,
+     WHILE_TOK = 282,
+     FOR_TOK = 283,
+     RETURN_TOK = 284,
+     MAIN = 285,
+     UMINUS = 286
    };
 #endif
 /* Tokens.  */
@@ -87,25 +90,28 @@
 #define IDENTIFIER 274
 #define NUMBER 275
 #define STRING_TOK 276
-#define IF_TOK 277
-#define ELSE_TOK 278
-#define WHILE_TOK 279
-#define FOR_TOK 280
-#define RETURN_TOK 281
-#define MAIN 282
-#define UMINUS 283
+#define SHORT_AND_TOK 277
+#define SHORT_OR_TOK 278
+#define NOT_TOK 279
+#define IF_TOK 280
+#define ELSE_TOK 281
+#define WHILE_TOK 282
+#define FOR_TOK 283
+#define RETURN_TOK 284
+#define MAIN 285
+#define UMINUS 286
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 35 "a2.y"
+#line 39 "a2.y"
 {
     char *str;
     int val;
     identifier_t *id;
-    expression_t *exp;
+	expression_t *exp; 
 	line_t *line;
 	line_list_t *lineList;
 	declaration_statement_t *declarationStatement;
@@ -125,9 +131,10 @@ typedef union YYSTYPE
 	arg_list_t *argList;
 	param_list_t *paramList;
 	data_type_e dataType;
+	condition_t *con;
 }
 /* Line 1529 of yacc.c.  */
-#line 131 "a2.tab.h"
+#line 138 "a2.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

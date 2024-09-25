@@ -41,6 +41,10 @@ extern int lineNumber;
 "<="		{ strcpy(mytext, yytext); return COMPAR; }
 ">="		{ strcpy(mytext, yytext); return COMPAR; }
 
+"&&"		{ strcpy(mytext, yytext); return SHORT_AND_TOK; }
+"||"		{ strcpy(mytext, yytext); return SHORT_OR_TOK; }
+"!"		{ strcpy(mytext, yytext); return NOT_TOK; }
+
 "if"		{ return IF_TOK; }
 "else"		{ return ELSE_TOK; }
 

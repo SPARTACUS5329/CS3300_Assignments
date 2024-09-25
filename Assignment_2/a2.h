@@ -31,6 +31,7 @@ typedef struct LineList line_list_t;
 typedef struct WhileLoop while_loop_t;
 typedef struct ForLoop for_loop_t;
 typedef struct Program program_t;
+typedef struct Condition condition_t;
 
 typedef enum {
   PLUS,
@@ -45,6 +46,8 @@ typedef enum {
   DIVIDE,
   EXPONENT
 } bin_op_e;
+
+typedef enum { SINGLE, SHORT_AND, SHORT_OR, NOT } condition_op_e;
 
 typedef enum { CONSTANT, BIN_OP, FUNCTION_CALL } expr_e;
 
@@ -205,7 +208,9 @@ typedef struct ArgList {
 
 typedef struct IfElseStatement {
   bool isMatched;
-  expression_t *condition;
+  int trueLabel;
+  int falseLabel;
+  condition_t *condition;
   line_list_t *ifLineList;
   line_list_t *elseLineList;
   void (*stringify)(if_else_statement_t *);
@@ -215,6 +220,12 @@ typedef struct Program {
   function_def_list_t *funDefList;
   function_def_t *main;
 } program_t;
+
+typedef struct Condition {
+  condition_op_e op;
+  expression_t *exp;
+  condition_t *chain;
+} condition_t;
 
 typedef struct HashTableItem {
   identifier_t *data;
