@@ -565,12 +565,6 @@ condition:
 		con->exp = exp;
 		$$ = con;
     }
-	| expression {
-		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
-		con->op = SINGLE;
-		con->exp = $1;
-		$$ = con;
-	}
 ;
 
 loopStatement:
@@ -847,7 +841,7 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 		    error("Invalid condition chaining");
 	}
 	int exitLabel = lCount++;
-	if (rootIfElse)
+	if (rootIfElse && ifElse->isMatched)
 		printf("goto L%d\n", exitLabel);
 	if (ifElse->isMatched) {
 		printf("L%d:\n", ifElse->falseLabel);

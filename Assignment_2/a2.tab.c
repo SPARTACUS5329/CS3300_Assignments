@@ -437,7 +437,7 @@ union yyalloc
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  34
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  71
+#define YYNRULES  70
 /* YYNRULES -- Number of states.  */
 #define YYNSTATES  135
 
@@ -493,8 +493,8 @@ static const yytype_uint8 yyprhs[] =
       85,    86,    88,    90,    94,    98,   102,   106,   110,   113,
      117,   119,   121,   128,   130,   134,   137,   139,   143,   144,
      147,   155,   161,   165,   169,   172,   176,   180,   182,   184,
-     186,   192,   203,   205,   209,   211,   214,   216,   218,   220,
-     222,   224
+     190,   201,   203,   207,   209,   212,   214,   216,   218,   220,
+     222
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
@@ -518,11 +518,11 @@ static const yytype_int8 yyrhs[] =
        4,    60,    26,    60,    -1,    25,     3,    56,     4,    60,
       -1,    56,    22,    56,    -1,    56,    23,    56,    -1,    24,
       56,    -1,     3,    56,     4,    -1,    49,    63,    49,    -1,
-      49,    -1,    58,    -1,    59,    -1,    27,     3,    49,     4,
-      60,    -1,    28,     3,    42,    49,    11,    43,    12,    49,
-       4,    60,    -1,    38,    -1,     5,    37,     6,    -1,    65,
-      -1,    65,    44,    -1,    20,    -1,    65,    -1,    20,    -1,
-      10,    -1,    18,    -1,    19,    -1
+      58,    -1,    59,    -1,    27,     3,    49,     4,    60,    -1,
+      28,     3,    42,    49,    11,    43,    12,    49,     4,    60,
+      -1,    38,    -1,     5,    37,     6,    -1,    65,    -1,    65,
+      44,    -1,    20,    -1,    65,    -1,    20,    -1,    10,    -1,
+      18,    -1,    19,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
@@ -533,9 +533,9 @@ static const yytype_uint16 yyrline[] =
      226,   234,   250,   266,   285,   288,   294,   298,   309,   314,
      318,   325,   331,   340,   352,   364,   376,   388,   400,   408,
      411,   419,   437,   448,   454,   460,   468,   475,   479,   488,
-     497,   506,   517,   524,   531,   537,   540,   568,   577,   584,
-     594,   603,   616,   622,   628,   634,   640,   650,   651,   655,
-     661,   672
+     497,   506,   517,   524,   531,   537,   540,   571,   578,   588,
+     597,   610,   616,   622,   628,   634,   644,   645,   649,   655,
+     666
 };
 #endif
 
@@ -581,9 +581,9 @@ static const yytype_uint8 yyr1[] =
       41,    42,    43,    43,    44,    44,    45,    46,    47,    47,
       47,    48,    48,    49,    49,    49,    49,    49,    49,    49,
       49,    49,    50,    51,    52,    52,    53,    53,    53,    54,
-      55,    55,    56,    56,    56,    56,    56,    56,    57,    57,
-      58,    59,    60,    60,    61,    61,    61,    62,    62,    63,
-      64,    65
+      55,    55,    56,    56,    56,    56,    56,    57,    57,    58,
+      59,    60,    60,    61,    61,    61,    62,    62,    63,    64,
+      65
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
@@ -594,9 +594,9 @@ static const yytype_uint8 yyr2[] =
        1,     4,     1,     2,     1,     2,     3,     4,     1,     3,
        0,     1,     1,     3,     3,     3,     3,     3,     2,     3,
        1,     1,     6,     1,     3,     2,     1,     3,     0,     2,
-       7,     5,     3,     3,     2,     3,     3,     1,     1,     1,
-       5,    10,     1,     3,     1,     2,     1,     1,     1,     1,
-       1,     1
+       7,     5,     3,     3,     2,     3,     3,     1,     1,     5,
+      10,     1,     3,     1,     2,     1,     1,     1,     1,     1,
+       1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -604,20 +604,20 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       4,     0,     0,     1,    70,     2,     3,     0,    71,     6,
+       4,     0,     0,     1,    69,     2,     3,     0,    70,     6,
        0,     0,    43,    48,    48,     0,    46,     0,     0,     0,
-       0,    49,    22,     0,     0,     0,     0,    66,     0,     0,
-       0,     0,    62,     9,    10,     0,    40,     0,    15,    12,
-      13,    14,    58,    59,     5,    41,     0,    64,    47,     0,
-      23,    24,    42,     0,    64,     0,     7,    38,     0,     0,
+       0,    49,    22,     0,     0,     0,     0,    65,     0,     0,
+       0,     0,    61,     9,    10,     0,    40,     0,    15,    12,
+      13,    14,    57,    58,     5,    41,     0,    63,    47,     0,
+      23,    24,    42,     0,    63,     0,     7,    38,     0,     0,
        0,    45,     0,     0,    11,     0,     0,     0,     0,     0,
-       0,    17,    20,    22,    30,    65,    68,     0,    67,    25,
-      39,    65,    63,     8,     0,     0,    57,     0,     0,     0,
+       0,    17,    20,    22,    30,    64,    67,     0,    66,    25,
+      39,    64,    62,     8,     0,     0,     0,     0,     0,     0,
       44,     0,    33,    34,    35,    36,    37,    16,     0,     0,
-      32,     0,    28,    31,    26,    57,     0,    54,    69,     0,
+      32,     0,    28,    31,    26,     0,     0,    54,    68,     0,
        0,     0,     0,     0,     0,    21,    18,    19,    27,     0,
-      55,    56,    51,    52,    53,    60,     0,    29,     0,     0,
-      50,     0,     0,     0,    61
+      55,    56,    51,    52,    53,    59,     0,    29,     0,     0,
+      50,     0,     0,     0,    60
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
@@ -2171,17 +2171,7 @@ yyreduce:
     break;
 
   case 57:
-#line 568 "a2.y"
-    {
-		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
-		con->op = SINGLE;
-		con->exp = (yyvsp[(1) - (1)].exp);
-		(yyval.con) = con;
-	;}
-    break;
-
-  case 58:
-#line 577 "a2.y"
+#line 571 "a2.y"
     {
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = WHILE;
@@ -2191,8 +2181,8 @@ yyreduce:
     ;}
     break;
 
-  case 59:
-#line 584 "a2.y"
+  case 58:
+#line 578 "a2.y"
     {
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = FOR;
@@ -2202,8 +2192,8 @@ yyreduce:
 	;}
     break;
 
-  case 60:
-#line 594 "a2.y"
+  case 59:
+#line 588 "a2.y"
     {
 		while_loop_t *loop = (while_loop_t *)malloc(sizeof(while_loop_t));
 		loop->condition = (yyvsp[(3) - (5)].exp);
@@ -2212,8 +2202,8 @@ yyreduce:
     ;}
     break;
 
-  case 61:
-#line 603 "a2.y"
+  case 60:
+#line 597 "a2.y"
     {
 		for_loop_t *loop = (for_loop_t *)malloc(sizeof(for_loop_t));
 		loop->initial = (yyvsp[(3) - (10)].assignmentStatement);
@@ -2226,8 +2216,8 @@ yyreduce:
 	;}
     break;
 
-  case 62:
-#line 616 "a2.y"
+  case 61:
+#line 610 "a2.y"
     {
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
@@ -2236,15 +2226,15 @@ yyreduce:
 	;}
     break;
 
-  case 63:
-#line 622 "a2.y"
+  case 62:
+#line 616 "a2.y"
     {
 		(yyval.lineList) = (yyvsp[(2) - (3)].lineList);
 	;}
     break;
 
-  case 64:
-#line 628 "a2.y"
+  case 63:
+#line 622 "a2.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, (yyvsp[(1) - (1)].str));
@@ -2253,8 +2243,8 @@ yyreduce:
     ;}
     break;
 
-  case 65:
-#line 634 "a2.y"
+  case 64:
+#line 628 "a2.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, (yyvsp[(1) - (2)].str));
@@ -2263,8 +2253,8 @@ yyreduce:
     ;}
     break;
 
-  case 66:
-#line 640 "a2.y"
+  case 65:
+#line 634 "a2.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, mytext);
@@ -2274,15 +2264,15 @@ yyreduce:
     ;}
     break;
 
-  case 69:
-#line 655 "a2.y"
+  case 68:
+#line 649 "a2.y"
     {
 		(yyval.str) = strdup(mytext);
 	;}
     break;
 
-  case 70:
-#line 661 "a2.y"
+  case 69:
+#line 655 "a2.y"
     {
 		if (streq(mytext, "int", 3))
 		    (yyval.dataType) = INT;
@@ -2294,8 +2284,8 @@ yyreduce:
     ;}
     break;
 
-  case 71:
-#line 672 "a2.y"
+  case 70:
+#line 666 "a2.y"
     {
 		(yyval.str) = strdup(mytext);
 	;}
@@ -2303,7 +2293,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2307 "a2.tab.c"
+#line 2297 "a2.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2517,7 +2507,7 @@ yyreturn:
 }
 
 
-#line 677 "a2.y"
+#line 671 "a2.y"
 
 
 void yyerror(char *message) {
@@ -2691,7 +2681,7 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 		    error("Invalid condition chaining");
 	}
 	int exitLabel = lCount++;
-	if (rootIfElse)
+	if (rootIfElse && ifElse->isMatched)
 		printf("goto L%d\n", exitLabel);
 	if (ifElse->isMatched) {
 		printf("L%d:\n", ifElse->falseLabel);
