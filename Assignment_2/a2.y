@@ -29,12 +29,12 @@ program_t *program;
 
 %left PLUS_TOK MINUS_TOK COMPAR
 %left MULTIPLY_TOK DIVIDE_TOK
+%left SHORT_AND_TOK SHORT_OR_TOK
+%right NOT_TOK
 %right UMINUS EXPONENT_TOK
 %left OPEN_PAREN CLOSE_PAREN
 %left ELSE_TOK
 
-%left SHORT_AND_TOK SHORT_OR_TOK
-%right NOT_TOK
 
 %union {
     char *str;
@@ -534,6 +534,9 @@ condition:
 		con->exp = $2->exp;
 		$$ = con;
 	}
+	| OPEN_PAREN condition CLOSE_PAREN {
+		$$ = $2;
+	}
     | expression compar expression {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -814,7 +817,6 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 			printf("goto L%d\n", ifElse->falseLabel);
 			printf("L%d:\n", ifElse->trueLabel);
 			ifElse->ifLineList->stringify(ifElse->ifLineList);
-			printf("goto L%d\n", lCount);
 			break;
 		case SHORT_AND:
 		    printf("if (%s) goto L%d\n", baseCon->exp->lValue, ifElse->trueLabel);
