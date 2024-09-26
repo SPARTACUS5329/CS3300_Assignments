@@ -133,14 +133,14 @@ typedef struct LoopStatement {
 } loop_statement_t;
 
 typedef struct WhileLoop {
-  expression_t *condition;
+  condition_t *condition;
   line_list_t *lineList;
   void (*stringify)(while_loop_t *);
 } while_loop_t;
 
 typedef struct ForLoop {
   assignment_statement_t *initial;
-  expression_t *condition;
+  condition_t *condition;
   assignment_statement_t *update;
   line_list_t *lineList;
   void (*stringify)(for_loop_t *);

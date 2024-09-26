@@ -585,7 +585,7 @@ loopStatement:
 ;
 
 whileStatement:
-    WHILE_TOK OPEN_PAREN expression CLOSE_PAREN body {
+    WHILE_TOK OPEN_PAREN condition CLOSE_PAREN body {
 		while_loop_t *loop = (while_loop_t *)malloc(sizeof(while_loop_t));
 		loop->condition = $3;
 		loop->lineList = $5;
@@ -594,7 +594,7 @@ whileStatement:
 ;
 
 forStatement:
-    FOR_TOK OPEN_PAREN assignmentStatement expression SEMI_COLON assignable EQ expression CLOSE_PAREN body {
+    FOR_TOK OPEN_PAREN assignmentStatement condition SEMI_COLON assignable EQ expression CLOSE_PAREN body {
 		for_loop_t *loop = (for_loop_t *)malloc(sizeof(for_loop_t));
 		loop->initial = $3;
 		loop->condition = $4;
@@ -801,7 +801,7 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 	if (ifElse->trueLabel == 0)
 		ifElse->trueLabel = lCount++;
 	if (ifElse->falseLabel == 0)
-		ifElse->falseLabel = ifElse->isMatched ? lCount++ : lCount;
+		ifElse->falseLabel = lCount++;
 
     if_else_statement_t *chainIfElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 	switch (baseCon->op) {
@@ -840,7 +840,7 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 		default:
 		    error("Invalid condition chaining");
 	}
-	int exitLabel = lCount++;
+	int exitLabel = ifElse->isMatched ? lCount++ : ifElse->falseLabel;
 	if (rootIfElse && ifElse->isMatched)
 		printf("goto L%d\n", exitLabel);
 	if (ifElse->isMatched) {
