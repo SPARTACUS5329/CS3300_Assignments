@@ -56,6 +56,7 @@ extern int lineNumber;
 [0-9]+         { strcpy(mytext, yytext); return NUMBER; }
 \"[^\"]*\"          { strcpy(mytext, yytext); return STRING_TOK; }
 [a-zA-Z_][a-zA-Z0-9_]* { strcpy(mytext, yytext); return IDENTIFIER; }
+"//".* {}
 
 [ \t]	{ }
 [\n]	{ lineNumber++; }

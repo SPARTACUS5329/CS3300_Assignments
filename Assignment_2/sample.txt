@@ -1,10 +1,10 @@
 int main() {
     int a = 5;
-    for (i = 0; i < 5; i = i + 1) {
-        while (a < 3) {
-            int d = 4;
-            a = a + 1;
-        }
+    // comments be working
+    // comments are working?
+    // let them work oh
+    for (i = 0; i < 5; i = i + 1) { // do they work here?, oh yes they do
+        int a = 4;
     }
     return 0;
 }
