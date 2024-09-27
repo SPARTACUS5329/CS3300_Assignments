@@ -893,6 +893,7 @@ void stringifyForLoop(for_loop_t *loop) {
     loop->startLabel = lCount++;
     loop->trueLabel = lCount++;
     loop->falseLabel = lCount++;
+	loop->initial->stringify(loop->initial);
 	printf("L%d:\n", loop->startLabel);
 	if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 	ifElse->condition = loop->condition;
