@@ -1,10 +1,14 @@
+int a = 1;
+
+int foo() {
+    printf("Something1234");
+}
+
 int main() {
-    int a = 5;
-    // comments be working
-    // comments are working?
     // let them work oh
-    for (i = 0; i < 5; i = i + 1) { // do they work here?, oh yes they do
-        int a = 4;
+    int x = 4 + a;
+    for (i = 0; i < 5; i = i + 1) { // This works
+        int b = 2;
     }
     return 0;
 }

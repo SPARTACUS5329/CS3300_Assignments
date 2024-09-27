@@ -120,7 +120,7 @@ typedef union YYSTYPE
 	return_statement_t *returnStatement;
 	loop_statement_t *loopStatement;
 	function_def_t *funDef;
-	function_def_list_t *funDefList;
+	combined_function_definitions_t *combinedFunDefList;
 	while_loop_t *whileLoop;
 	for_loop_t *forLoop;
 	declaration_list_t *decList;

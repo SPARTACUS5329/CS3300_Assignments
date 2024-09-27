@@ -49,7 +49,7 @@ program_t *program;
 	return_statement_t *returnStatement;
 	loop_statement_t *loopStatement;
 	function_def_t *funDef;
-	function_def_list_t *funDefList;
+	combined_function_definitions_t *combinedFunDefList;
 	while_loop_t *whileLoop;
 	for_loop_t *forLoop;
 	declaration_list_t *decList;
@@ -73,7 +73,7 @@ program_t *program;
 %type <paramList> parameters
 %type <funCall> functionCall
 %type <funDef> functionDefinition mainFunction
-%type <funDefList> functionDefinitions
+%type <combinedFunDefList> functionDefinitions
 %type <line> line
 %type <lineList> lines body
 %type <declarationStatement> declarationStatement
@@ -90,22 +90,30 @@ program_t *program;
 
 %%
 program:
-	functionDefinitions mainFunction {
-		program->funDefList = $1;
-		program->main = $2;
+	globalDeclarations functionDefinitions {
+		function_def_list_t *funDefList = (function_def_list_t *)malloc(sizeof(function_def_list_t));
+		funDefList->functions = $2->functions;
+		funDefList->functionCount = $2->functionCount;
+		funDefList->stringify = &stringifyFunctionDefList;
+		program->funDefList = funDefList;
+		program->main = $2->main;
 	}
 ;
 
+globalDeclarations:
+    | globalDeclarations declarationStatement
+;
+
 functionDefinitions:
-	functionDefinitions functionDefinition {
-		$1->functions[$1->functionCount++] = $2;
-		$$ = $1;
+	functionDefinition functionDefinitions {
+		$2->functions[$2->functionCount++] = $1;
+		$$ = $2;
 	}
-	| {
-		function_def_list_t *funDefList = (function_def_list_t *)malloc(sizeof(function_def_list_t));
-		funDefList->functions = (function_def_t **)malloc(MAX_LINES * sizeof(function_def_t *));
-		funDefList->stringify = &stringifyFunctionDefList;
-		$$ = funDefList;
+	| mainFunction {
+		combined_function_definitions_t *combinedFunctions = (combined_function_definitions_t *)malloc(sizeof(combined_function_definitions_t));
+		combinedFunctions->functions = (function_def_t **)malloc(MAX_LINES * sizeof(function_def_t *));
+		combinedFunctions->main = $1;
+		$$ = combinedFunctions;
 	}
 ;
 
@@ -331,6 +339,7 @@ argument:
 	| STRING_TOK {
 		arg_t *arg = (arg_t *)malloc(sizeof(arg_t));
 		arg->type = STRING;
+		arg->value.str = (char *)malloc(MAX_IDENTIFIER_LENGTH * sizeof(char));
 		strcpy(arg->value.str, mytext);
 		$$ = arg;
 	}
@@ -423,8 +432,12 @@ expression:
 			char temp[2 * MAX_IDENTIFIER_LENGTH];
 		    sprintf(temp, "%s_%s", currScope, $1->name);
 			hash_table_item_t *item = searchSymbol(temp, symbolTable);
-			if (item == NULL)
-				error("Undefined identifier");
+			if (item == NULL) {
+			    sprintf(temp, "global_%s", $1->name);
+			    item = searchSymbol(temp, symbolTable);
+			    if (item == NULL)
+			    	error("Undefined identifier");
+			}
 		}
 
 		sprintf(exp->lValue, "%s", $1->name);
@@ -450,6 +463,7 @@ functionIdentifier:
 		strcpy(currScope, $1);
 		$$ = $1;
 	}
+;
 
 returnStatement:
 	RETURN_TOK expression SEMI_COLON {
@@ -965,7 +979,7 @@ void stringifyFunctionCall(function_call_t *fun) {
 		passedParams[passedParamCount] = malloc(MAX_IDENTIFIER_LENGTH * sizeof(char));
 		switch (arg->type) {
 			case STRING:
-				printf("t%d = \"%s\"", tCount, arg->value.str);
+				printf("t%d = %s\n", tCount, arg->value.str);
 				sprintf(passedParams[passedParamCount++], "t%d", tCount++);
 				break;
 			case EXPRESSION:

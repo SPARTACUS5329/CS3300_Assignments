@@ -19,6 +19,7 @@ typedef struct IfElseStatement if_else_statement_t;
 typedef struct LoopStatement loop_statement_t;
 typedef struct FunctionDefinition function_def_t;
 typedef struct FunctionDefinitionList function_def_list_t;
+typedef struct CombinedFunctionDefinitions combined_function_definitions_t;
 typedef struct Expression expression_t;
 typedef struct FunctionCall function_call_t;
 typedef struct Parameter param_t;
@@ -181,6 +182,12 @@ typedef struct FunctionDefinition {
   line_list_t *lineList;
   void (*stringify)(function_def_t *);
 } function_def_t;
+
+typedef struct CombinedFunctionDefinitions {
+  int functionCount;
+  function_def_t **functions;
+  function_def_t *main;
+} combined_function_definitions_t;
 
 typedef struct FunctionDefinitionList {
   int functionCount;
