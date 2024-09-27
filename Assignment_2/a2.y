@@ -21,7 +21,7 @@ program_t *program;
 
 %token OPEN_PAREN CLOSE_PAREN OPEN_BRACE CLOSE_BRACE OPEN_SQUARE CLOSE_SQUARE COMMA COMPAR SEMI_COLON
 %token EQ PLUS_TOK MINUS_TOK MULTIPLY_TOK DIVIDE_TOK EXPONENT_TOK
-%token VALID_TYPE IDENTIFIER NUMBER STRING_TOK
+%token VALID_TYPE IDENTIFIER NUMBER STRING_TOK CHAR_TOK
 %token SHORT_AND_TOK SHORT_OR_TOK NOT_TOK
 %token IF_TOK ELSE_TOK
 %token WHILE_TOK FOR_TOK
@@ -241,9 +241,10 @@ declaration:
 assignmentStatement:
     assignable EQ expression SEMI_COLON {
 		hash_table_item_t *item = searchSymbol($1->name, symbolTable);
-		if (item == NULL) error("Undefined identifier");
+		if (item == NULL)
+		    error("Undefined variable");
 		if (item->data->depth != $1->depth)
-		    yyerror("Invalid location");
+		    error("Invalid location");
 
 		assignment_statement_t *ass = (assignment_statement_t *)malloc(sizeof(assignment_statement_t));
 		ass->type = item->data->type;
@@ -438,6 +439,8 @@ expression:
 			    if (item == NULL)
 			    	error("Undefined identifier");
 			}
+			if (item->data->depth != $1->depth)
+				error("Invalid location");
 		}
 
 		sprintf(exp->lValue, "%s", $1->name);
@@ -658,9 +661,18 @@ term:
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, mytext);
 		id->depth = 0;
+		id->type = INT;
 		id->isConstant = true;
 		$$ = id;
     }
+	| CHAR_TOK {
+		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
+		strcpy(id->name, mytext);
+		id->depth = 0;
+		id->type = CHAR;
+		id->isConstant = true;
+		$$ = id;
+	}
 ;
 
 index:
@@ -676,13 +688,13 @@ compar:
 
 validType:
     VALID_TYPE {
+		strcpy(currType, mytext);
 		if (streq(mytext, "int", 3))
 		    $$ = INT;
 		else if (streq(mytext, "float", 5))
 		    $$ = FLOAT;
 		else if (streq(mytext, "char", 4))
 		    $$ = CHAR;
-		strcpy(currType, mytext);
     }
 ;
 
@@ -1025,10 +1037,8 @@ hash_table_item_t *searchSymbol(char *key, hash_table_item_t* hashTable[]) {
 void insertSymbol(char *key, identifier_t *data, hash_table_item_t* hashTable[]) {
 	hash_table_item_t *item;
 	item = searchSymbol(key, hashTable);
-	if (item != NULL) {
-		item->data = data;
+	if (item != NULL)
 		return;
-	}
 	int hashIndex = hash(key);
 	item = (hash_table_item_t*) malloc(sizeof(hash_table_item_t));
 	item->data = data;

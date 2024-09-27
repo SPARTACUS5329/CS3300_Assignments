@@ -1,12 +1,9 @@
-int a = 1;
-
-int foo() {
-    printf("Something1234");
-}
-
 int main() {
     // let them work oh
-    int x = 4 + a;
+    int x[1][1];
+    x[1][1] = 1;
+    char str[10];
+    str[1] = 'A';
     for (i = 0; i < 5; i = i + 1) { // This works
         int b = 2;
     }

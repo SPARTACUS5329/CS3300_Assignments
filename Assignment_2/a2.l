@@ -29,7 +29,7 @@ extern int lineNumber;
 ";"		{ return SEMI_COLON; }
 
 "int"		{ strcpy(mytext, yytext); return VALID_TYPE; }
-"char"
+"char"		{ strcpy(mytext, yytext); return VALID_TYPE; }
 "float"		{ strcpy(mytext, yytext); return VALID_TYPE; }
 
 "main"		{ strcpy(mytext, yytext); return MAIN; }
@@ -55,6 +55,7 @@ extern int lineNumber;
 
 [0-9]+         { strcpy(mytext, yytext); return NUMBER; }
 \"[^\"]*\"          { strcpy(mytext, yytext); return STRING_TOK; }
+\'[^\']\'          { strcpy(mytext, yytext); return CHAR_TOK; }
 [a-zA-Z_][a-zA-Z0-9_]* { strcpy(mytext, yytext); return IDENTIFIER; }
 "//".* {}
 

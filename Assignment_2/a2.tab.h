@@ -58,16 +58,17 @@
      IDENTIFIER = 274,
      NUMBER = 275,
      STRING_TOK = 276,
-     SHORT_AND_TOK = 277,
-     SHORT_OR_TOK = 278,
-     NOT_TOK = 279,
-     IF_TOK = 280,
-     ELSE_TOK = 281,
-     WHILE_TOK = 282,
-     FOR_TOK = 283,
-     RETURN_TOK = 284,
-     MAIN = 285,
-     UMINUS = 286
+     CHAR_TOK = 277,
+     SHORT_AND_TOK = 278,
+     SHORT_OR_TOK = 279,
+     NOT_TOK = 280,
+     IF_TOK = 281,
+     ELSE_TOK = 282,
+     WHILE_TOK = 283,
+     FOR_TOK = 284,
+     RETURN_TOK = 285,
+     MAIN = 286,
+     UMINUS = 287
    };
 #endif
 /* Tokens.  */
@@ -90,16 +91,17 @@
 #define IDENTIFIER 274
 #define NUMBER 275
 #define STRING_TOK 276
-#define SHORT_AND_TOK 277
-#define SHORT_OR_TOK 278
-#define NOT_TOK 279
-#define IF_TOK 280
-#define ELSE_TOK 281
-#define WHILE_TOK 282
-#define FOR_TOK 283
-#define RETURN_TOK 284
-#define MAIN 285
-#define UMINUS 286
+#define CHAR_TOK 277
+#define SHORT_AND_TOK 278
+#define SHORT_OR_TOK 279
+#define NOT_TOK 280
+#define IF_TOK 281
+#define ELSE_TOK 282
+#define WHILE_TOK 283
+#define FOR_TOK 284
+#define RETURN_TOK 285
+#define MAIN 286
+#define UMINUS 287
 
 
 
@@ -134,7 +136,7 @@ typedef union YYSTYPE
 	condition_t *con;
 }
 /* Line 1529 of yacc.c.  */
-#line 138 "a2.tab.h"
+#line 140 "a2.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
