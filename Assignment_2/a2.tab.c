@@ -532,10 +532,10 @@ static const yytype_uint16 yyrline[] =
      152,   159,   166,   173,   180,   187,   197,   207,   213,   220,
      226,   234,   250,   266,   285,   288,   294,   298,   309,   314,
      318,   325,   331,   340,   352,   364,   376,   388,   400,   408,
-     411,   419,   437,   448,   454,   460,   468,   475,   479,   488,
-     497,   506,   517,   524,   531,   537,   540,   571,   578,   588,
-     597,   610,   616,   622,   628,   634,   644,   645,   649,   655,
-     666
+     411,   419,   438,   449,   455,   461,   469,   476,   480,   489,
+     498,   507,   518,   525,   532,   538,   541,   574,   581,   591,
+     601,   618,   625,   631,   637,   643,   653,   654,   658,   664,
+     675
 };
 #endif
 
@@ -1981,8 +1981,9 @@ yyreduce:
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 
 		if (!(yyvsp[(1) - (1)].id)->isConstant) {
-		    sprintf(mytext, "%s_%s", currScope, (yyvsp[(1) - (1)].id)->name);
-			hash_table_item_t *item = searchSymbol(mytext, symbolTable);
+			char temp[2 * MAX_IDENTIFIER_LENGTH];
+		    sprintf(temp, "%s_%s", currScope, (yyvsp[(1) - (1)].id)->name);
+			hash_table_item_t *item = searchSymbol(temp, symbolTable);
 			if (item == NULL)
 				error("Undefined identifier");
 		}
@@ -1995,7 +1996,7 @@ yyreduce:
     break;
 
   case 42:
-#line 437 "a2.y"
+#line 438 "a2.y"
     {
 		function_def_t *fun = (function_def_t *)malloc(sizeof(function_def_t));
 		strcpy(fun->name, (yyvsp[(2) - (6)].str));
@@ -2007,7 +2008,7 @@ yyreduce:
     break;
 
   case 43:
-#line 448 "a2.y"
+#line 449 "a2.y"
     {
 		strcpy(currScope, (yyvsp[(1) - (1)].str));
 		(yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2015,7 +2016,7 @@ yyreduce:
     break;
 
   case 44:
-#line 454 "a2.y"
+#line 455 "a2.y"
     {
 		return_statement_t *ret = (return_statement_t *)malloc(sizeof(return_statement_t));
 		ret->exp = (yyvsp[(2) - (3)].exp);
@@ -2025,7 +2026,7 @@ yyreduce:
     break;
 
   case 45:
-#line 460 "a2.y"
+#line 461 "a2.y"
     {
 		return_statement_t *ret = (return_statement_t *)malloc(sizeof(return_statement_t));
 		ret->stringify = &stringifyReturnStatement;
@@ -2034,7 +2035,7 @@ yyreduce:
     break;
 
   case 46:
-#line 468 "a2.y"
+#line 469 "a2.y"
     {
 		param_list_t *paramList = (param_list_t *)malloc(sizeof(param_list_t));
 		paramList->params = (param_t **)malloc(MAX_ARGS * sizeof(param_t *));
@@ -2045,7 +2046,7 @@ yyreduce:
     break;
 
   case 47:
-#line 475 "a2.y"
+#line 476 "a2.y"
     {
 		(yyvsp[(1) - (3)].paramList)->params[(yyvsp[(1) - (3)].paramList)->paramCount++] = (yyvsp[(3) - (3)].param);
 		(yyval.paramList) = (yyvsp[(1) - (3)].paramList);
@@ -2053,7 +2054,7 @@ yyreduce:
     break;
 
   case 48:
-#line 479 "a2.y"
+#line 480 "a2.y"
     {
 		param_list_t *paramList = (param_list_t *)malloc(sizeof(param_list_t));
 		paramList->params = (param_t **)malloc(MAX_ARGS * sizeof(param_t *));
@@ -2063,7 +2064,7 @@ yyreduce:
     break;
 
   case 49:
-#line 488 "a2.y"
+#line 489 "a2.y"
     {
 		param_t *param = (param_t *)malloc(sizeof(param_t));
 		param->type = (yyvsp[(1) - (2)].dataType);
@@ -2073,7 +2074,7 @@ yyreduce:
     break;
 
   case 50:
-#line 497 "a2.y"
+#line 498 "a2.y"
     {
 		if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 		ifElse->isMatched = true;
@@ -2086,7 +2087,7 @@ yyreduce:
     break;
 
   case 51:
-#line 506 "a2.y"
+#line 507 "a2.y"
     {
 		if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 		ifElse->isMatched = false;
@@ -2098,7 +2099,7 @@ yyreduce:
     break;
 
   case 52:
-#line 517 "a2.y"
+#line 518 "a2.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = SHORT_AND;
@@ -2109,7 +2110,7 @@ yyreduce:
     break;
 
   case 53:
-#line 524 "a2.y"
+#line 525 "a2.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = SHORT_OR;
@@ -2120,7 +2121,7 @@ yyreduce:
     break;
 
   case 54:
-#line 531 "a2.y"
+#line 532 "a2.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = NOT;
@@ -2130,14 +2131,14 @@ yyreduce:
     break;
 
   case 55:
-#line 537 "a2.y"
+#line 538 "a2.y"
     {
 		(yyval.con) = (yyvsp[(2) - (3)].con);
 	;}
     break;
 
   case 56:
-#line 540 "a2.y"
+#line 541 "a2.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -2157,8 +2158,10 @@ yyreduce:
 		    binOp->type = COMPAR_LE;
 		else if (streq((yyvsp[(2) - (3)].str), ">=", 2))
 		    binOp->type = COMPAR_GE;
-		else
+		else {
+			printf("%s\n", (yyvsp[(1) - (3)].exp)->lValue);
 		    error("Invalid comparison operator");
+		}
 		exp->child.binOp = binOp;
 		exp->stringify = &stringifyExpression;
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
@@ -2169,7 +2172,7 @@ yyreduce:
     break;
 
   case 57:
-#line 571 "a2.y"
+#line 574 "a2.y"
     {
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = WHILE;
@@ -2180,7 +2183,7 @@ yyreduce:
     break;
 
   case 58:
-#line 578 "a2.y"
+#line 581 "a2.y"
     {
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = FOR;
@@ -2191,48 +2194,54 @@ yyreduce:
     break;
 
   case 59:
-#line 588 "a2.y"
+#line 591 "a2.y"
     {
 		while_loop_t *loop = (while_loop_t *)malloc(sizeof(while_loop_t));
 		loop->condition = (yyvsp[(3) - (5)].con);
 		loop->lineList = (yyvsp[(5) - (5)].lineList);
+		loop->stringify = &stringifyWhileLoop;
 		(yyval.whileLoop) = loop;
     ;}
     break;
 
   case 60:
-#line 597 "a2.y"
+#line 601 "a2.y"
     {
 		for_loop_t *loop = (for_loop_t *)malloc(sizeof(for_loop_t));
 		loop->initial = (yyvsp[(3) - (10)].assignmentStatement);
 		loop->condition = (yyvsp[(4) - (10)].con);
 		assignment_statement_t *update = (assignment_statement_t *)malloc(sizeof(assignment_statement_t));
 		update->type = (yyvsp[(6) - (10)].id)->type;
+		update->lValue = (yyvsp[(6) - (10)].id);
 		update->exp = (yyvsp[(8) - (10)].exp);
+		update->stringify = &stringifyAssignmentStatement;
 		loop->update = update;
+		loop->lineList = (yyvsp[(10) - (10)].lineList);
+		loop->stringify = &stringifyForLoop;
 		(yyval.forLoop) = loop;
 	;}
     break;
 
   case 61:
-#line 610 "a2.y"
+#line 618 "a2.y"
     {
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
 		lineList->lines[lineList->lineCount++] = (yyvsp[(1) - (1)].line);
+		lineList->stringify = &stringifyLineList;
 		(yyval.lineList) = lineList;
 	;}
     break;
 
   case 62:
-#line 616 "a2.y"
+#line 625 "a2.y"
     {
 		(yyval.lineList) = (yyvsp[(2) - (3)].lineList);
 	;}
     break;
 
   case 63:
-#line 622 "a2.y"
+#line 631 "a2.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, (yyvsp[(1) - (1)].str));
@@ -2242,7 +2251,7 @@ yyreduce:
     break;
 
   case 64:
-#line 628 "a2.y"
+#line 637 "a2.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, (yyvsp[(1) - (2)].str));
@@ -2252,7 +2261,7 @@ yyreduce:
     break;
 
   case 65:
-#line 634 "a2.y"
+#line 643 "a2.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, mytext);
@@ -2263,14 +2272,14 @@ yyreduce:
     break;
 
   case 68:
-#line 649 "a2.y"
+#line 658 "a2.y"
     {
 		(yyval.str) = strdup(mytext);
 	;}
     break;
 
   case 69:
-#line 655 "a2.y"
+#line 664 "a2.y"
     {
 		if (streq(mytext, "int", 3))
 		    (yyval.dataType) = INT;
@@ -2283,7 +2292,7 @@ yyreduce:
     break;
 
   case 70:
-#line 666 "a2.y"
+#line 675 "a2.y"
     {
 		(yyval.str) = strdup(mytext);
 	;}
@@ -2291,7 +2300,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2295 "a2.tab.c"
+#line 2304 "a2.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2505,7 +2514,7 @@ yyreturn:
 }
 
 
-#line 671 "a2.y"
+#line 680 "a2.y"
 
 
 void yyerror(char *message) {
@@ -2689,8 +2698,50 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 		printf("L%d:\n", exitLabel);
 }
 
-void stringifyLoopStatement(loop_statement_t *loopStatement) {
-	printf("LOOP_STATEMENT\n");
+void stringifyLoopStatement(loop_statement_t *loop) {
+	switch (loop->type) {
+		case WHILE:
+		    loop->loop.whileLoop->stringify(loop->loop.whileLoop);
+			break;
+		case FOR:
+		    loop->loop.forLoop->stringify(loop->loop.forLoop);
+			break;
+		default:
+		    error("Invalid loop type");
+	}
+}
+
+void stringifyWhileLoop(while_loop_t *loop) {
+    loop->startLabel = lCount++;
+    loop->trueLabel = lCount++;
+    loop->falseLabel = lCount++;
+	printf("L%d:\n", loop->startLabel);
+	if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
+	ifElse->condition = loop->condition;
+	ifElse->ifLineList = loop->lineList;
+	ifElse->trueLabel = loop->trueLabel;
+	ifElse->falseLabel = loop->falseLabel;
+	ifElse->stringify = &stringifyIfElseStatement;
+	ifElse->stringify(ifElse);
+	printf("goto L%d\n", loop->startLabel);
+	printf("L%d:\n", loop->falseLabel);
+}
+
+void stringifyForLoop(for_loop_t *loop) {
+    loop->startLabel = lCount++;
+    loop->trueLabel = lCount++;
+    loop->falseLabel = lCount++;
+	printf("L%d:\n", loop->startLabel);
+	if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
+	ifElse->condition = loop->condition;
+	ifElse->ifLineList = loop->lineList;
+	ifElse->trueLabel = loop->trueLabel;
+	ifElse->falseLabel = loop->falseLabel;
+	ifElse->stringify = &stringifyIfElseStatement;
+	ifElse->stringify(ifElse);
+	loop->update->stringify(loop->update);
+	printf("goto L%d\n", loop->startLabel);
+	printf("L%d:\n", loop->falseLabel);
 }
 
 void stringifyBinOp(expression_t *exp, bin_op_t *binOp) {

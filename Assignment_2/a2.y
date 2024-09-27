@@ -420,8 +420,9 @@ expression:
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 
 		if (!$1->isConstant) {
-		    sprintf(mytext, "%s_%s", currScope, $1->name);
-			hash_table_item_t *item = searchSymbol(mytext, symbolTable);
+			char temp[2 * MAX_IDENTIFIER_LENGTH];
+		    sprintf(temp, "%s_%s", currScope, $1->name);
+			hash_table_item_t *item = searchSymbol(temp, symbolTable);
 			if (item == NULL)
 				error("Undefined identifier");
 		}
@@ -556,8 +557,10 @@ condition:
 		    binOp->type = COMPAR_LE;
 		else if (streq($2, ">=", 2))
 		    binOp->type = COMPAR_GE;
-		else
+		else {
+			printf("%s\n", $1->lValue);
 		    error("Invalid comparison operator");
+		}
 		exp->child.binOp = binOp;
 		exp->stringify = &stringifyExpression;
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
@@ -589,6 +592,7 @@ whileStatement:
 		while_loop_t *loop = (while_loop_t *)malloc(sizeof(while_loop_t));
 		loop->condition = $3;
 		loop->lineList = $5;
+		loop->stringify = &stringifyWhileLoop;
 		$$ = loop;
     }
 ;
@@ -600,8 +604,12 @@ forStatement:
 		loop->condition = $4;
 		assignment_statement_t *update = (assignment_statement_t *)malloc(sizeof(assignment_statement_t));
 		update->type = $6->type;
+		update->lValue = $6;
 		update->exp = $8;
+		update->stringify = &stringifyAssignmentStatement;
 		loop->update = update;
+		loop->lineList = $10;
+		loop->stringify = &stringifyForLoop;
 		$$ = loop;
 	}
 ;
@@ -611,6 +619,7 @@ body:
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
 		lineList->lines[lineList->lineCount++] = $1;
+		lineList->stringify = &stringifyLineList;
 		$$ = lineList;
 	}
     | OPEN_BRACE lines CLOSE_BRACE {
@@ -851,8 +860,50 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 		printf("L%d:\n", exitLabel);
 }
 
-void stringifyLoopStatement(loop_statement_t *loopStatement) {
-	printf("LOOP_STATEMENT\n");
+void stringifyLoopStatement(loop_statement_t *loop) {
+	switch (loop->type) {
+		case WHILE:
+		    loop->loop.whileLoop->stringify(loop->loop.whileLoop);
+			break;
+		case FOR:
+		    loop->loop.forLoop->stringify(loop->loop.forLoop);
+			break;
+		default:
+		    error("Invalid loop type");
+	}
+}
+
+void stringifyWhileLoop(while_loop_t *loop) {
+    loop->startLabel = lCount++;
+    loop->trueLabel = lCount++;
+    loop->falseLabel = lCount++;
+	printf("L%d:\n", loop->startLabel);
+	if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
+	ifElse->condition = loop->condition;
+	ifElse->ifLineList = loop->lineList;
+	ifElse->trueLabel = loop->trueLabel;
+	ifElse->falseLabel = loop->falseLabel;
+	ifElse->stringify = &stringifyIfElseStatement;
+	ifElse->stringify(ifElse);
+	printf("goto L%d\n", loop->startLabel);
+	printf("L%d:\n", loop->falseLabel);
+}
+
+void stringifyForLoop(for_loop_t *loop) {
+    loop->startLabel = lCount++;
+    loop->trueLabel = lCount++;
+    loop->falseLabel = lCount++;
+	printf("L%d:\n", loop->startLabel);
+	if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
+	ifElse->condition = loop->condition;
+	ifElse->ifLineList = loop->lineList;
+	ifElse->trueLabel = loop->trueLabel;
+	ifElse->falseLabel = loop->falseLabel;
+	ifElse->stringify = &stringifyIfElseStatement;
+	ifElse->stringify(ifElse);
+	loop->update->stringify(loop->update);
+	printf("goto L%d\n", loop->startLabel);
+	printf("L%d:\n", loop->falseLabel);
 }
 
 void stringifyBinOp(expression_t *exp, bin_op_t *binOp) {

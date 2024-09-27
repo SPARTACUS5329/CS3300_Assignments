@@ -133,12 +133,18 @@ typedef struct LoopStatement {
 } loop_statement_t;
 
 typedef struct WhileLoop {
+  int startLabel;
+  int trueLabel;
+  int falseLabel;
   condition_t *condition;
   line_list_t *lineList;
   void (*stringify)(while_loop_t *);
 } while_loop_t;
 
 typedef struct ForLoop {
+  int startLabel;
+  int trueLabel;
+  int falseLabel;
   assignment_statement_t *initial;
   condition_t *condition;
   assignment_statement_t *update;
@@ -248,6 +254,8 @@ void stringifyExpression(expression_t *exp);
 void stringifyReturnStatement(return_statement_t *ret);
 void stringifyIfElseStatement(if_else_statement_t *ifElseStatement);
 void stringifyLoopStatement(loop_statement_t *loopStatement);
+void stringifyWhileLoop(while_loop_t *loop);
+void stringifyForLoop(for_loop_t *loop);
 void stringifyBinOp(expression_t *exp, bin_op_t *binOp);
 void stringifyFunctionCall(function_call_t *fun);
 void stringifyLine(line_t *line);
