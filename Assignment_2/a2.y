@@ -67,7 +67,7 @@ program_t *program;
 %type <str> identifier functionIdentifier compar
 %type <subscriptList> subscripts
 %type <id> assignable term
-%type <exp> expression subscript
+%type <exp> expression subscript computable
 %type <arg> argument
 %type <param> parameter
 %type <argList> arguments
@@ -93,8 +93,11 @@ program_t *program;
 program:
 	globalDeclarations functionDefinitions {
 		function_def_list_t *funDefList = (function_def_list_t *)malloc(sizeof(function_def_list_t));
-		funDefList->functions = $2->functions;
+		funDefList->functions = (function_def_t **)malloc(MAX_IDENTIFIERS * sizeof(function_def_t *));
 		funDefList->functionCount = $2->functionCount;
+		for (int i = 0; i < funDefList->functionCount; i++) {
+		    funDefList->functions[i] = $2->functions[$2->functionCount - i - 1];
+		}
 		funDefList->stringify = &stringifyFunctionDefList;
 		program->globalDeclarations = $1;
 		program->funDefList = funDefList;
@@ -254,7 +257,7 @@ declaration:
 ;
 
 assignmentStatement:
-    assignable EQ expression SEMI_COLON {
+    assignable EQ computable SEMI_COLON {
 		hash_table_item_t *item = searchSymbol($1->name, symbolTable);
 		if (item == NULL)
 		    error("Undefined variable");
@@ -492,7 +495,7 @@ functionIdentifier:
 ;
 
 returnStatement:
-	RETURN_TOK expression SEMI_COLON {
+	RETURN_TOK computable SEMI_COLON {
 		return_statement_t *ret = (return_statement_t *)malloc(sizeof(return_statement_t));
 		ret->exp = $2;
 		ret->stringify = &stringifyReturnStatement;
@@ -608,6 +611,15 @@ condition:
 		con->exp = exp;
 		$$ = con;
     }
+;
+
+computable:
+    expression {
+		$$ = $1;
+	}
+	| condition {
+		$$ = $1->exp;
+	}
 ;
 
 loopStatement:
