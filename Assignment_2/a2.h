@@ -75,14 +75,14 @@ typedef struct Identifier {
   char name[MAX_IDENTIFIER_LENGTH];
   char displayName[MAX_IDENTIFIER_LENGTH];
   int depth;
-  identifier_t **subscripts;
+  expression_t **subscripts;
   bool isConstant;
   data_type_e type;
 } identifier_t;
 
 typedef struct SubscriptList {
   int depth;
-  identifier_t **subscripts;
+  expression_t **subscripts;
 } subscript_list_t;
 
 typedef struct Line {
@@ -239,6 +239,7 @@ typedef struct IfElseStatement {
 } if_else_statement_t;
 
 typedef struct Program {
+  line_list_t *globalDeclarations;
   function_def_list_t *funDefList;
   function_def_t *main;
 } program_t;

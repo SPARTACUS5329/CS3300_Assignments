@@ -66,8 +66,8 @@ program_t *program;
 
 %type <str> identifier functionIdentifier compar
 %type <subscriptList> subscripts
-%type <id> assignable term index subscript
-%type <exp> expression
+%type <id> assignable term
+%type <exp> expression subscript
 %type <arg> argument
 %type <param> parameter
 %type <argList> arguments
@@ -76,7 +76,7 @@ program_t *program;
 %type <funDef> functionDefinition mainFunction
 %type <combinedFunDefList> functionDefinitions
 %type <line> line
-%type <lineList> lines body
+%type <lineList> lines body globalDeclarations
 %type <declarationStatement> declarationStatement
 %type <decList> declarations
 %type <dec> declaration
@@ -96,13 +96,27 @@ program:
 		funDefList->functions = $2->functions;
 		funDefList->functionCount = $2->functionCount;
 		funDefList->stringify = &stringifyFunctionDefList;
+		program->globalDeclarations = $1;
 		program->funDefList = funDefList;
 		program->main = $2->main;
 	}
 ;
 
 globalDeclarations:
-    | globalDeclarations declarationStatement
+    globalDeclarations declarationStatement {
+		line_t *line = (line_t *)malloc(sizeof(line_t));
+		line->type = DECLARATION;
+		line->statement.declaration = $2;
+		line->stringify = &stringifyLine;
+		$1->lines[$1->lineCount++] = line;
+		$$ = $1;
+	}
+	| {
+		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
+		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
+		lineList->stringify = &stringifyLineList;
+		$$ = lineList;
+	}
 ;
 
 functionDefinitions:
@@ -296,7 +310,7 @@ subscripts:
 	subscript {
 		subscript_list_t *subscriptList = (subscript_list_t *)malloc(sizeof(subscript_list_t));
 		subscriptList->depth = 1;
-		subscriptList->subscripts = (identifier_t **)malloc(MAX_DEPTH * sizeof(identifier_t *));
+		subscriptList->subscripts = (expression_t **)malloc(MAX_DEPTH * sizeof(expression_t *));
 		subscriptList->subscripts[0] = $1;
 		$$ = subscriptList;
 	}
@@ -307,7 +321,7 @@ subscripts:
 ;
 
 subscript:
-	OPEN_SQUARE index CLOSE_SQUARE {
+	OPEN_SQUARE expression CLOSE_SQUARE {
 		$$ = $2;
 	}
 ;
@@ -575,14 +589,14 @@ condition:
 		    binOp->type = COMPAR_EQ;
 		else if (streq($2, "!=", 2))
 		    binOp->type = COMPAR_NE;
-		else if (streq($2, "<", 1))
-		    binOp->type = COMPAR_LT;
-		else if (streq($2, ">", 1))
-		    binOp->type = COMPAR_GT;
 		else if (streq($2, "<=", 2))
 		    binOp->type = COMPAR_LE;
 		else if (streq($2, ">=", 2))
 		    binOp->type = COMPAR_GE;
+		else if (streq($2, "<", 1))
+		    binOp->type = COMPAR_LT;
+		else if (streq($2, ">", 1))
+		    binOp->type = COMPAR_GT;
 		else {
 			printf("%s\n", $1->lValue);
 		    error("Invalid comparison operator");
@@ -685,25 +699,6 @@ term:
 	}
 ;
 
-index:
-	identifier {
-		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
-		strcpy(id->name, $1);
-		strcpy(id->displayName, $1);
-		id->depth = 0;
-		$$ = id;
-    }
-    | NUMBER {
-		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
-		strcpy(id->name, mytext);
-		strcpy(id->displayName, mytext);
-		id->depth = 0;
-		id->type = INT;
-		id->isConstant = true;
-		$$ = id;
-    }
-;
-
 compar:
     COMPAR {
 		$$ = strdup(mytext);
@@ -747,6 +742,7 @@ int main(void) {
 }
 
 void stringifyProgram(program_t *program) {
+	program->globalDeclarations->stringify(program->globalDeclarations);
 	program->funDefList->stringify(program->funDefList);
 	program->main->stringify(program->main);
 }
@@ -820,23 +816,30 @@ void stringifyDeclarationStatement(declaration_statement_t *decList) {
 
 void stringifyAssignmentStatement(assignment_statement_t *ass) {
 	ass->exp->stringify(ass->exp);
+	for (int i = 0; i < ass->lValue->depth; i++) {
+		ass->lValue->subscripts[i]->stringify(ass->lValue->subscripts[i]);
+	}
 	printf("%s", ass->lValue->displayName);
 	for (int i = 0; i < ass->lValue->depth; i++) {
-		printf("[%s]", ass->lValue->subscripts[i]->displayName);
+		printf("[%s]", ass->lValue->subscripts[i]->lValue);
 	}
-	printf(" = t%d\n", tCount - 1);
+	printf(" = %s\n", ass->exp->lValue);
 }
 
 void stringifyExpression(expression_t *exp) {
     switch (exp->type) {
 		case CONSTANT:
 			printf("t%d = %s\n", tCount++, exp->lValue);
+			sprintf(exp->lValue, "t%d", tCount - 1);
 			break;
 		case BIN_OP:
 			exp->child.binOp->stringify(exp, exp->child.binOp);
+			sprintf(exp->lValue, "t%d", tCount - 1);
 			break;
 		case FUNCTION_CALL:
 			exp->child.functionCall->stringify(exp->child.functionCall);
+			printf("t%d = retval\n", tCount++);
+			sprintf(exp->lValue, "t%d", tCount - 1);
 			break;
 		default:
 			error("Invalid expression");
@@ -851,7 +854,7 @@ void stringifyReturnStatement(return_statement_t *ret) {
 				break;
 			default:
 				ret->exp->stringify(ret->exp);
-				printf("retval = t%d\n", tCount++);
+				printf("retval = t%d\n", tCount - 1);
 		}
 	}
 	printf("return\n");
