@@ -7,9 +7,12 @@
 #define MAX_IDENTIFIER_LENGTH 200
 #define MAX_EXPRESSION_LENGTH 200
 #define MAX_LINES 2000
+#define MAX_DEPTH 20
 #define streq(str1, str2, n) (strncmp(str1, str2, n) == 0)
 
 typedef struct Identifier identifier_t;
+typedef struct SubscriptList subscript_list_t;
+typedef struct Subscript subscript_t;
 typedef struct DeclarationStatement declaration_statement_t;
 typedef struct Declaration declaration_t;
 typedef struct DeclarationList declaration_list_t;
@@ -72,9 +75,15 @@ typedef struct Identifier {
   char name[MAX_IDENTIFIER_LENGTH];
   char displayName[MAX_IDENTIFIER_LENGTH];
   int depth;
+  identifier_t **subscripts;
   bool isConstant;
   data_type_e type;
 } identifier_t;
+
+typedef struct SubscriptList {
+  int depth;
+  identifier_t **subscripts;
+} subscript_list_t;
 
 typedef struct Line {
   statement_e type;

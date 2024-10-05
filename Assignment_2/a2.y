@@ -40,6 +40,7 @@ program_t *program;
     char *str;
     int val;
     identifier_t *id;
+	subscript_list_t *subscriptList;
 	expression_t *exp; 
 	line_t *line;
 	line_list_t *lineList;
@@ -64,8 +65,8 @@ program_t *program;
 }
 
 %type <str> identifier functionIdentifier compar
-%type <val> subscripts
-%type <id> assignable term
+%type <subscriptList> subscripts
+%type <id> assignable term index subscript
 %type <exp> expression
 %type <arg> argument
 %type <param> parameter
@@ -284,7 +285,8 @@ assignable:
 		    id->type = FLOAT;
 		else if (streq(currType, "char", 4))
 		    id->type = CHAR;
-	    id->depth = $2;
+	    id->depth = $2->depth;
+	    id->subscripts = $2->subscripts;
 		insertSymbol(id->name, id, symbolTable);
 		$$ = id;
 	}
@@ -292,15 +294,22 @@ assignable:
 
 subscripts:
 	subscript {
-		$$ = 1;
+		subscript_list_t *subscriptList = (subscript_list_t *)malloc(sizeof(subscript_list_t));
+		subscriptList->depth = 1;
+		subscriptList->subscripts = (identifier_t **)malloc(MAX_DEPTH * sizeof(identifier_t *));
+		subscriptList->subscripts[0] = $1;
+		$$ = subscriptList;
 	}
-	| subscript subscripts {
-	    $$ = 1 + $2;
+	| subscripts subscript {
+		$1->subscripts[$1->depth++] = $2;
+		$$ = $1;
     }
 ;
 
 subscript:
-	OPEN_SQUARE index CLOSE_SQUARE
+	OPEN_SQUARE index CLOSE_SQUARE {
+		$$ = $2;
+	}
 ;
 
 functionCall:
@@ -654,7 +663,8 @@ term:
     | identifier subscripts {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, $1);
-		id->depth = $2;
+		id->depth = $2->depth;
+		id->subscripts = $2->subscripts;
 		$$ = id;
     }
     | NUMBER {
@@ -676,8 +686,22 @@ term:
 ;
 
 index:
-    identifier
-    | NUMBER
+	identifier {
+		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
+		strcpy(id->name, $1);
+		strcpy(id->displayName, $1);
+		id->depth = 0;
+		$$ = id;
+    }
+    | NUMBER {
+		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
+		strcpy(id->name, mytext);
+		strcpy(id->displayName, mytext);
+		id->depth = 0;
+		id->type = INT;
+		id->isConstant = true;
+		$$ = id;
+    }
 ;
 
 compar:
@@ -796,7 +820,11 @@ void stringifyDeclarationStatement(declaration_statement_t *decList) {
 
 void stringifyAssignmentStatement(assignment_statement_t *ass) {
 	ass->exp->stringify(ass->exp);
-	printf("%s = t%d\n", ass->lValue->displayName, tCount - 1);
+	printf("%s", ass->lValue->displayName);
+	for (int i = 0; i < ass->lValue->depth; i++) {
+		printf("[%s]", ass->lValue->subscripts[i]->displayName);
+	}
+	printf(" = t%d\n", tCount - 1);
 }
 
 void stringifyExpression(expression_t *exp) {

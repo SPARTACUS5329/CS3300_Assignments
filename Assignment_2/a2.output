@@ -39,7 +39,7 @@ Grammar
    24           | identifier subscripts
 
    25 subscripts: subscript
-   26           | subscript subscripts
+   26           | subscripts subscript
 
    27 subscript: OPEN_SQUARE index CLOSE_SQUARE
 
@@ -487,21 +487,20 @@ state 26
 state 27
 
    24 assignable: identifier subscripts .
+   26 subscripts: subscripts . subscript
+
+    OPEN_SQUARE  shift, and go to state 26
 
     $default  reduce using rule 24 (assignable)
+
+    subscript  go to state 46
 
 
 state 28
 
    25 subscripts: subscript .
-   26           | subscript . subscripts
-
-    OPEN_SQUARE  shift, and go to state 26
 
     $default  reduce using rule 25 (subscripts)
-
-    subscripts  go to state 46
-    subscript   go to state 28
 
 
 state 29
@@ -675,7 +674,7 @@ state 45
 
 state 46
 
-   26 subscripts: subscript subscripts .
+   26 subscripts: subscripts subscript .
 
     $default  reduce using rule 26 (subscripts)
 
@@ -865,9 +864,14 @@ state 57
 
 state 58
 
+   26 subscripts: subscripts . subscript
    65 term: identifier subscripts .
 
+    OPEN_SQUARE  shift, and go to state 26
+
     $default  reduce using rule 65 (term)
+
+    subscript  go to state 46
 
 
 state 59
@@ -1385,10 +1389,15 @@ state 100
 state 101
 
    24 assignable: identifier subscripts .
+   26 subscripts: subscripts . subscript
    65 term: identifier subscripts .
+
+    OPEN_SQUARE  shift, and go to state 26
 
     EQ        reduce using rule 24 (assignable)
     $default  reduce using rule 65 (term)
+
+    subscript  go to state 46
 
 
 state 102

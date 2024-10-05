@@ -113,6 +113,7 @@ typedef union YYSTYPE
     char *str;
     int val;
     identifier_t *id;
+	subscript_list_t *subscriptList;
 	expression_t *exp; 
 	line_t *line;
 	line_list_t *lineList;
@@ -136,7 +137,7 @@ typedef union YYSTYPE
 	condition_t *con;
 }
 /* Line 1529 of yacc.c.  */
-#line 140 "a2.tab.h"
+#line 141 "a2.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

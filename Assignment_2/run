@@ -1,3 +1,4 @@
+clear
 flex a2.l
 bison --verbose -d a2.y
 gcc lex.yy.c a2.tab.c
