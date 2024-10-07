@@ -176,11 +176,11 @@ program_t *program;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 39 "a2.y"
+#line 40 "a2.y"
 {
-    char *str;
-    int val;
-    identifier_t *id;
+	char *str;
+	int val;
+	identifier_t *id;
 	subscript_list_t *subscriptList;
 	expression_t *exp; 
 	line_t *line;
@@ -532,14 +532,14 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    94,    94,   109,   117,   126,   130,   139,   150,   156,
-     163,   171,   178,   185,   192,   199,   206,   213,   223,   233,
-     239,   246,   252,   260,   277,   293,   313,   320,   327,   333,
-     344,   349,   353,   360,   366,   376,   388,   400,   412,   424,
-     436,   444,   447,   455,   480,   491,   498,   504,   512,   519,
-     523,   532,   541,   550,   561,   568,   575,   581,   584,   617,
-     620,   626,   633,   643,   653,   670,   677,   683,   689,   696,
-     704,   715,   721,   732
+       0,    95,    95,   110,   118,   127,   131,   140,   151,   157,
+     164,   172,   179,   186,   193,   200,   207,   214,   224,   234,
+     240,   247,   253,   261,   278,   294,   314,   321,   328,   334,
+     345,   350,   354,   361,   367,   377,   389,   401,   413,   425,
+     437,   445,   448,   456,   481,   492,   499,   505,   513,   520,
+     524,   533,   542,   551,   562,   569,   576,   582,   585,   618,
+     621,   627,   634,   644,   654,   671,   678,   684,   690,   697,
+     705,   716,   722,   733
 };
 #endif
 
@@ -651,16 +651,16 @@ static const yytype_int16 yypact[] =
       13,   -54,    84,    84,    86,    84,   -54,    84,   174,    98,
      121,    84,   -54,    68,   -54,    97,   -54,   -54,   174,    22,
       30,    84,   182,    34,   -54,   -54,   163,    84,    84,   -54,
-     123,   -54,   122,   122,    -3,   -54,   218,   -54,   -54,   -54,
-     110,   -54,    86,   122,   126,   -54,   163,   203,   122,   -54
+     123,   -54,   122,   122,    -3,   -54,   218,   -54,   114,   -54,
+     111,   -54,    86,   122,   133,   -54,   163,   203,   122,   -54
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-     -54,   -54,   -54,   137,   -54,   -54,   -54,   -53,   145,   130,
-     -54,    64,    -6,   -37,   -26,   -54,   -54,    54,    38,     5,
-     -54,   -54,   135,   118,   -54,    83,    66,   -54,   -54,   -54,
+     -54,   -54,   -54,   139,   -54,   -54,   -54,   -53,   151,   135,
+     -54,    65,    -6,   -37,   -26,   -54,   -54,    55,    38,     5,
+     -54,   -54,   142,   118,   -54,    83,    69,   -54,   -54,   -54,
      -39,   -54,   -54,     3,    -9
 };
 
@@ -684,11 +684,11 @@ static const yytype_int16 yytable[] =
       34,    98,    26,    12,    36,    12,    37,    54,    55,    97,
       92,    35,    26,    77,    77,    93,    12,    36,    85,    37,
       94,   117,   118,    33,    77,    34,   134,    59,   101,    77,
-     108,   108,   119,   112,   129,   108,    35,   133,   136,    98,
-       4,    12,    36,    88,    37,    10,    34,     7,    60,   108,
-      61,    62,    63,    32,   126,   108,   108,    35,   111,   121,
-      42,     4,    12,    36,    78,    37,    34,   120,     0,    60,
-       0,    61,    62,    63,   137,   109,   110,    35,   113,     0,
+     108,   108,   119,   112,   129,   108,    35,   117,   133,    98,
+       4,    12,    36,    88,    37,   136,    34,    10,    60,   108,
+      61,    62,    63,     7,   126,   108,   108,    35,    32,   111,
+     121,     4,    12,    36,    78,    37,    34,    42,     0,    60,
+     120,    61,    62,    63,   137,   109,   110,    35,   113,     0,
      114,     0,    12,    36,   115,    37,    79,    50,    51,    52,
       53,    54,   115,    79,   124,    50,    51,    52,    53,    54,
      127,   128,    50,    51,    52,    53,    54,   138,   102,     0,
@@ -712,11 +712,11 @@ static const yytype_int16 yycheck[] =
        3,    63,     7,    19,    20,    19,    22,    17,     3,    25,
        3,    14,     7,   122,   123,     3,    19,    20,    21,    22,
        3,    23,    24,   132,   133,     3,   132,     5,    12,   138,
-      92,    93,    11,    95,    11,    97,    14,    27,    12,   101,
-      18,    19,    20,   105,    22,     8,     3,     2,    26,   111,
-      28,    29,    30,    23,   116,   117,   118,    14,    94,   105,
-      25,    18,    19,    20,    46,    22,     3,   101,    -1,    26,
-      -1,    28,    29,    30,   136,    92,    93,    14,    95,    -1,
+      92,    93,    11,    95,    11,    97,    14,    23,    27,   101,
+      18,    19,    20,   105,    22,    12,     3,     8,    26,   111,
+      28,    29,    30,     2,   116,   117,   118,    14,    23,    94,
+     105,    18,    19,    20,    46,    22,     3,    25,    -1,    26,
+     101,    28,    29,    30,   136,    92,    93,    14,    95,    -1,
       97,    -1,    19,    20,    10,    22,     4,    13,    14,    15,
       16,    17,    10,     4,   111,    13,    14,    15,    16,    17,
      117,   118,    13,    14,    15,    16,    17,     4,    11,    -1,
@@ -1557,7 +1557,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 94 "a2.y"
+#line 95 "a2.y"
     {
 		function_def_list_t *funDefList = (function_def_list_t *)malloc(sizeof(function_def_list_t));
 		funDefList->functions = (function_def_t **)malloc(MAX_IDENTIFIERS * sizeof(function_def_t *));
@@ -1573,7 +1573,7 @@ yyreduce:
     break;
 
   case 3:
-#line 109 "a2.y"
+#line 110 "a2.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = DECLARATION;
@@ -1585,7 +1585,7 @@ yyreduce:
     break;
 
   case 4:
-#line 117 "a2.y"
+#line 118 "a2.y"
     {
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
@@ -1595,7 +1595,7 @@ yyreduce:
     break;
 
   case 5:
-#line 126 "a2.y"
+#line 127 "a2.y"
     {
 		(yyvsp[(2) - (2)].combinedFunDefList)->functions[(yyvsp[(2) - (2)].combinedFunDefList)->functionCount++] = (yyvsp[(1) - (2)].funDef);
 		(yyval.combinedFunDefList) = (yyvsp[(2) - (2)].combinedFunDefList);
@@ -1603,7 +1603,7 @@ yyreduce:
     break;
 
   case 6:
-#line 130 "a2.y"
+#line 131 "a2.y"
     {
 		combined_function_definitions_t *combinedFunctions = (combined_function_definitions_t *)malloc(sizeof(combined_function_definitions_t));
 		combinedFunctions->functions = (function_def_t **)malloc(MAX_LINES * sizeof(function_def_t *));
@@ -1613,7 +1613,7 @@ yyreduce:
     break;
 
   case 7:
-#line 139 "a2.y"
+#line 140 "a2.y"
     {
 		function_def_t *fun = (function_def_t *)malloc(sizeof(function_def_t));
 		strcpy(fun->name, "main");
@@ -1625,14 +1625,14 @@ yyreduce:
     break;
 
   case 8:
-#line 150 "a2.y"
+#line 151 "a2.y"
     {
 		strcpy(currScope, "main");
 	;}
     break;
 
   case 9:
-#line 156 "a2.y"
+#line 157 "a2.y"
     {
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
@@ -1643,7 +1643,7 @@ yyreduce:
     break;
 
   case 10:
-#line 163 "a2.y"
+#line 164 "a2.y"
     {
 		(yyvsp[(1) - (2)].lineList)->lines[(yyvsp[(1) - (2)].lineList)->lineCount++] = (yyvsp[(2) - (2)].line);
 		(yyval.lineList) = (yyvsp[(1) - (2)].lineList);
@@ -1651,7 +1651,7 @@ yyreduce:
     break;
 
   case 11:
-#line 171 "a2.y"
+#line 172 "a2.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = DECLARATION;
@@ -1662,7 +1662,7 @@ yyreduce:
     break;
 
   case 12:
-#line 178 "a2.y"
+#line 179 "a2.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = ASSIGNMENT;
@@ -1673,7 +1673,7 @@ yyreduce:
     break;
 
   case 13:
-#line 185 "a2.y"
+#line 186 "a2.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = EXPRESSION_STATEMENT;
@@ -1684,7 +1684,7 @@ yyreduce:
     break;
 
   case 14:
-#line 192 "a2.y"
+#line 193 "a2.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = RETURN;
@@ -1695,7 +1695,7 @@ yyreduce:
     break;
 
   case 15:
-#line 199 "a2.y"
+#line 200 "a2.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = IF_ELSE;
@@ -1706,7 +1706,7 @@ yyreduce:
     break;
 
   case 16:
-#line 206 "a2.y"
+#line 207 "a2.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = LOOP;
@@ -1717,7 +1717,7 @@ yyreduce:
     break;
 
   case 17:
-#line 213 "a2.y"
+#line 214 "a2.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = FUNCTION;
@@ -1728,7 +1728,7 @@ yyreduce:
     break;
 
   case 18:
-#line 223 "a2.y"
+#line 224 "a2.y"
     {
 		declaration_statement_t *dec = (declaration_statement_t *)malloc(sizeof(declaration_statement_t));
 		dec->type = (yyvsp[(1) - (3)].dataType);
@@ -1739,7 +1739,7 @@ yyreduce:
     break;
 
   case 19:
-#line 233 "a2.y"
+#line 234 "a2.y"
     {
 		declaration_list_t *decList = (declaration_list_t *)malloc(sizeof(declaration_list_t));
 		decList->declarations = (declaration_t **)malloc(MAX_LINES * sizeof(declaration_t *));
@@ -1749,7 +1749,7 @@ yyreduce:
     break;
 
   case 20:
-#line 239 "a2.y"
+#line 240 "a2.y"
     {
 		(yyvsp[(3) - (3)].decList)->declarations[(yyvsp[(3) - (3)].decList)->decCount++] = (yyvsp[(1) - (3)].dec);
 		(yyval.decList) = (yyvsp[(3) - (3)].decList);
@@ -1757,7 +1757,7 @@ yyreduce:
     break;
 
   case 21:
-#line 246 "a2.y"
+#line 247 "a2.y"
     {
 		declaration_t *dec = (declaration_t *)malloc(sizeof(declaration_t));
 		dec->lValue = (yyvsp[(1) - (3)].id);
@@ -1767,7 +1767,7 @@ yyreduce:
     break;
 
   case 22:
-#line 252 "a2.y"
+#line 253 "a2.y"
     {
 		declaration_t *dec = (declaration_t *)malloc(sizeof(declaration_t));
 		dec->lValue = (yyvsp[(1) - (1)].id);
@@ -1776,7 +1776,7 @@ yyreduce:
     break;
 
   case 23:
-#line 260 "a2.y"
+#line 261 "a2.y"
     {
 		hash_table_item_t *item = searchSymbol((yyvsp[(1) - (4)].id)->name, symbolTable);
 		if (item == NULL)
@@ -1794,7 +1794,7 @@ yyreduce:
     break;
 
   case 24:
-#line 277 "a2.y"
+#line 278 "a2.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, currScope);
@@ -1814,7 +1814,7 @@ yyreduce:
     break;
 
   case 25:
-#line 293 "a2.y"
+#line 294 "a2.y"
     {
 	    identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, currScope);
@@ -1835,7 +1835,7 @@ yyreduce:
     break;
 
   case 26:
-#line 313 "a2.y"
+#line 314 "a2.y"
     {
 		subscript_list_t *subscriptList = (subscript_list_t *)malloc(sizeof(subscript_list_t));
 		subscriptList->depth = 1;
@@ -1846,7 +1846,7 @@ yyreduce:
     break;
 
   case 27:
-#line 320 "a2.y"
+#line 321 "a2.y"
     {
 		(yyvsp[(1) - (2)].subscriptList)->subscripts[(yyvsp[(1) - (2)].subscriptList)->depth++] = (yyvsp[(2) - (2)].exp);
 		(yyval.subscriptList) = (yyvsp[(1) - (2)].subscriptList);
@@ -1854,14 +1854,14 @@ yyreduce:
     break;
 
   case 28:
-#line 327 "a2.y"
+#line 328 "a2.y"
     {
 		(yyval.exp) = (yyvsp[(2) - (3)].exp);
 	;}
     break;
 
   case 29:
-#line 333 "a2.y"
+#line 334 "a2.y"
     {
 		arg_list_t *argList = (yyvsp[(3) - (4)].argList);
 		function_call_t *fun = (function_call_t *)malloc(sizeof(function_call_t));
@@ -1873,7 +1873,7 @@ yyreduce:
     break;
 
   case 30:
-#line 344 "a2.y"
+#line 345 "a2.y"
     {
 		(yyval.argList) = (arg_list_t *)malloc(sizeof(arg_list_t));
 		(yyval.argList)->args = (arg_t **)malloc(MAX_ARGS * sizeof(arg_t *));
@@ -1882,7 +1882,7 @@ yyreduce:
     break;
 
   case 31:
-#line 349 "a2.y"
+#line 350 "a2.y"
     {
 		(yyvsp[(1) - (3)].argList)->args[(yyvsp[(1) - (3)].argList)->argCount++] = (yyvsp[(3) - (3)].arg);
 		(yyval.argList) = (yyvsp[(1) - (3)].argList);
@@ -1890,7 +1890,7 @@ yyreduce:
     break;
 
   case 32:
-#line 353 "a2.y"
+#line 354 "a2.y"
     {
 		(yyval.argList) = (arg_list_t *)malloc(sizeof(arg_list_t));
 		(yyval.argList)->args = (arg_t **)malloc(MAX_ARGS * sizeof(arg_t *));
@@ -1898,7 +1898,7 @@ yyreduce:
     break;
 
   case 33:
-#line 360 "a2.y"
+#line 361 "a2.y"
     {
 		arg_t *arg = (arg_t *)malloc(sizeof(arg_t));
 		arg->type = EXPRESSION;
@@ -1908,7 +1908,7 @@ yyreduce:
     break;
 
   case 34:
-#line 366 "a2.y"
+#line 367 "a2.y"
     {
 		arg_t *arg = (arg_t *)malloc(sizeof(arg_t));
 		arg->type = STRING;
@@ -1919,7 +1919,7 @@ yyreduce:
     break;
 
   case 35:
-#line 376 "a2.y"
+#line 377 "a2.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -1935,7 +1935,7 @@ yyreduce:
     break;
 
   case 36:
-#line 388 "a2.y"
+#line 389 "a2.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -1951,7 +1951,7 @@ yyreduce:
     break;
 
   case 37:
-#line 400 "a2.y"
+#line 401 "a2.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -1967,7 +1967,7 @@ yyreduce:
     break;
 
   case 38:
-#line 412 "a2.y"
+#line 413 "a2.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -1983,7 +1983,7 @@ yyreduce:
     break;
 
   case 39:
-#line 424 "a2.y"
+#line 425 "a2.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -1999,7 +1999,7 @@ yyreduce:
     break;
 
   case 40:
-#line 436 "a2.y"
+#line 437 "a2.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = CONSTANT;
@@ -2011,14 +2011,14 @@ yyreduce:
     break;
 
   case 41:
-#line 444 "a2.y"
+#line 445 "a2.y"
     {
 		(yyval.exp) = (yyvsp[(2) - (3)].exp);
     ;}
     break;
 
   case 42:
-#line 447 "a2.y"
+#line 448 "a2.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		strcpy(exp->lValue, "retval");
@@ -2030,7 +2030,7 @@ yyreduce:
     break;
 
   case 43:
-#line 455 "a2.y"
+#line 456 "a2.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 
@@ -2056,7 +2056,7 @@ yyreduce:
     break;
 
   case 44:
-#line 480 "a2.y"
+#line 481 "a2.y"
     {
 		function_def_t *fun = (function_def_t *)malloc(sizeof(function_def_t));
 		strcpy(fun->name, (yyvsp[(2) - (6)].str));
@@ -2068,7 +2068,7 @@ yyreduce:
     break;
 
   case 45:
-#line 491 "a2.y"
+#line 492 "a2.y"
     {
 		strcpy(currScope, (yyvsp[(1) - (1)].str));
 		(yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2076,7 +2076,7 @@ yyreduce:
     break;
 
   case 46:
-#line 498 "a2.y"
+#line 499 "a2.y"
     {
 		return_statement_t *ret = (return_statement_t *)malloc(sizeof(return_statement_t));
 		ret->exp = (yyvsp[(2) - (3)].exp);
@@ -2086,7 +2086,7 @@ yyreduce:
     break;
 
   case 47:
-#line 504 "a2.y"
+#line 505 "a2.y"
     {
 		return_statement_t *ret = (return_statement_t *)malloc(sizeof(return_statement_t));
 		ret->stringify = &stringifyReturnStatement;
@@ -2095,7 +2095,7 @@ yyreduce:
     break;
 
   case 48:
-#line 512 "a2.y"
+#line 513 "a2.y"
     {
 		param_list_t *paramList = (param_list_t *)malloc(sizeof(param_list_t));
 		paramList->params = (param_t **)malloc(MAX_ARGS * sizeof(param_t *));
@@ -2106,7 +2106,7 @@ yyreduce:
     break;
 
   case 49:
-#line 519 "a2.y"
+#line 520 "a2.y"
     {
 		(yyvsp[(1) - (3)].paramList)->params[(yyvsp[(1) - (3)].paramList)->paramCount++] = (yyvsp[(3) - (3)].param);
 		(yyval.paramList) = (yyvsp[(1) - (3)].paramList);
@@ -2114,7 +2114,7 @@ yyreduce:
     break;
 
   case 50:
-#line 523 "a2.y"
+#line 524 "a2.y"
     {
 		param_list_t *paramList = (param_list_t *)malloc(sizeof(param_list_t));
 		paramList->params = (param_t **)malloc(MAX_ARGS * sizeof(param_t *));
@@ -2124,7 +2124,7 @@ yyreduce:
     break;
 
   case 51:
-#line 532 "a2.y"
+#line 533 "a2.y"
     {
 		param_t *param = (param_t *)malloc(sizeof(param_t));
 		param->type = (yyvsp[(1) - (2)].dataType);
@@ -2134,7 +2134,7 @@ yyreduce:
     break;
 
   case 52:
-#line 541 "a2.y"
+#line 542 "a2.y"
     {
 		if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 		ifElse->isMatched = true;
@@ -2147,7 +2147,7 @@ yyreduce:
     break;
 
   case 53:
-#line 550 "a2.y"
+#line 551 "a2.y"
     {
 		if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 		ifElse->isMatched = false;
@@ -2159,46 +2159,46 @@ yyreduce:
     break;
 
   case 54:
-#line 561 "a2.y"
+#line 562 "a2.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = SHORT_AND;
-		con->exp = (yyvsp[(1) - (3)].con)->exp;
+		con->base = (yyvsp[(1) - (3)].con);
 		con->chain = (yyvsp[(3) - (3)].con);
 		(yyval.con) = con;
 	;}
     break;
 
   case 55:
-#line 568 "a2.y"
+#line 569 "a2.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = SHORT_OR;
-		con->exp = (yyvsp[(1) - (3)].con)->exp;
+		con->base = (yyvsp[(1) - (3)].con);
 		con->chain = (yyvsp[(3) - (3)].con);
 		(yyval.con) = con;
 	;}
     break;
 
   case 56:
-#line 575 "a2.y"
+#line 576 "a2.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = NOT;
-		con->exp = (yyvsp[(2) - (2)].con)->exp;
+		con->base = (yyvsp[(2) - (2)].con);
 		(yyval.con) = con;
 	;}
     break;
 
   case 57:
-#line 581 "a2.y"
+#line 582 "a2.y"
     {
 		(yyval.con) = (yyvsp[(2) - (3)].con);
 	;}
     break;
 
   case 58:
-#line 584 "a2.y"
+#line 585 "a2.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -2232,21 +2232,21 @@ yyreduce:
     break;
 
   case 59:
-#line 617 "a2.y"
+#line 618 "a2.y"
     {
 		(yyval.exp) = (yyvsp[(1) - (1)].exp);
 	;}
     break;
 
   case 60:
-#line 620 "a2.y"
+#line 621 "a2.y"
     {
 		(yyval.exp) = (yyvsp[(1) - (1)].con)->exp;
 	;}
     break;
 
   case 61:
-#line 626 "a2.y"
+#line 627 "a2.y"
     {
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = WHILE;
@@ -2257,7 +2257,7 @@ yyreduce:
     break;
 
   case 62:
-#line 633 "a2.y"
+#line 634 "a2.y"
     {
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = FOR;
@@ -2268,7 +2268,7 @@ yyreduce:
     break;
 
   case 63:
-#line 643 "a2.y"
+#line 644 "a2.y"
     {
 		while_loop_t *loop = (while_loop_t *)malloc(sizeof(while_loop_t));
 		loop->condition = (yyvsp[(3) - (5)].con);
@@ -2279,7 +2279,7 @@ yyreduce:
     break;
 
   case 64:
-#line 653 "a2.y"
+#line 654 "a2.y"
     {
 		for_loop_t *loop = (for_loop_t *)malloc(sizeof(for_loop_t));
 		loop->initial = (yyvsp[(3) - (10)].assignmentStatement);
@@ -2297,7 +2297,7 @@ yyreduce:
     break;
 
   case 65:
-#line 670 "a2.y"
+#line 671 "a2.y"
     {
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
@@ -2308,14 +2308,14 @@ yyreduce:
     break;
 
   case 66:
-#line 677 "a2.y"
+#line 678 "a2.y"
     {
 		(yyval.lineList) = (yyvsp[(2) - (3)].lineList);
 	;}
     break;
 
   case 67:
-#line 683 "a2.y"
+#line 684 "a2.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, (yyvsp[(1) - (1)].str));
@@ -2325,7 +2325,7 @@ yyreduce:
     break;
 
   case 68:
-#line 689 "a2.y"
+#line 690 "a2.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, (yyvsp[(1) - (2)].str));
@@ -2336,7 +2336,7 @@ yyreduce:
     break;
 
   case 69:
-#line 696 "a2.y"
+#line 697 "a2.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, mytext);
@@ -2348,7 +2348,7 @@ yyreduce:
     break;
 
   case 70:
-#line 704 "a2.y"
+#line 705 "a2.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, mytext);
@@ -2360,14 +2360,14 @@ yyreduce:
     break;
 
   case 71:
-#line 715 "a2.y"
+#line 716 "a2.y"
     {
 		(yyval.str) = strdup(mytext);
 	;}
     break;
 
   case 72:
-#line 721 "a2.y"
+#line 722 "a2.y"
     {
 		strcpy(currType, mytext);
 		if (streq(mytext, "int", 3))
@@ -2380,7 +2380,7 @@ yyreduce:
     break;
 
   case 73:
-#line 732 "a2.y"
+#line 733 "a2.y"
     {
 		(yyval.str) = strdup(mytext);
 	;}
@@ -2602,7 +2602,7 @@ yyreturn:
 }
 
 
-#line 737 "a2.y"
+#line 738 "a2.y"
 
 
 void yyerror(char *message) {
@@ -2623,6 +2623,13 @@ int main(void) {
 }
 
 void stringifyProgram(program_t *program) {
+	line_list_t *globalDecs = program->globalDeclarations;
+	for (int i = 0; i < globalDecs->lineCount; i++) {
+		declaration_list_t *globalDecList = globalDecs->lines[i]->statement.declaration->declarationList;
+		for (int j = 0; j < globalDecList->decCount; j++) {
+		    printf("global %s\n", globalDecList->declarations[j]->lValue->displayName);
+		}
+	}
 	program->globalDeclarations->stringify(program->globalDeclarations);
 	program->funDefList->stringify(program->funDefList);
 	program->main->stringify(program->main);
@@ -2743,7 +2750,6 @@ void stringifyReturnStatement(return_statement_t *ret) {
 
 void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 	condition_t *baseCon = ifElse->condition;
-	baseCon->exp->stringify(baseCon->exp);
 	bool rootIfElse = ifElse->trueLabel == 0 && ifElse->falseLabel == 0;
 	if (ifElse->trueLabel == 0)
 		ifElse->trueLabel = lCount++;
@@ -2751,42 +2757,64 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 		ifElse->falseLabel = lCount++;
 
     if_else_statement_t *chainIfElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
+    if_else_statement_t *baseIfElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
+	int tempLabel;
+
 	switch (baseCon->op) {
 		case NOT:
-		    printf("t%d = not %s\n", tCount, baseCon->exp->lValue);
-			printf("if (t%d) goto L%d\n", tCount++, ifElse->trueLabel);
-			printf("goto L%d\n", ifElse->falseLabel);
-			printf("L%d:\n", ifElse->trueLabel);
-			ifElse->ifLineList->stringify(ifElse->ifLineList);
+			baseIfElse->condition = baseCon->base;
+			baseIfElse->trueLabel = ifElse->falseLabel;
+			baseIfElse->falseLabel = ifElse->trueLabel;
+			baseIfElse->ifLineList = ifElse->ifLineList;
+			baseIfElse->stringify = &stringifyIfElseStatement;
+			baseIfElse->stringify(baseIfElse);
 			break;
 		case SHORT_AND:
-		    printf("if (%s) goto L%d\n", baseCon->exp->lValue, ifElse->trueLabel);
-			printf("goto L%d\n", ifElse->falseLabel);
-			printf("L%d:\n", ifElse->trueLabel);
+			tempLabel = lCount++;
+			baseIfElse->condition = baseCon->base;
+			baseIfElse->trueLabel = tempLabel;
+			baseIfElse->falseLabel = ifElse->falseLabel;
+			baseIfElse->stringify = &stringifyIfElseStatement;
+			baseIfElse->stringify(baseIfElse);
+
+			printf("L%d:\n", tempLabel);
+
 			chainIfElse->condition = baseCon->chain;
+			chainIfElse->trueLabel = ifElse->trueLabel;
 			chainIfElse->falseLabel = ifElse->falseLabel;
-			chainIfElse->ifLineList = ifElse->ifLineList;
 			chainIfElse->stringify = &stringifyIfElseStatement;
 			chainIfElse->stringify(chainIfElse);
 			break;
 		case SHORT_OR:
-		    printf("if (%s) goto L%d\n", baseCon->exp->lValue, ifElse->trueLabel);
+			tempLabel = lCount++;
+			baseIfElse->condition = baseCon->base;
+			baseIfElse->trueLabel = ifElse->trueLabel;
+			baseIfElse->falseLabel = tempLabel;
+			baseIfElse->stringify = &stringifyIfElseStatement;
+			baseIfElse->stringify(baseIfElse);
+
+			printf("L%d:\n", tempLabel);
+
 			chainIfElse->condition = baseCon->chain;
 			chainIfElse->trueLabel = ifElse->trueLabel;
 			chainIfElse->falseLabel = ifElse->falseLabel;
-			chainIfElse->ifLineList = ifElse->ifLineList;
 			chainIfElse->stringify = &stringifyIfElseStatement;
 			chainIfElse->stringify(chainIfElse);
 			break;
 		case SINGLE:
+			baseCon->exp->stringify(baseCon->exp);
 		    printf("if (%s) goto L%d\n", baseCon->exp->lValue, ifElse->trueLabel);
 			printf("goto L%d\n", ifElse->falseLabel);
-			printf("L%d:\n", ifElse->trueLabel);
-			ifElse->ifLineList->stringify(ifElse->ifLineList);
 			break;
 		default:
 		    error("Invalid condition chaining");
 	}
+
+	if (ifElse->ifLineList != NULL) {
+		printf("L%d:\n", ifElse->trueLabel);
+		ifElse->ifLineList->stringify(ifElse->ifLineList);
+	}
+
 	int exitLabel = ifElse->isMatched ? lCount++ : ifElse->falseLabel;
 	if (rootIfElse && ifElse->isMatched)
 		printf("goto L%d\n", exitLabel);

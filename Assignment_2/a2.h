@@ -246,6 +246,7 @@ typedef struct Program {
 
 typedef struct Condition {
   condition_op_e op;
+  condition_t *base;
   expression_t *exp;
   condition_t *chain;
 } condition_t;

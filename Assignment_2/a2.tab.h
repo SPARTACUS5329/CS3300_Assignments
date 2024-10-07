@@ -108,11 +108,11 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 39 "a2.y"
+#line 40 "a2.y"
 {
-    char *str;
-    int val;
-    identifier_t *id;
+	char *str;
+	int val;
+	identifier_t *id;
 	subscript_list_t *subscriptList;
 	expression_t *exp; 
 	line_t *line;

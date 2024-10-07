@@ -1,15 +1,17 @@
+int result;
+int flag = 0;
+
+
+int add(int x, int y) {
+    result = x + y;
+    return x + y;
+}
+
 int main() {
-    int a;
-    int b;
-    if (a < b || !(a > b)) {
-        for (a = 0; a < 5; a = a + 1) {
-            b = 2;
-        }
-        printf("x");
-    }  else {
-        for (b = 0; b < 5; b = b + 1) {
-            a = 2;
-        }
-    }
+    int a = 5;
+    int b = 10;
+    int c;
+
+    c = add(a, b);
     return 0;
 }

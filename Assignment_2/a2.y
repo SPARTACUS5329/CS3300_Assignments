@@ -29,7 +29,8 @@ program_t *program;
 
 %left PLUS_TOK MINUS_TOK COMPAR
 %left MULTIPLY_TOK DIVIDE_TOK
-%left SHORT_AND_TOK SHORT_OR_TOK
+%left SHORT_OR_TOK 
+%left SHORT_AND_TOK 
 %right NOT_TOK
 %right UMINUS EXPONENT_TOK
 %left OPEN_PAREN CLOSE_PAREN
@@ -37,9 +38,9 @@ program_t *program;
 
 
 %union {
-    char *str;
-    int val;
-    identifier_t *id;
+	char *str;
+	int val;
+	identifier_t *id;
 	subscript_list_t *subscriptList;
 	expression_t *exp; 
 	line_t *line;
@@ -561,21 +562,21 @@ condition:
 	condition SHORT_AND_TOK condition {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = SHORT_AND;
-		con->exp = $1->exp;
+		con->base = $1;
 		con->chain = $3;
 		$$ = con;
 	}
 	| condition SHORT_OR_TOK condition {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = SHORT_OR;
-		con->exp = $1->exp;
+		con->base = $1;
 		con->chain = $3;
 		$$ = con;
 	}
 	| NOT_TOK condition {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = NOT;
-		con->exp = $2->exp;
+		con->base = $2;
 		$$ = con;
 	}
 	| OPEN_PAREN condition CLOSE_PAREN {
@@ -754,6 +755,13 @@ int main(void) {
 }
 
 void stringifyProgram(program_t *program) {
+	line_list_t *globalDecs = program->globalDeclarations;
+	for (int i = 0; i < globalDecs->lineCount; i++) {
+		declaration_list_t *globalDecList = globalDecs->lines[i]->statement.declaration->declarationList;
+		for (int j = 0; j < globalDecList->decCount; j++) {
+		    printf("global %s\n", globalDecList->declarations[j]->lValue->displayName);
+		}
+	}
 	program->globalDeclarations->stringify(program->globalDeclarations);
 	program->funDefList->stringify(program->funDefList);
 	program->main->stringify(program->main);
@@ -874,7 +882,6 @@ void stringifyReturnStatement(return_statement_t *ret) {
 
 void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 	condition_t *baseCon = ifElse->condition;
-	baseCon->exp->stringify(baseCon->exp);
 	bool rootIfElse = ifElse->trueLabel == 0 && ifElse->falseLabel == 0;
 	if (ifElse->trueLabel == 0)
 		ifElse->trueLabel = lCount++;
@@ -882,42 +889,64 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 		ifElse->falseLabel = lCount++;
 
     if_else_statement_t *chainIfElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
+    if_else_statement_t *baseIfElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
+	int tempLabel;
+
 	switch (baseCon->op) {
 		case NOT:
-		    printf("t%d = not %s\n", tCount, baseCon->exp->lValue);
-			printf("if (t%d) goto L%d\n", tCount++, ifElse->trueLabel);
-			printf("goto L%d\n", ifElse->falseLabel);
-			printf("L%d:\n", ifElse->trueLabel);
-			ifElse->ifLineList->stringify(ifElse->ifLineList);
+			baseIfElse->condition = baseCon->base;
+			baseIfElse->trueLabel = ifElse->falseLabel;
+			baseIfElse->falseLabel = ifElse->trueLabel;
+			baseIfElse->ifLineList = ifElse->ifLineList;
+			baseIfElse->stringify = &stringifyIfElseStatement;
+			baseIfElse->stringify(baseIfElse);
 			break;
 		case SHORT_AND:
-		    printf("if (%s) goto L%d\n", baseCon->exp->lValue, ifElse->trueLabel);
-			printf("goto L%d\n", ifElse->falseLabel);
-			printf("L%d:\n", ifElse->trueLabel);
+			tempLabel = lCount++;
+			baseIfElse->condition = baseCon->base;
+			baseIfElse->trueLabel = tempLabel;
+			baseIfElse->falseLabel = ifElse->falseLabel;
+			baseIfElse->stringify = &stringifyIfElseStatement;
+			baseIfElse->stringify(baseIfElse);
+
+			printf("L%d:\n", tempLabel);
+
 			chainIfElse->condition = baseCon->chain;
+			chainIfElse->trueLabel = ifElse->trueLabel;
 			chainIfElse->falseLabel = ifElse->falseLabel;
-			chainIfElse->ifLineList = ifElse->ifLineList;
 			chainIfElse->stringify = &stringifyIfElseStatement;
 			chainIfElse->stringify(chainIfElse);
 			break;
 		case SHORT_OR:
-		    printf("if (%s) goto L%d\n", baseCon->exp->lValue, ifElse->trueLabel);
+			tempLabel = lCount++;
+			baseIfElse->condition = baseCon->base;
+			baseIfElse->trueLabel = ifElse->trueLabel;
+			baseIfElse->falseLabel = tempLabel;
+			baseIfElse->stringify = &stringifyIfElseStatement;
+			baseIfElse->stringify(baseIfElse);
+
+			printf("L%d:\n", tempLabel);
+
 			chainIfElse->condition = baseCon->chain;
 			chainIfElse->trueLabel = ifElse->trueLabel;
 			chainIfElse->falseLabel = ifElse->falseLabel;
-			chainIfElse->ifLineList = ifElse->ifLineList;
 			chainIfElse->stringify = &stringifyIfElseStatement;
 			chainIfElse->stringify(chainIfElse);
 			break;
 		case SINGLE:
+			baseCon->exp->stringify(baseCon->exp);
 		    printf("if (%s) goto L%d\n", baseCon->exp->lValue, ifElse->trueLabel);
 			printf("goto L%d\n", ifElse->falseLabel);
-			printf("L%d:\n", ifElse->trueLabel);
-			ifElse->ifLineList->stringify(ifElse->ifLineList);
 			break;
 		default:
 		    error("Invalid condition chaining");
 	}
+
+	if (ifElse->ifLineList != NULL) {
+		printf("L%d:\n", ifElse->trueLabel);
+		ifElse->ifLineList->stringify(ifElse->ifLineList);
+	}
+
 	int exitLabel = ifElse->isMatched ? lCount++ : ifElse->falseLabel;
 	if (rootIfElse && ifElse->isMatched)
 		printf("goto L%d\n", exitLabel);
