@@ -7,6 +7,7 @@
 #define MAX_IDENTIFIER_LENGTH 200
 #define MAX_EXPRESSION_LENGTH 200
 #define MAX_LINES 2000
+#define MAX_TAC_INSTRUCTIONS 2000
 #define MAX_DEPTH 20
 #define streq(str1, str2, n) (strncmp(str1, str2, n) == 0)
 
@@ -36,6 +37,15 @@ typedef struct WhileLoop while_loop_t;
 typedef struct ForLoop for_loop_t;
 typedef struct Program program_t;
 typedef struct Condition condition_t;
+typedef struct TAC tac_t;
+typedef struct TACGlobalDec tac_global_dec_t;
+typedef struct TACAssignment tac_ass_t;
+typedef struct TACLabel tac_label_t;
+typedef struct TACGoto tac_goto_t;
+typedef struct TACAssTerm tac_term_t;
+typedef struct TACAssExp tac_exp_t;
+typedef struct TACCall tac_call_t;
+typedef struct TACReturn tac_return_t;
 
 typedef enum {
   PLUS,
@@ -52,6 +62,30 @@ typedef enum {
 } bin_op_e;
 
 typedef enum { SINGLE, SHORT_AND, SHORT_OR, NOT } condition_op_e;
+
+typedef enum {
+  TAC_ASSIGNMENT,
+  TAC_LABEL,
+  TAC_GOTO,
+  TAC_CALL,
+  TAC_RETURN,
+  TAC_GLOBAL_DEC
+} tac_e;
+
+typedef enum { FUNCTION_LABEL, JUMP_LABEL } tac_label_e;
+
+typedef enum { TAC_BIN_OP, TAC_CONSTANT } tac_exp_e;
+
+typedef enum {
+  TEMPORARY,
+  PARAM,
+  RETVAL,
+  VARIABLE,
+  STRING_LITERAL,
+  INTEGER_CONSTANT
+} tac_term_e;
+
+typedef enum { IF_GOTO, GOTO } tac_goto_e;
 
 typedef enum { CONSTANT, BIN_OP, FUNCTION_CALL } expr_e;
 
@@ -251,6 +285,69 @@ typedef struct Condition {
   condition_t *chain;
 } condition_t;
 
+typedef struct TAC {
+  tac_e type;
+  union {
+    tac_global_dec_t *global;
+    tac_ass_t *assignment;
+    tac_label_t *label;
+    tac_goto_t *jump;
+    tac_call_t *call;
+    tac_return_t *ret;
+  } instruction;
+  void (*stringify)(tac_t *);
+} tac_t;
+
+typedef struct TACGlobalDec {
+  char value[MAX_IDENTIFIER_LENGTH];
+  void (*stringify)(tac_global_dec_t *);
+} tac_global_dec_t;
+
+typedef struct TACAssignment {
+  tac_term_t *lValue;
+  tac_exp_t *rValue;
+  void (*stringify)(tac_ass_t *);
+} tac_ass_t;
+
+typedef struct TACAssExp {
+  tac_exp_e type;
+  bin_op_e op;
+  tac_term_t *lTerm;
+  tac_term_t *rTerm;
+  void (*stringify)(tac_exp_t *);
+} tac_exp_t;
+
+typedef struct TACAssTerm {
+  tac_term_e type;
+  int depth;
+  expression_t **subscripts;
+  char value[MAX_IDENTIFIER_LENGTH];
+  void (*stringify)(tac_term_t *);
+} tac_term_t;
+
+typedef struct TACLabel {
+  tac_label_e type;
+  char value[MAX_IDENTIFIER_LENGTH];
+  void (*stringify)(tac_label_t *);
+} tac_label_t;
+
+typedef struct TACGoto {
+  tac_goto_e type;
+  char condition[MAX_IDENTIFIER_LENGTH];
+  char label[MAX_IDENTIFIER_LENGTH];
+  void (*stringify)(tac_goto_t *);
+} tac_goto_t;
+
+typedef struct TACCall {
+  char label[MAX_IDENTIFIER_LENGTH];
+  void (*stringify)(tac_call_t *);
+} tac_call_t;
+
+typedef struct TACReturn {
+  char label[MAX_IDENTIFIER_LENGTH];
+  void (*stringify)(tac_return_t *);
+} tac_return_t;
+
 typedef struct HashTableItem {
   identifier_t *data;
   int key;
@@ -277,3 +374,25 @@ void stringifyForLoop(for_loop_t *loop);
 void stringifyBinOp(expression_t *exp, bin_op_t *binOp);
 void stringifyFunctionCall(function_call_t *fun);
 void stringifyLine(line_t *line);
+void newTACGlobalDec(char value[MAX_IDENTIFIER_LENGTH]);
+void newTACAssignment(tac_term_t *lValue, tac_exp_t *rValue);
+void newTACGlobalDec(char value[MAX_IDENTIFIER_LENGTH]);
+void newTACAssignment(tac_term_t *lValue, tac_exp_t *rValue);
+tac_term_t *newTACTerm(tac_term_e type, int depth, expression_t **subscripts,
+                       char value[MAX_IDENTIFIER_LENGTH]);
+tac_exp_t *newTACExp(tac_exp_e type, bin_op_e op, tac_term_t *lTerm,
+                     tac_term_t *rTerm);
+void newTACLabel(tac_label_e type, char value[MAX_IDENTIFIER_LENGTH]);
+void newTACGoto(tac_goto_e type, char label[MAX_IDENTIFIER_LENGTH],
+                char condition[MAX_IDENTIFIER_LENGTH]);
+void newTACCall(char label[MAX_IDENTIFIER_LENGTH]);
+void newTACReturn(char label[MAX_IDENTIFIER_LENGTH]);
+void stringifyTAC(tac_t *tac);
+void stringifyTACGlobalDec(tac_global_dec_t *tac);
+void stringifyTACAssignment(tac_ass_t *tac);
+void stringifyTACTerm(tac_term_t *term);
+void stringifyTACExp(tac_exp_t *exp);
+void stringifyTACLabel(tac_label_t *tac);
+void stringifyTACGoto(tac_goto_t *tac);
+void stringifyTACCall(tac_call_t *tac);
+void stringifyTACReturn(tac_return_t *tac);
