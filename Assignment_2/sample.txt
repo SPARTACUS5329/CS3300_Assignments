@@ -1,6 +1,5 @@
-int main() {
-	int a;
-	int b = 2;
-	a = 5 + 4 * b;
-	return 0;
+int sum() {
+    int total;
+    total = a + 5;  // 'a' is not defined within the function
+    return total;
 }

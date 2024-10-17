@@ -1,0 +1,6 @@
+global a
+global b
+main:
+t1 = 'A'
+t2 = 0
+str[t2] = t1

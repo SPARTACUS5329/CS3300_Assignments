@@ -2,6 +2,5 @@ clear
 flex a3.l
 bison -d a3.y
 gcc lex.yy.c a3.tab.c
-tail -n +2 sample.c | ../Assignment_2/a.out > prev.txt
 ./a.out < sample.c
-cmp prev.txt new.txt
+# cat tac.txt

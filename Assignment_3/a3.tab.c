@@ -143,6 +143,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdbool.h>
 #include "a3.h"
 
@@ -158,8 +159,7 @@ static int lCount = 1;
 
 hash_table_item_t *symbolTable[MAX_IDENTIFIERS];
 program_t *program;
-tac_t **tacInstructions;
-static int tacCount = 0;
+tac_list_t *tacList;
 
 
 
@@ -2627,18 +2627,31 @@ void error(char *message) {
 
 int main(int argc, char *argv[]) {
     program = (program_t *)malloc(sizeof(program_t));
-	tacInstructions = (tac_t **)calloc(MAX_TAC_INSTRUCTIONS, sizeof(tac_t *));
+	tacList = (tac_list_t *)malloc(sizeof(tac_list_t));
+	tacList->instructions = (tac_t **)calloc(MAX_TAC_INSTRUCTIONS, sizeof(tac_t *));
+
 	yyparse();
 
 	stringifyProgram(program);
 
-	FILE *file = freopen("new.txt", "w", stdout);
+	int saved_stdout = dup(fileno(stdout));
+
+    FILE *file = freopen("tac.txt", "w", stdout);
     if (file == NULL)
         error("Error opening file");
-	for (int i = 0; i < tacCount; i++) {
-		tac_t *tac = tacInstructions[i];
+
+	for (int i = 0; i < tacList->tacCount; i++) {
+		tac_t *tac = tacList->instructions[i];
 		stringifyTAC(tac);
 	}
+
+    fflush(stdout);
+    dup2(saved_stdout, fileno(stdout));
+    close(saved_stdout);
+
+    assembly_list_t *assList = parseTACs(tacList);
+	stringifyAssList(assList);
+
     return 0;
 }
 
@@ -3084,7 +3097,7 @@ void newTAC(tac_e type, void *instruction) {
 		    error("Invalid TAC type");
 
 	}
-	tacInstructions[tacCount++] = tac;
+	tacList->instructions[tacList->tacCount++] = tac;
 }
 
 void newTACGlobalDec(char value[MAX_IDENTIFIER_LENGTH]) {
@@ -3317,5 +3330,104 @@ void insertSymbol(char *key, identifier_t *data, hash_table_item_t* hashTable[])
 	}
 
 	hashTable[hashIndex] = item;
+}
+
+assembly_list_t *parseTACs(tac_list_t *tacList) {
+	tac_t *tac;
+	assembly_list_t *assList = (assembly_list_t *)calloc(1, sizeof(assembly_list_t));
+	assList->instructions = (assembly_t **)calloc(MAX_ASSEMBLY_INSTRUCTIONS, sizeof(assembly_t *));
+
+    for (int i = 0; i < tacList->tacCount; i++) {
+		tac = tacList->instructions[i];
+		switch(tac->type) {
+		    case TAC_GLOBAL_DEC:
+				assList->instructions[assList->assCount++] = newAssemblyGlobalDec(tac->instruction.global);;
+				break;
+		    case TAC_ASSIGNMENT:
+				break;
+		    case TAC_LABEL:
+				break;
+		    case TAC_GOTO:
+				break;
+		    case TAC_CALL:
+				break;
+		    case TAC_RETURN:
+				break;
+		}
+	}
+	return assList;
+}
+
+assembly_t *newAssemblyGlobalDec(tac_global_dec_t *tac) {
+	char temp[MAX_IDENTIFIER_LENGTH];
+	sprintf(temp, "global_%s", tac->value);
+	hash_table_item_t *item = searchSymbol(temp, symbolTable);
+	if (item == NULL)
+		error("Global variable not found");
+
+    assembly_bss_t *bss = (assembly_bss_t *)malloc(sizeof(assembly_bss_t));
+	bss->var = item->data;
+	bss->stringify = &stringifyBSS;
+	assembly_t *ass = (assembly_t *)malloc(sizeof(assembly_t));
+	ass->section = ASSEMBLY_BSS_SECTION;
+	ass->instruction.bss = bss;
+
+	return ass;
+}
+
+void stringifyAssList(assembly_list_t *assList) {
+    assembly_t *ass;
+	assembly_bss_list_t *bssList = (assembly_bss_list_t *)calloc(1, sizeof(assembly_bss_list_t));
+	bssList->instructions = (assembly_bss_t **)calloc(MAX_ASSEMBLY_INSTRUCTIONS, sizeof(assembly_bss_t *));
+	assembly_data_list_t *dataList = (assembly_data_list_t *)calloc(1, sizeof(assembly_data_list_t));
+	dataList->instructions = (assembly_data_t **)calloc(MAX_ASSEMBLY_INSTRUCTIONS, sizeof(assembly_data_t *));
+	assembly_text_list_t *textList = (assembly_text_list_t *)calloc(1, sizeof(assembly_text_list_t));
+	textList->instructions = (assembly_text_t **)calloc(MAX_ASSEMBLY_INSTRUCTIONS, sizeof(assembly_text_t *));
+
+    for (int i = 0; i < assList->assCount; i++) {
+		ass = assList->instructions[i];
+		switch(ass->section) {
+		    case ASSEMBLY_BSS_SECTION:
+				bssList->instructions[bssList->assCount++] = ass->instruction.bss;
+				break;
+		    case ASSEMBLY_DATA_SECTION:
+				break;
+		    case ASSEMBLY_TEXT_SECTION:
+				break;
+		}
+	}
+	stringifyBSSList(bssList);
+	stringifyDataList(dataList);
+	stringifyTextList(textList);
+}
+
+void stringifyBSSList(assembly_bss_list_t *bssList) {
+    printf(".bss\n");
+	for (int i = 0; i < bssList->assCount; i++) {
+		bssList->instructions[i]->stringify(bssList->instructions[i]);
+		printf("\n");
+    }
+}
+
+void stringifyDataList(assembly_data_list_t *dataList) {
+}
+
+void stringifyTextList(assembly_text_list_t *textList) {
+}
+
+void stringifyBSS(assembly_bss_t *ass) {
+	identifier_t *var = ass->var;
+	int space;
+	switch(var->type) {
+		case INT:
+			space = 4 * (1 + var->depth);
+			break;
+		case CHAR:
+			space = 1 * ( + var->depth);
+			break;
+		default:
+		    error("Unsupported data type");
+	}
+	printf("%s: .space %d", ass->var->displayName, space);
 }
 

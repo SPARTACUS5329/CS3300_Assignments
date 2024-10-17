@@ -1,4 +1,6 @@
 #include <stdio.h>
+int a;
+int b;
 
 int main() {
   char str[10];

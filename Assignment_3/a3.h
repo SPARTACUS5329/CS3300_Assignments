@@ -9,6 +9,7 @@
 #define MAX_LINES 2000
 #define MAX_TAC_INSTRUCTIONS 2000
 #define MAX_DEPTH 20
+#define MAX_ASSEMBLY_INSTRUCTIONS 2000
 #define streq(str1, str2, n) (strncmp(str1, str2, n) == 0)
 
 typedef struct Identifier identifier_t;
@@ -38,6 +39,7 @@ typedef struct ForLoop for_loop_t;
 typedef struct Program program_t;
 typedef struct Condition condition_t;
 typedef struct TAC tac_t;
+typedef struct TACList tac_list_t;
 typedef struct TACGlobalDec tac_global_dec_t;
 typedef struct TACAssignment tac_ass_t;
 typedef struct TACLabel tac_label_t;
@@ -46,6 +48,13 @@ typedef struct TACAssTerm tac_term_t;
 typedef struct TACAssExp tac_exp_t;
 typedef struct TACCall tac_call_t;
 typedef struct TACReturn tac_return_t;
+typedef struct Assembly assembly_t;
+typedef struct AssemblyBSS assembly_bss_t;
+typedef struct AssemblyData assembly_data_t;
+typedef struct AssemblyText assembly_text_t;
+typedef struct AssemblyBSSList assembly_bss_list_t;
+typedef struct AssemblyDataList assembly_data_list_t;
+typedef struct AssemblyTextList assembly_text_list_t;
 
 typedef enum {
   PLUS,
@@ -71,6 +80,12 @@ typedef enum {
   TAC_RETURN,
   TAC_GLOBAL_DEC
 } tac_e;
+
+typedef enum {
+  ASSEMBLY_DATA_SECTION,
+  ASSEMBLY_BSS_SECTION,
+  ASSEMBLY_TEXT_SECTION
+} assembly_sec_e;
 
 typedef enum { FUNCTION_LABEL, JUMP_LABEL } tac_label_e;
 
@@ -106,12 +121,12 @@ typedef enum {
 } statement_e;
 
 typedef struct Identifier {
+  data_type_e type;
   char name[MAX_IDENTIFIER_LENGTH];
   char displayName[MAX_IDENTIFIER_LENGTH];
   int depth;
   expression_t **subscripts;
   bool isConstant;
-  data_type_e type;
 } identifier_t;
 
 typedef struct SubscriptList {
@@ -285,6 +300,11 @@ typedef struct Condition {
   condition_t *chain;
 } condition_t;
 
+typedef struct TACList {
+  int tacCount;
+  tac_t **instructions;
+} tac_list_t;
+
 typedef struct TAC {
   tac_e type;
   union {
@@ -348,6 +368,50 @@ typedef struct TACReturn {
   void (*stringify)(tac_return_t *);
 } tac_return_t;
 
+typedef struct AssemblyList {
+  int assCount;
+  assembly_t **instructions;
+} assembly_list_t;
+
+typedef struct AssemblyBSSList {
+  int assCount;
+  assembly_bss_t **instructions;
+} assembly_bss_list_t;
+
+typedef struct AssemblyDataList {
+  int assCount;
+  assembly_data_t **instructions;
+} assembly_data_list_t;
+
+typedef struct AssemblyTextList {
+  int assCount;
+  assembly_text_t **instructions;
+} assembly_text_list_t;
+
+typedef struct Assembly {
+  assembly_sec_e section;
+  union {
+    assembly_bss_t *bss;
+    assembly_data_t *data;
+    assembly_text_t *text;
+  } instruction;
+} assembly_t;
+
+typedef struct AssemblyBSS {
+  identifier_t *var;
+  void (*stringify)(assembly_bss_t *);
+} assembly_bss_t;
+
+typedef struct AssemblyData {
+  int id;
+  char *value;
+  void (*stringify)(assembly_data_t *);
+} assembly_data_t;
+
+typedef struct AssemblyText {
+  void (*stringify)(assembly_text_t *);
+} assembly_text_t;
+
 typedef struct HashTableItem {
   identifier_t *data;
   int key;
@@ -396,3 +460,10 @@ void stringifyTACLabel(tac_label_t *tac);
 void stringifyTACGoto(tac_goto_t *tac);
 void stringifyTACCall(tac_call_t *tac);
 void stringifyTACReturn(tac_return_t *tac);
+assembly_list_t *parseTACs(tac_list_t *tacList);
+assembly_t *newAssemblyGlobalDec(tac_global_dec_t *tac);
+void stringifyAssList(assembly_list_t *assList);
+void stringifyBSSList(assembly_bss_list_t *bssList);
+void stringifyDataList(assembly_data_list_t *dataList);
+void stringifyTextList(assembly_text_list_t *textList);
+void stringifyBSS(assembly_bss_t *ass);
