@@ -1,8 +1,8 @@
 #include <stdio.h>
-int a;
 int b;
 
 int main() {
-  char str[10];
-  str[0] = 'A';
+  int a;
+  a = 3 + 5 * 4;
+  return 0;
 }

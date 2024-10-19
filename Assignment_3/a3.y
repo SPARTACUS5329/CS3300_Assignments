@@ -11,12 +11,13 @@ int yylex(void);
 char mytext[100];
 char currType[10];
 char currScope[MAX_IDENTIFIER_LENGTH] = "global";
+char currTACFunction[MAX_IDENTIFIER_LENGTH];
 expression_t args[MAX_FUNCTION_CALLS][MAX_ARGS];
 int lineNumber = 1;
 static int tCount = 1;
 static int lCount = 1;
 
-hash_table_item_t *symbolTable[MAX_IDENTIFIERS];
+symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 program_t *program;
 tac_list_t *tacList;
 
@@ -267,7 +268,7 @@ declaration:
 
 assignmentStatement:
     assignable EQ computable SEMI_COLON {
-		hash_table_item_t *item = searchSymbol($1->name, symbolTable);
+		symbol_table_item_t *item = searchSymbol($1->name, symbolTable);
 		if (item == NULL)
 		    error("Undefined variable");
 		if (item->data->depth != $1->depth)
@@ -444,7 +445,7 @@ expression:
     }
     | MINUS_TOK expression %prec UMINUS {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
-		exp->type = CONSTANT;
+		exp->type = INT_CONSTANT;
 		exp->child.binOp->type = EXPONENT;
 		sprintf(exp->lValue, "%s", $2->lValue);
 		exp->stringify = &stringifyExpression;
@@ -467,7 +468,7 @@ expression:
 		if (!$1->isConstant) {
 			char temp[2 * MAX_IDENTIFIER_LENGTH];
 		    sprintf(temp, "%s_%s", currScope, $1->name);
-			hash_table_item_t *item = searchSymbol(temp, symbolTable);
+			symbol_table_item_t *item = searchSymbol(temp, symbolTable);
 			if (item == NULL) {
 			    sprintf(temp, "global_%s", $1->name);
 			    item = searchSymbol(temp, symbolTable);
@@ -476,10 +477,12 @@ expression:
 			}
 			if (item->data->depth != $1->depth)
 				error("Invalid location");
+		    exp->type = VAR_CONSTANT;
+		} else {
+		    exp->type = $1->type == INT ? INT_CONSTANT : CHAR_CONSTANT;
 		}
 
 		sprintf(exp->lValue, "%s", $1->name);
-		exp->type = CONSTANT;
 		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
@@ -779,6 +782,7 @@ int main(int argc, char *argv[]) {
     dup2(saved_stdout, fileno(stdout));
     close(saved_stdout);
 
+	firstPassTACs(tacList);
     assembly_list_t *assList = parseTACs(tacList);
 	stringifyAssList(assList);
 
@@ -882,7 +886,7 @@ void stringifyAssignmentStatement(assignment_statement_t *ass) {
 	}
 
 	tac_term_t *lValue = newTACTerm(VARIABLE, ass->lValue->depth, ass->lValue->subscripts, ass->lValue->displayName);
-tac_term_t *lTerm = newTACTerm(VARIABLE, 0, NULL, ass->exp->lValue);
+	tac_term_t *lTerm = newTACTerm(VARIABLE, 0, NULL, ass->exp->lValue);
     tac_exp_t *rValue = newTACExp(TAC_CONSTANT, 0, lTerm, NULL);
 	newTACAssignment(lValue, rValue);
 }
@@ -893,10 +897,19 @@ void stringifyExpression(expression_t *exp) {
 	tac_term_t *lTerm;
 	tac_exp_t *rValue;
     switch (exp->type) {
-		case CONSTANT:
+		case INT_CONSTANT:
 			sprintf(tempString, "t%d", tCount++);
 			lValue = newTACTerm(TEMPORARY, 0, NULL, tempString);
-			lTerm = newTACTerm(VARIABLE, 0, NULL, exp->lValue);
+			lTerm = newTACTerm(INTEGER_LITERAL, 0, NULL, exp->lValue);
+			rValue = newTACExp(TAC_CONSTANT, 0, lTerm, NULL);
+		    newTACAssignment(lValue, rValue);
+
+			sprintf(exp->lValue, "t%d", tCount - 1);
+			break;
+		case CHAR_CONSTANT:
+			sprintf(tempString, "t%d", tCount++);
+			lValue = newTACTerm(TEMPORARY, 0, NULL, tempString);
+			lTerm = newTACTerm(CHAR_LITERAL, 0, NULL, exp->lValue);
 			rValue = newTACExp(TAC_CONSTANT, 0, lTerm, NULL);
 		    newTACAssignment(lValue, rValue);
 
@@ -928,9 +941,15 @@ void stringifyReturnStatement(return_statement_t *ret) {
 		tac_term_t *lTerm;
 		tac_exp_t *rValue;
 		switch (ret->exp->type) {
-			case CONSTANT:
+			case INT_CONSTANT:
 				lValue = newTACTerm(RETVAL, 0, NULL, "retval");
-				lTerm = newTACTerm(VARIABLE, 0, NULL, ret->exp->lValue);
+				lTerm = newTACTerm(INTEGER_LITERAL, 0, NULL, ret->exp->lValue);
+				rValue = newTACExp(TAC_CONSTANT, 0, lTerm, NULL);
+				newTACAssignment(lValue, rValue);
+				break;
+			case CHAR_CONSTANT:
+				lValue = newTACTerm(RETVAL, 0, NULL, "retval");
+				lTerm = newTACTerm(CHAR_LITERAL, 0, NULL, ret->exp->lValue);
 				rValue = newTACExp(TAC_CONSTANT, 0, lTerm, NULL);
 				newTACAssignment(lValue, rValue);
 				break;
@@ -944,6 +963,7 @@ void stringifyReturnStatement(return_statement_t *ret) {
 				newTACAssignment(lValue, rValue);
 		}
 	}
+
 	newTACReturn("return");
 }
 
@@ -1102,16 +1122,60 @@ void stringifyBinOp(expression_t *exp, bin_op_t *binOp) {
 	sprintf(exp->lValue, "t%d", tCount);
 	expression_t *left = binOp->left;
 	expression_t *right = binOp->right;
-	if (left->type != CONSTANT)
-		left->stringify(left);
-	if (right->type != CONSTANT)
-		right->stringify(right);
+
+	tac_term_e leftType;
+	tac_term_e rightType;
+
+	switch (left->type) {
+		case BIN_OP:
+		    left->stringify(left);
+			leftType = TEMPORARY;
+			break;
+		case FUNCTION_CALL:
+		    left->stringify(left);
+			leftType = TEMPORARY;
+			break;
+		case CHAR_CONSTANT:
+			leftType = CHAR_LITERAL;
+			break;
+		case INT_CONSTANT:
+			leftType = INTEGER_LITERAL;
+			break;
+		case VAR_CONSTANT:
+			leftType = VARIABLE;
+			break;
+		default:
+		    error("Invalid expression type");
+	}
+
+	switch (right->type) {
+		case BIN_OP:
+		    right->stringify(right);
+			rightType = TEMPORARY;
+			break;
+		case FUNCTION_CALL:
+		    right->stringify(right);
+			rightType = TEMPORARY;
+			break;
+		case CHAR_CONSTANT:
+			rightType = CHAR_LITERAL;
+			break;
+		case INT_CONSTANT:
+			rightType = INTEGER_LITERAL;
+			break;
+		case VAR_CONSTANT:
+			rightType = VARIABLE;
+			break;
+		default:
+		    error("Invalid expression type");
+
+	}
 
     char tempString[MAX_IDENTIFIER_LENGTH];
 	sprintf(tempString, "t%d", tCount++);
 	tac_term_t *lValue = newTACTerm(TEMPORARY, 0, NULL, tempString);
-	tac_term_t *lTerm = newTACTerm(VARIABLE, 0, NULL, left->lValue);
-	tac_term_t *rTerm = newTACTerm(VARIABLE, 0, NULL, right->lValue);
+	tac_term_t *lTerm = newTACTerm(leftType, 0, NULL, left->lValue);
+	tac_term_t *rTerm = newTACTerm(rightType, 0, NULL, right->lValue);
 	tac_exp_t *rValue = newTACExp(TAC_BIN_OP, PLUS, lTerm, rTerm);
 
 	switch (binOp->type) {
@@ -1151,6 +1215,7 @@ void stringifyBinOp(expression_t *exp, bin_op_t *binOp) {
 		default:
 			error("Invalid binary operation");
 	}
+
 	newTACAssignment(lValue, rValue);
 }
 
@@ -1163,9 +1228,11 @@ void stringifyFunctionCall(function_call_t *fun) {
 	tac_term_t *lValue;
 	tac_term_t *lTerm;
 	tac_exp_t *rValue;
+
 	for (int i = 0; i < argCount; i++) {
 		arg_t *arg = args[i];
 		passedParams[passedParamCount] = malloc(MAX_IDENTIFIER_LENGTH * sizeof(char));
+
 		switch (arg->type) {
 			case STRING:
 				sprintf(tempString, "t%d", tCount);
@@ -1176,7 +1243,7 @@ void stringifyFunctionCall(function_call_t *fun) {
 				sprintf(passedParams[passedParamCount++], "t%d", tCount++);
 				break;
 			case EXPRESSION:
-				if (arg->value.exp->type != CONSTANT)
+				if (arg->value.exp->type != CHAR_CONSTANT && arg->value.exp->type != INT_CONSTANT && arg->value.exp->type != VAR_CONSTANT)
 					arg->value.exp->stringify(arg->value.exp);
 
 				sprintf(tempString, "t%d", tCount);
@@ -1190,6 +1257,7 @@ void stringifyFunctionCall(function_call_t *fun) {
 				error("Invalid argument");
 		}
 	}
+
 	for (int i = 0; i < passedParamCount; i++) {
 		sprintf(tempString, "param%d", i + 1);
 		tac_term_t *lValue = newTACTerm(PARAM, 0, NULL, tempString);
@@ -1267,7 +1335,7 @@ tac_exp_t *newTACExp(tac_exp_e type, bin_op_e op, tac_term_t *lTerm,
 	return tacExp;
 }
 
-void newTACLabel(tac_label_e type, char value[MAX_IDENTIFIER_LENGTH]) {
+void newTACLabel(label_e type, char value[MAX_IDENTIFIER_LENGTH]) {
     tac_label_t *tacLabel = (tac_label_t *)malloc(sizeof(tac_label_t));
 	tacLabel->type = type;
 	strcpy(tacLabel->value, value);
@@ -1275,7 +1343,7 @@ void newTACLabel(tac_label_e type, char value[MAX_IDENTIFIER_LENGTH]) {
 	newTAC(TAC_LABEL, tacLabel);
 }
 
-void newTACGoto(tac_goto_e type, char label[MAX_IDENTIFIER_LENGTH],
+void newTACGoto(goto_e type, char label[MAX_IDENTIFIER_LENGTH],
                 char condition[MAX_IDENTIFIER_LENGTH]) {
     tac_goto_t *tacGoto = (tac_goto_t *)calloc(1, sizeof(tac_goto_t));
 	tacGoto->type = type;
@@ -1429,7 +1497,7 @@ unsigned long hash(char *str) {
 	return hash % MAX_IDENTIFIERS;
 }
 
-hash_table_item_t *searchSymbol(char *key, hash_table_item_t* hashTable[]) {
+symbol_table_item_t *searchSymbol(char *key, symbol_table_item_t* hashTable[]) {
 
 	int hashIndex = hash(key);
 
@@ -1444,13 +1512,13 @@ hash_table_item_t *searchSymbol(char *key, hash_table_item_t* hashTable[]) {
 	return NULL;        
 }
 
-void insertSymbol(char *key, identifier_t *data, hash_table_item_t* hashTable[]) {
-	hash_table_item_t *item;
+void insertSymbol(char *key, identifier_t *data, symbol_table_item_t* hashTable[]) {
+	symbol_table_item_t *item;
 	item = searchSymbol(key, hashTable);
 	if (item != NULL)
 		return;
 	int hashIndex = hash(key);
-	item = (hash_table_item_t*) malloc(sizeof(hash_table_item_t));
+	item = (symbol_table_item_t*) malloc(sizeof(symbol_table_item_t));
 	item->data = data;
 	item->key = hashIndex;
 
@@ -1462,6 +1530,59 @@ void insertSymbol(char *key, identifier_t *data, hash_table_item_t* hashTable[])
 	hashTable[hashIndex] = item;
 }
 
+void firstPassTACs(tac_list_t *tacList) {
+	tac_t *tac;
+	int i = 0;
+	char tempStr[MAX_IDENTIFIER_LENGTH];
+	int currStackOffset = 0;
+
+	while (i < tacList->tacCount) {
+		tac = tacList->instructions[i];
+		if (tac->type == TAC_LABEL && tac->instruction.label->type == FUNCTION_LABEL) {
+			strcpy(currTACFunction, tac->instruction.label->value);
+			currStackOffset = 0;
+		}
+
+		else if (tac->type == TAC_RETURN) {
+			identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
+			id->type = INT;
+			strcpy(id->name, currTACFunction);
+			strcpy(id->displayName, currTACFunction);
+			id->stackOffset = currStackOffset;
+			insertSymbol(currTACFunction, id, symbolTable);
+		    bzero(currTACFunction, MAX_IDENTIFIER_LENGTH);
+		}
+
+		else if (tac->type == TAC_ASSIGNMENT) {
+			tac_ass_t *ass = tac->instruction.assignment;
+			if (ass->lValue->type != TEMPORARY && ass->lValue->type != VARIABLE)
+				goto continue_first_pass;
+
+		    sprintf(tempStr, "%s_%s", currTACFunction, ass->lValue->value);
+			symbol_table_item_t *item = searchSymbol(tempStr, symbolTable);
+
+			if (item != NULL) {
+				if (item->data->stackOffset == 0) {
+				    item->data->stackOffset = currStackOffset + 4;
+					currStackOffset += 4;
+				}
+				goto continue_first_pass;
+		    }
+
+			identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
+			tac_term_e rType = ass->rValue->lTerm->type;
+			id->type = rType == CHAR_LITERAL ? CHAR : INT;
+			strcpy(id->name, tempStr);
+			strcpy(id->displayName, ass->lValue->value);
+			id->stackOffset = currStackOffset + 4;
+			currStackOffset += 4;
+			insertSymbol(tempStr, id, symbolTable);
+		}
+continue_first_pass:
+		i++;
+	}
+}
+
 assembly_list_t *parseTACs(tac_list_t *tacList) {
 	tac_t *tac;
 	assembly_list_t *assList = (assembly_list_t *)calloc(1, sizeof(assembly_list_t));
@@ -1471,36 +1592,94 @@ assembly_list_t *parseTACs(tac_list_t *tacList) {
 		tac = tacList->instructions[i];
 		switch(tac->type) {
 		    case TAC_GLOBAL_DEC:
-				assList->instructions[assList->assCount++] = newAssemblyGlobalDec(tac->instruction.global);;
+				assList->instructions[assList->assCount++] = newAssemblyGlobalDec(tac->instruction.global);
 				break;
 		    case TAC_ASSIGNMENT:
 				break;
 		    case TAC_LABEL:
+				assList->instructions[assList->assCount++] = newAssemblyLabel(tac->instruction.label);
 				break;
 		    case TAC_GOTO:
+				assList->instructions[assList->assCount++] = newAssemblyGoto(tac->instruction.jump);
 				break;
 		    case TAC_CALL:
 				break;
 		    case TAC_RETURN:
+				assList->instructions[assList->assCount++] = newAssemblyReturn(tac->instruction.ret);
 				break;
 		}
 	}
+
 	return assList;
 }
 
 assembly_t *newAssemblyGlobalDec(tac_global_dec_t *tac) {
 	char temp[MAX_IDENTIFIER_LENGTH];
 	sprintf(temp, "global_%s", tac->value);
-	hash_table_item_t *item = searchSymbol(temp, symbolTable);
+	symbol_table_item_t *item = searchSymbol(temp, symbolTable);
 	if (item == NULL)
 		error("Global variable not found");
 
     assembly_bss_t *bss = (assembly_bss_t *)malloc(sizeof(assembly_bss_t));
 	bss->var = item->data;
 	bss->stringify = &stringifyBSS;
+
 	assembly_t *ass = (assembly_t *)malloc(sizeof(assembly_t));
 	ass->section = ASSEMBLY_BSS_SECTION;
 	ass->instruction.bss = bss;
+
+	return ass;
+}
+
+assembly_t *newAssemblyLabel(tac_label_t *tac) {
+	assembly_label_t *label = (assembly_label_t *)malloc(sizeof(assembly_label_t));
+	label->type = tac->type;
+	strcpy(label->value, tac->value);
+	label->stringify = &stringifyAssemblyLabel;
+
+    assembly_text_t *text = (assembly_text_t *)malloc(sizeof(assembly_text_t));
+	text->type = ASSEMBLY_LABEL;
+	text->instruction.label = label;
+	text->stringify = &stringifyText;
+
+	assembly_t *ass = (assembly_t *)malloc(sizeof(assembly_t));
+	ass->section = ASSEMBLY_TEXT_SECTION;
+	ass->instruction.text = text;
+
+	return ass;
+}
+
+assembly_t *newAssemblyReturn(tac_return_t *tac) {
+	assembly_return_t *ret = (assembly_return_t *)malloc(sizeof(assembly_return_t));
+	strcpy(ret->label, tac->label);
+	ret->stringify = &stringifyAssemblyReturn;
+
+    assembly_text_t *text = (assembly_text_t *)malloc(sizeof(assembly_text_t));
+	text->type = ASSEMBLY_RETURN;
+	text->instruction.ret = ret;
+	text->stringify = &stringifyText;
+
+	assembly_t *ass = (assembly_t *)malloc(sizeof(assembly_t));
+	ass->section = ASSEMBLY_TEXT_SECTION;
+	ass->instruction.text = text;
+
+	return ass;
+}
+
+assembly_t *newAssemblyGoto(tac_goto_t *tac) {
+	assembly_goto_t *jump = (assembly_goto_t *)malloc(sizeof(assembly_goto_t));
+	jump->type = tac->type;
+	strcpy(jump->label, tac->label);
+	jump->stringify = &stringifyAssemblyJump;
+
+    assembly_text_t *text = (assembly_text_t *)malloc(sizeof(assembly_text_t));
+	text->type = ASSEMBLY_GOTO;
+	text->instruction.jump = jump;
+	text->stringify = &stringifyText;
+
+	assembly_t *ass = (assembly_t *)malloc(sizeof(assembly_t));
+	ass->section = ASSEMBLY_TEXT_SECTION;
+	ass->instruction.text = text;
 
 	return ass;
 }
@@ -1521,18 +1700,24 @@ void stringifyAssList(assembly_list_t *assList) {
 				bssList->instructions[bssList->assCount++] = ass->instruction.bss;
 				break;
 		    case ASSEMBLY_DATA_SECTION:
+				dataList->instructions[dataList->assCount++] = ass->instruction.data;
 				break;
 		    case ASSEMBLY_TEXT_SECTION:
+				textList->instructions[textList->assCount++] = ass->instruction.text;
 				break;
 		}
 	}
+
 	stringifyBSSList(bssList);
+	printf("\n");
 	stringifyDataList(dataList);
+	printf("\n");
 	stringifyTextList(textList);
+	printf("\n");
 }
 
 void stringifyBSSList(assembly_bss_list_t *bssList) {
-    printf(".bss\n");
+    printf("\t.bss\n");
 	for (int i = 0; i < bssList->assCount; i++) {
 		bssList->instructions[i]->stringify(bssList->instructions[i]);
 		printf("\n");
@@ -1543,6 +1728,12 @@ void stringifyDataList(assembly_data_list_t *dataList) {
 }
 
 void stringifyTextList(assembly_text_list_t *textList) {
+    printf("\t.text\n");
+	assembly_text_t *text;
+	for (int i = 0; i < textList->assCount; i++) {
+		text = textList->instructions[i];
+		text->stringify(text);
+	}
 }
 
 void stringifyBSS(assembly_bss_t *ass) {
@@ -1553,10 +1744,77 @@ void stringifyBSS(assembly_bss_t *ass) {
 			space = 4 * (1 + var->depth);
 			break;
 		case CHAR:
-			space = 1 * ( + var->depth);
+			space = 1 * (1 + var->depth);
 			break;
 		default:
 		    error("Unsupported data type");
 	}
 	printf("%s: .space %d", ass->var->displayName, space);
+}
+
+void stringifyData(assembly_data_t *ass) {
+}
+
+void stringifyText(assembly_text_t *text) {
+    switch (text->type) {
+		case ASSEMBLY_LABEL:
+		    text->instruction.label->stringify(text->instruction.label);
+			break;
+	    case ASSEMBLY_ASSIGNMENT:
+		    text->instruction.assignment->stringify(text->instruction.assignment);
+			break;
+	    case ASSEMBLY_GOTO:
+		    text->instruction.jump->stringify(text->instruction.jump);
+			break;
+	    case ASSEMBLY_CALL:
+		    text->instruction.call->stringify(text->instruction.call);
+			break;
+	    case ASSEMBLY_RETURN:
+		    text->instruction.ret->stringify(text->instruction.ret);
+			break;
+    }
+}
+
+void stringifyAssemblyLabel(assembly_label_t *label) {
+	if (label->type == FUNCTION_LABEL) {
+		printf("\t.globl %s\n", label->value);
+	}
+
+	printf("%s:\n", label->value);
+
+	if (label->type == FUNCTION_LABEL) {
+		printf("\tpushl %%ebp\n");
+		printf("\tmovl %%esp, %%ebp\n");
+		symbol_table_item_t *item = searchSymbol(label->value, symbolTable);
+		if (item == NULL) {
+			printf("%s\n", label->value);
+			fflush(0);
+		    error("Function not found");
+		}
+		int stackOffset = item->data->stackOffset;
+		printf("\tsub $%d, %%esp\n", stackOffset);
+	}
+}
+
+void stringifyAssemblyAssignment(assembly_assignment_t *assignment) {
+}
+
+void stringifyAssemblyCall(assembly_call_t *call) {
+}
+
+void stringifyAssemblyJump(assembly_goto_t *jump) {
+    switch(jump->type) {
+		case IF_GOTO:
+		    break;
+		case GOTO:
+		    printf("\tgoto %s", jump->label);
+		    break;
+		default:
+		    error("Unsupported jump");
+	}
+}
+
+void stringifyAssemblyReturn(assembly_return_t *ret) {
+    printf("\tleave\n");
+	printf("\treturn\n");
 }

@@ -30,7 +30,7 @@ for testcase in "$testcase_dir"/*; do
     ./a.out < "$tmpfile" > new.txt
 
     # Compare the two outputs
-    cmp prev.txt new.txt
+    cmp prev.txt tac.txt
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Testcase $basename passed.${NC}"
     else

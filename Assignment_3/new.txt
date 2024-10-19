@@ -1,0 +1,18 @@
+	.bss
+
+
+	.text
+	.globl main
+main:
+	pushl %ebp
+	movl %esp, %ebp
+	sub $N, %esp
+L1:
+	goto L3L2:
+L4:
+	goto L6L5:
+	goto L4L6:
+	goto L1L3:
+	leave
+	return
+

@@ -1,6 +1,7 @@
-global a
 global b
 main:
-t1 = 'A'
-t2 = 0
-str[t2] = t1
+t1 = 5 * 4
+t2 = 3 + t1
+a = t2
+retval = 0
+return

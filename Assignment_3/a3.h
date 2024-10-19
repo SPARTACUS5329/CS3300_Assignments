@@ -55,6 +55,11 @@ typedef struct AssemblyText assembly_text_t;
 typedef struct AssemblyBSSList assembly_bss_list_t;
 typedef struct AssemblyDataList assembly_data_list_t;
 typedef struct AssemblyTextList assembly_text_list_t;
+typedef struct AssemblyLabel assembly_label_t;
+typedef struct AssemblyAssignment assembly_assignment_t;
+typedef struct AssemblyCall assembly_call_t;
+typedef struct AssemblyGoto assembly_goto_t;
+typedef struct AssemblyReturn assembly_return_t;
 
 typedef enum {
   PLUS,
@@ -73,6 +78,14 @@ typedef enum {
 typedef enum { SINGLE, SHORT_AND, SHORT_OR, NOT } condition_op_e;
 
 typedef enum {
+  ASSEMBLY_LABEL,
+  ASSEMBLY_ASSIGNMENT,
+  ASSEMBLY_GOTO,
+  ASSEMBLY_CALL,
+  ASSEMBLY_RETURN
+} assembly_text_e;
+
+typedef enum {
   TAC_ASSIGNMENT,
   TAC_LABEL,
   TAC_GOTO,
@@ -87,7 +100,7 @@ typedef enum {
   ASSEMBLY_TEXT_SECTION
 } assembly_sec_e;
 
-typedef enum { FUNCTION_LABEL, JUMP_LABEL } tac_label_e;
+typedef enum { FUNCTION_LABEL, JUMP_LABEL } label_e;
 
 typedef enum { TAC_BIN_OP, TAC_CONSTANT } tac_exp_e;
 
@@ -97,12 +110,19 @@ typedef enum {
   RETVAL,
   VARIABLE,
   STRING_LITERAL,
-  INTEGER_CONSTANT
+  CHAR_LITERAL,
+  INTEGER_LITERAL
 } tac_term_e;
 
-typedef enum { IF_GOTO, GOTO } tac_goto_e;
+typedef enum { IF_GOTO, GOTO } goto_e;
 
-typedef enum { CONSTANT, BIN_OP, FUNCTION_CALL } expr_e;
+typedef enum {
+  CHAR_CONSTANT,
+  INT_CONSTANT,
+  VAR_CONSTANT,
+  BIN_OP,
+  FUNCTION_CALL
+} expr_e;
 
 typedef enum { INT, FLOAT, CHAR } data_type_e;
 
@@ -127,6 +147,7 @@ typedef struct Identifier {
   int depth;
   expression_t **subscripts;
   bool isConstant;
+  int stackOffset;
 } identifier_t;
 
 typedef struct SubscriptList {
@@ -346,13 +367,13 @@ typedef struct TACAssTerm {
 } tac_term_t;
 
 typedef struct TACLabel {
-  tac_label_e type;
+  label_e type;
   char value[MAX_IDENTIFIER_LENGTH];
   void (*stringify)(tac_label_t *);
 } tac_label_t;
 
 typedef struct TACGoto {
-  tac_goto_e type;
+  goto_e type;
   char condition[MAX_IDENTIFIER_LENGTH];
   char label[MAX_IDENTIFIER_LENGTH];
   void (*stringify)(tac_goto_t *);
@@ -409,19 +430,53 @@ typedef struct AssemblyData {
 } assembly_data_t;
 
 typedef struct AssemblyText {
+  assembly_text_e type;
+  union {
+    assembly_label_t *label;
+    assembly_assignment_t *assignment;
+    assembly_call_t *call;
+    assembly_goto_t *jump;
+    assembly_return_t *ret;
+  } instruction;
   void (*stringify)(assembly_text_t *);
 } assembly_text_t;
 
-typedef struct HashTableItem {
+typedef struct AssemblyAssignment {
+  void (*stringify)(assembly_assignment_t *);
+} assembly_assignment_t;
+
+typedef struct AssemblyCall {
+  char label[MAX_IDENTIFIER_LENGTH];
+  void (*stringify)(assembly_call_t *);
+} assembly_call_t;
+
+typedef struct AssemblyGoto {
+  goto_e type;
+  char label[MAX_IDENTIFIER_LENGTH];
+  void (*stringify)(assembly_goto_t *);
+} assembly_goto_t;
+
+typedef struct AssemblyReturn {
+  char label[MAX_IDENTIFIER_LENGTH];
+  void (*stringify)(assembly_return_t *);
+} assembly_return_t;
+
+typedef struct AssemblyLabel {
+  label_e type;
+  char value[MAX_IDENTIFIER_LENGTH];
+  void (*stringify)(assembly_label_t *);
+} assembly_label_t;
+
+typedef struct SymbolTableItem {
   identifier_t *data;
   int key;
-} hash_table_item_t;
+} symbol_table_item_t;
 
 void error(char *message);
 unsigned long hash(char *str);
-hash_table_item_t *searchSymbol(char *key, hash_table_item_t *hashTable[]);
+symbol_table_item_t *searchSymbol(char *key, symbol_table_item_t *hashTable[]);
 void insertSymbol(char *key, identifier_t *data,
-                  hash_table_item_t *hashTable[]);
+                  symbol_table_item_t *hashTable[]);
 void stringifyProgram(program_t *program);
 void stringifyFunctionDefList(function_def_list_t *funDefList);
 void stringifyFunDef(function_def_t *fun);
@@ -446,8 +501,8 @@ tac_term_t *newTACTerm(tac_term_e type, int depth, expression_t **subscripts,
                        char value[MAX_IDENTIFIER_LENGTH]);
 tac_exp_t *newTACExp(tac_exp_e type, bin_op_e op, tac_term_t *lTerm,
                      tac_term_t *rTerm);
-void newTACLabel(tac_label_e type, char value[MAX_IDENTIFIER_LENGTH]);
-void newTACGoto(tac_goto_e type, char label[MAX_IDENTIFIER_LENGTH],
+void newTACLabel(label_e type, char value[MAX_IDENTIFIER_LENGTH]);
+void newTACGoto(goto_e type, char label[MAX_IDENTIFIER_LENGTH],
                 char condition[MAX_IDENTIFIER_LENGTH]);
 void newTACCall(char label[MAX_IDENTIFIER_LENGTH]);
 void newTACReturn(char label[MAX_IDENTIFIER_LENGTH]);
@@ -460,10 +515,21 @@ void stringifyTACLabel(tac_label_t *tac);
 void stringifyTACGoto(tac_goto_t *tac);
 void stringifyTACCall(tac_call_t *tac);
 void stringifyTACReturn(tac_return_t *tac);
+void firstPassTACs(tac_list_t *tacList);
 assembly_list_t *parseTACs(tac_list_t *tacList);
 assembly_t *newAssemblyGlobalDec(tac_global_dec_t *tac);
+assembly_t *newAssemblyLabel(tac_label_t *tac);
+assembly_t *newAssemblyReturn(tac_return_t *tac);
+assembly_t *newAssemblyGoto(tac_goto_t *tac);
 void stringifyAssList(assembly_list_t *assList);
 void stringifyBSSList(assembly_bss_list_t *bssList);
 void stringifyDataList(assembly_data_list_t *dataList);
 void stringifyTextList(assembly_text_list_t *textList);
 void stringifyBSS(assembly_bss_t *ass);
+void stringifyData(assembly_data_t *ass);
+void stringifyText(assembly_text_t *ass);
+void stringifyAssemblyLabel(assembly_label_t *label);
+void stringifyAssemblyAssignment(assembly_assignment_t *assignment);
+void stringifyAssemblyCall(assembly_call_t *call);
+void stringifyAssemblyJump(assembly_goto_t *jump);
+void stringifyAssemblyReturn(assembly_return_t *ret);

@@ -152,12 +152,13 @@ int yylex(void);
 char mytext[100];
 char currType[10];
 char currScope[MAX_IDENTIFIER_LENGTH] = "global";
+char currTACFunction[MAX_IDENTIFIER_LENGTH];
 expression_t args[MAX_FUNCTION_CALLS][MAX_ARGS];
 int lineNumber = 1;
 static int tCount = 1;
 static int lCount = 1;
 
-hash_table_item_t *symbolTable[MAX_IDENTIFIERS];
+symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 program_t *program;
 tac_list_t *tacList;
 
@@ -183,7 +184,7 @@ tac_list_t *tacList;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 44 "a3.y"
+#line 45 "a3.y"
 {
 	char *str;
 	int val;
@@ -212,7 +213,7 @@ typedef union YYSTYPE
 	condition_t *con;
 }
 /* Line 193 of yacc.c.  */
-#line 216 "a3.tab.c"
+#line 217 "a3.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -225,7 +226,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 229 "a3.tab.c"
+#line 230 "a3.tab.c"
 
 #ifdef short
 # undef short
@@ -539,14 +540,14 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    99,    99,   114,   118,   126,   135,   139,   148,   159,
-     165,   172,   180,   187,   194,   201,   208,   215,   222,   232,
-     242,   248,   255,   261,   269,   286,   302,   322,   329,   336,
-     342,   353,   358,   362,   369,   375,   385,   397,   409,   421,
-     433,   445,   453,   456,   464,   489,   500,   507,   513,   521,
-     528,   532,   541,   550,   559,   570,   577,   584,   590,   593,
-     626,   629,   635,   642,   652,   662,   679,   686,   692,   698,
-     705,   713,   724,   730,   741
+       0,   100,   100,   115,   119,   127,   136,   140,   149,   160,
+     166,   173,   181,   188,   195,   202,   209,   216,   223,   233,
+     243,   249,   256,   262,   270,   287,   303,   323,   330,   337,
+     343,   354,   359,   363,   370,   376,   386,   398,   410,   422,
+     434,   446,   454,   457,   465,   492,   503,   510,   516,   524,
+     531,   535,   544,   553,   562,   573,   580,   587,   593,   596,
+     629,   632,   638,   645,   655,   665,   682,   689,   695,   701,
+     708,   716,   727,   733,   744
 };
 #endif
 
@@ -1567,7 +1568,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 99 "a3.y"
+#line 100 "a3.y"
     {
 		function_def_list_t *funDefList = (function_def_list_t *)malloc(sizeof(function_def_list_t));
 		funDefList->functions = (function_def_t **)malloc(MAX_IDENTIFIERS * sizeof(function_def_t *));
@@ -1583,7 +1584,7 @@ yyreduce:
     break;
 
   case 4:
-#line 118 "a3.y"
+#line 119 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = DECLARATION;
@@ -1595,7 +1596,7 @@ yyreduce:
     break;
 
   case 5:
-#line 126 "a3.y"
+#line 127 "a3.y"
     {
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
@@ -1605,7 +1606,7 @@ yyreduce:
     break;
 
   case 6:
-#line 135 "a3.y"
+#line 136 "a3.y"
     {
 		(yyvsp[(2) - (2)].combinedFunDefList)->functions[(yyvsp[(2) - (2)].combinedFunDefList)->functionCount++] = (yyvsp[(1) - (2)].funDef);
 		(yyval.combinedFunDefList) = (yyvsp[(2) - (2)].combinedFunDefList);
@@ -1613,7 +1614,7 @@ yyreduce:
     break;
 
   case 7:
-#line 139 "a3.y"
+#line 140 "a3.y"
     {
 		combined_function_definitions_t *combinedFunctions = (combined_function_definitions_t *)malloc(sizeof(combined_function_definitions_t));
 		combinedFunctions->functions = (function_def_t **)malloc(MAX_LINES * sizeof(function_def_t *));
@@ -1623,7 +1624,7 @@ yyreduce:
     break;
 
   case 8:
-#line 148 "a3.y"
+#line 149 "a3.y"
     {
 		function_def_t *fun = (function_def_t *)malloc(sizeof(function_def_t));
 		strcpy(fun->name, "main");
@@ -1635,14 +1636,14 @@ yyreduce:
     break;
 
   case 9:
-#line 159 "a3.y"
+#line 160 "a3.y"
     {
 		strcpy(currScope, "main");
 	;}
     break;
 
   case 10:
-#line 165 "a3.y"
+#line 166 "a3.y"
     {
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
@@ -1653,7 +1654,7 @@ yyreduce:
     break;
 
   case 11:
-#line 172 "a3.y"
+#line 173 "a3.y"
     {
 		(yyvsp[(1) - (2)].lineList)->lines[(yyvsp[(1) - (2)].lineList)->lineCount++] = (yyvsp[(2) - (2)].line);
 		(yyval.lineList) = (yyvsp[(1) - (2)].lineList);
@@ -1661,7 +1662,7 @@ yyreduce:
     break;
 
   case 12:
-#line 180 "a3.y"
+#line 181 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = DECLARATION;
@@ -1672,7 +1673,7 @@ yyreduce:
     break;
 
   case 13:
-#line 187 "a3.y"
+#line 188 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = ASSIGNMENT;
@@ -1683,7 +1684,7 @@ yyreduce:
     break;
 
   case 14:
-#line 194 "a3.y"
+#line 195 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = EXPRESSION_STATEMENT;
@@ -1694,7 +1695,7 @@ yyreduce:
     break;
 
   case 15:
-#line 201 "a3.y"
+#line 202 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = RETURN;
@@ -1705,7 +1706,7 @@ yyreduce:
     break;
 
   case 16:
-#line 208 "a3.y"
+#line 209 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = IF_ELSE;
@@ -1716,7 +1717,7 @@ yyreduce:
     break;
 
   case 17:
-#line 215 "a3.y"
+#line 216 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = LOOP;
@@ -1727,7 +1728,7 @@ yyreduce:
     break;
 
   case 18:
-#line 222 "a3.y"
+#line 223 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = FUNCTION;
@@ -1738,7 +1739,7 @@ yyreduce:
     break;
 
   case 19:
-#line 232 "a3.y"
+#line 233 "a3.y"
     {
 		declaration_statement_t *dec = (declaration_statement_t *)malloc(sizeof(declaration_statement_t));
 		dec->type = (yyvsp[(1) - (3)].dataType);
@@ -1749,7 +1750,7 @@ yyreduce:
     break;
 
   case 20:
-#line 242 "a3.y"
+#line 243 "a3.y"
     {
 		declaration_list_t *decList = (declaration_list_t *)malloc(sizeof(declaration_list_t));
 		decList->declarations = (declaration_t **)malloc(MAX_LINES * sizeof(declaration_t *));
@@ -1759,7 +1760,7 @@ yyreduce:
     break;
 
   case 21:
-#line 248 "a3.y"
+#line 249 "a3.y"
     {
 		(yyvsp[(3) - (3)].decList)->declarations[(yyvsp[(3) - (3)].decList)->decCount++] = (yyvsp[(1) - (3)].dec);
 		(yyval.decList) = (yyvsp[(3) - (3)].decList);
@@ -1767,7 +1768,7 @@ yyreduce:
     break;
 
   case 22:
-#line 255 "a3.y"
+#line 256 "a3.y"
     {
 		declaration_t *dec = (declaration_t *)malloc(sizeof(declaration_t));
 		dec->lValue = (yyvsp[(1) - (3)].id);
@@ -1777,7 +1778,7 @@ yyreduce:
     break;
 
   case 23:
-#line 261 "a3.y"
+#line 262 "a3.y"
     {
 		declaration_t *dec = (declaration_t *)malloc(sizeof(declaration_t));
 		dec->lValue = (yyvsp[(1) - (1)].id);
@@ -1786,9 +1787,9 @@ yyreduce:
     break;
 
   case 24:
-#line 269 "a3.y"
+#line 270 "a3.y"
     {
-		hash_table_item_t *item = searchSymbol((yyvsp[(1) - (4)].id)->name, symbolTable);
+		symbol_table_item_t *item = searchSymbol((yyvsp[(1) - (4)].id)->name, symbolTable);
 		if (item == NULL)
 		    error("Undefined variable");
 		if (item->data->depth != (yyvsp[(1) - (4)].id)->depth)
@@ -1804,7 +1805,7 @@ yyreduce:
     break;
 
   case 25:
-#line 286 "a3.y"
+#line 287 "a3.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, currScope);
@@ -1824,7 +1825,7 @@ yyreduce:
     break;
 
   case 26:
-#line 302 "a3.y"
+#line 303 "a3.y"
     {
 	    identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, currScope);
@@ -1845,7 +1846,7 @@ yyreduce:
     break;
 
   case 27:
-#line 322 "a3.y"
+#line 323 "a3.y"
     {
 		subscript_list_t *subscriptList = (subscript_list_t *)malloc(sizeof(subscript_list_t));
 		subscriptList->depth = 1;
@@ -1856,7 +1857,7 @@ yyreduce:
     break;
 
   case 28:
-#line 329 "a3.y"
+#line 330 "a3.y"
     {
 		(yyvsp[(1) - (2)].subscriptList)->subscripts[(yyvsp[(1) - (2)].subscriptList)->depth++] = (yyvsp[(2) - (2)].exp);
 		(yyval.subscriptList) = (yyvsp[(1) - (2)].subscriptList);
@@ -1864,14 +1865,14 @@ yyreduce:
     break;
 
   case 29:
-#line 336 "a3.y"
+#line 337 "a3.y"
     {
 		(yyval.exp) = (yyvsp[(2) - (3)].exp);
 	;}
     break;
 
   case 30:
-#line 342 "a3.y"
+#line 343 "a3.y"
     {
 		arg_list_t *argList = (yyvsp[(3) - (4)].argList);
 		function_call_t *fun = (function_call_t *)malloc(sizeof(function_call_t));
@@ -1883,7 +1884,7 @@ yyreduce:
     break;
 
   case 31:
-#line 353 "a3.y"
+#line 354 "a3.y"
     {
 		(yyval.argList) = (arg_list_t *)malloc(sizeof(arg_list_t));
 		(yyval.argList)->args = (arg_t **)malloc(MAX_ARGS * sizeof(arg_t *));
@@ -1892,7 +1893,7 @@ yyreduce:
     break;
 
   case 32:
-#line 358 "a3.y"
+#line 359 "a3.y"
     {
 		(yyvsp[(1) - (3)].argList)->args[(yyvsp[(1) - (3)].argList)->argCount++] = (yyvsp[(3) - (3)].arg);
 		(yyval.argList) = (yyvsp[(1) - (3)].argList);
@@ -1900,7 +1901,7 @@ yyreduce:
     break;
 
   case 33:
-#line 362 "a3.y"
+#line 363 "a3.y"
     {
 		(yyval.argList) = (arg_list_t *)malloc(sizeof(arg_list_t));
 		(yyval.argList)->args = (arg_t **)malloc(MAX_ARGS * sizeof(arg_t *));
@@ -1908,7 +1909,7 @@ yyreduce:
     break;
 
   case 34:
-#line 369 "a3.y"
+#line 370 "a3.y"
     {
 		arg_t *arg = (arg_t *)malloc(sizeof(arg_t));
 		arg->type = EXPRESSION;
@@ -1918,7 +1919,7 @@ yyreduce:
     break;
 
   case 35:
-#line 375 "a3.y"
+#line 376 "a3.y"
     {
 		arg_t *arg = (arg_t *)malloc(sizeof(arg_t));
 		arg->type = STRING;
@@ -1929,7 +1930,7 @@ yyreduce:
     break;
 
   case 36:
-#line 385 "a3.y"
+#line 386 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -1945,7 +1946,7 @@ yyreduce:
     break;
 
   case 37:
-#line 397 "a3.y"
+#line 398 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -1961,7 +1962,7 @@ yyreduce:
     break;
 
   case 38:
-#line 409 "a3.y"
+#line 410 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -1977,7 +1978,7 @@ yyreduce:
     break;
 
   case 39:
-#line 421 "a3.y"
+#line 422 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -1993,7 +1994,7 @@ yyreduce:
     break;
 
   case 40:
-#line 433 "a3.y"
+#line 434 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -2009,10 +2010,10 @@ yyreduce:
     break;
 
   case 41:
-#line 445 "a3.y"
+#line 446 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
-		exp->type = CONSTANT;
+		exp->type = INT_CONSTANT;
 		exp->child.binOp->type = EXPONENT;
 		sprintf(exp->lValue, "%s", (yyvsp[(2) - (2)].exp)->lValue);
 		exp->stringify = &stringifyExpression;
@@ -2021,14 +2022,14 @@ yyreduce:
     break;
 
   case 42:
-#line 453 "a3.y"
+#line 454 "a3.y"
     {
 		(yyval.exp) = (yyvsp[(2) - (3)].exp);
     ;}
     break;
 
   case 43:
-#line 456 "a3.y"
+#line 457 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		strcpy(exp->lValue, "retval");
@@ -2040,14 +2041,14 @@ yyreduce:
     break;
 
   case 44:
-#line 464 "a3.y"
+#line 465 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 
 		if (!(yyvsp[(1) - (1)].id)->isConstant) {
 			char temp[2 * MAX_IDENTIFIER_LENGTH];
 		    sprintf(temp, "%s_%s", currScope, (yyvsp[(1) - (1)].id)->name);
-			hash_table_item_t *item = searchSymbol(temp, symbolTable);
+			symbol_table_item_t *item = searchSymbol(temp, symbolTable);
 			if (item == NULL) {
 			    sprintf(temp, "global_%s", (yyvsp[(1) - (1)].id)->name);
 			    item = searchSymbol(temp, symbolTable);
@@ -2056,17 +2057,19 @@ yyreduce:
 			}
 			if (item->data->depth != (yyvsp[(1) - (1)].id)->depth)
 				error("Invalid location");
+		    exp->type = VAR_CONSTANT;
+		} else {
+		    exp->type = (yyvsp[(1) - (1)].id)->type == INT ? INT_CONSTANT : CHAR_CONSTANT;
 		}
 
 		sprintf(exp->lValue, "%s", (yyvsp[(1) - (1)].id)->name);
-		exp->type = CONSTANT;
 		exp->stringify = &stringifyExpression;
 		(yyval.exp) = exp;
     ;}
     break;
 
   case 45:
-#line 489 "a3.y"
+#line 492 "a3.y"
     {
 		function_def_t *fun = (function_def_t *)malloc(sizeof(function_def_t));
 		strcpy(fun->name, (yyvsp[(2) - (6)].str));
@@ -2078,7 +2081,7 @@ yyreduce:
     break;
 
   case 46:
-#line 500 "a3.y"
+#line 503 "a3.y"
     {
 		strcpy(currScope, (yyvsp[(1) - (1)].str));
 		(yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2086,7 +2089,7 @@ yyreduce:
     break;
 
   case 47:
-#line 507 "a3.y"
+#line 510 "a3.y"
     {
 		return_statement_t *ret = (return_statement_t *)malloc(sizeof(return_statement_t));
 		ret->exp = (yyvsp[(2) - (3)].exp);
@@ -2096,7 +2099,7 @@ yyreduce:
     break;
 
   case 48:
-#line 513 "a3.y"
+#line 516 "a3.y"
     {
 		return_statement_t *ret = (return_statement_t *)malloc(sizeof(return_statement_t));
 		ret->stringify = &stringifyReturnStatement;
@@ -2105,7 +2108,7 @@ yyreduce:
     break;
 
   case 49:
-#line 521 "a3.y"
+#line 524 "a3.y"
     {
 		param_list_t *paramList = (param_list_t *)malloc(sizeof(param_list_t));
 		paramList->params = (param_t **)malloc(MAX_ARGS * sizeof(param_t *));
@@ -2116,7 +2119,7 @@ yyreduce:
     break;
 
   case 50:
-#line 528 "a3.y"
+#line 531 "a3.y"
     {
 		(yyvsp[(1) - (3)].paramList)->params[(yyvsp[(1) - (3)].paramList)->paramCount++] = (yyvsp[(3) - (3)].param);
 		(yyval.paramList) = (yyvsp[(1) - (3)].paramList);
@@ -2124,7 +2127,7 @@ yyreduce:
     break;
 
   case 51:
-#line 532 "a3.y"
+#line 535 "a3.y"
     {
 		param_list_t *paramList = (param_list_t *)malloc(sizeof(param_list_t));
 		paramList->params = (param_t **)malloc(MAX_ARGS * sizeof(param_t *));
@@ -2134,7 +2137,7 @@ yyreduce:
     break;
 
   case 52:
-#line 541 "a3.y"
+#line 544 "a3.y"
     {
 		param_t *param = (param_t *)malloc(sizeof(param_t));
 		param->type = (yyvsp[(1) - (2)].dataType);
@@ -2144,7 +2147,7 @@ yyreduce:
     break;
 
   case 53:
-#line 550 "a3.y"
+#line 553 "a3.y"
     {
 		if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 		ifElse->isMatched = true;
@@ -2157,7 +2160,7 @@ yyreduce:
     break;
 
   case 54:
-#line 559 "a3.y"
+#line 562 "a3.y"
     {
 		if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 		ifElse->isMatched = false;
@@ -2169,7 +2172,7 @@ yyreduce:
     break;
 
   case 55:
-#line 570 "a3.y"
+#line 573 "a3.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = SHORT_AND;
@@ -2180,7 +2183,7 @@ yyreduce:
     break;
 
   case 56:
-#line 577 "a3.y"
+#line 580 "a3.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = SHORT_OR;
@@ -2191,7 +2194,7 @@ yyreduce:
     break;
 
   case 57:
-#line 584 "a3.y"
+#line 587 "a3.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = NOT;
@@ -2201,14 +2204,14 @@ yyreduce:
     break;
 
   case 58:
-#line 590 "a3.y"
+#line 593 "a3.y"
     {
 		(yyval.con) = (yyvsp[(2) - (3)].con);
 	;}
     break;
 
   case 59:
-#line 593 "a3.y"
+#line 596 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -2242,21 +2245,21 @@ yyreduce:
     break;
 
   case 60:
-#line 626 "a3.y"
+#line 629 "a3.y"
     {
 		(yyval.exp) = (yyvsp[(1) - (1)].exp);
 	;}
     break;
 
   case 61:
-#line 629 "a3.y"
+#line 632 "a3.y"
     {
 		(yyval.exp) = (yyvsp[(1) - (1)].con)->exp;
 	;}
     break;
 
   case 62:
-#line 635 "a3.y"
+#line 638 "a3.y"
     {
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = WHILE;
@@ -2267,7 +2270,7 @@ yyreduce:
     break;
 
   case 63:
-#line 642 "a3.y"
+#line 645 "a3.y"
     {
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = FOR;
@@ -2278,7 +2281,7 @@ yyreduce:
     break;
 
   case 64:
-#line 652 "a3.y"
+#line 655 "a3.y"
     {
 		while_loop_t *loop = (while_loop_t *)malloc(sizeof(while_loop_t));
 		loop->condition = (yyvsp[(3) - (5)].con);
@@ -2289,7 +2292,7 @@ yyreduce:
     break;
 
   case 65:
-#line 662 "a3.y"
+#line 665 "a3.y"
     {
 		for_loop_t *loop = (for_loop_t *)malloc(sizeof(for_loop_t));
 		loop->initial = (yyvsp[(3) - (10)].assignmentStatement);
@@ -2307,7 +2310,7 @@ yyreduce:
     break;
 
   case 66:
-#line 679 "a3.y"
+#line 682 "a3.y"
     {
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
@@ -2318,14 +2321,14 @@ yyreduce:
     break;
 
   case 67:
-#line 686 "a3.y"
+#line 689 "a3.y"
     {
 		(yyval.lineList) = (yyvsp[(2) - (3)].lineList);
 	;}
     break;
 
   case 68:
-#line 692 "a3.y"
+#line 695 "a3.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, (yyvsp[(1) - (1)].str));
@@ -2335,7 +2338,7 @@ yyreduce:
     break;
 
   case 69:
-#line 698 "a3.y"
+#line 701 "a3.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, (yyvsp[(1) - (2)].str));
@@ -2346,7 +2349,7 @@ yyreduce:
     break;
 
   case 70:
-#line 705 "a3.y"
+#line 708 "a3.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, mytext);
@@ -2358,7 +2361,7 @@ yyreduce:
     break;
 
   case 71:
-#line 713 "a3.y"
+#line 716 "a3.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, mytext);
@@ -2370,14 +2373,14 @@ yyreduce:
     break;
 
   case 72:
-#line 724 "a3.y"
+#line 727 "a3.y"
     {
 		(yyval.str) = strdup(mytext);
 	;}
     break;
 
   case 73:
-#line 730 "a3.y"
+#line 733 "a3.y"
     {
 		strcpy(currType, mytext);
 		if (streq(mytext, "int", 3))
@@ -2390,7 +2393,7 @@ yyreduce:
     break;
 
   case 74:
-#line 741 "a3.y"
+#line 744 "a3.y"
     {
 		(yyval.str) = strdup(mytext);
 	;}
@@ -2398,7 +2401,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2402 "a3.tab.c"
+#line 2405 "a3.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2612,7 +2615,7 @@ yyreturn:
 }
 
 
-#line 746 "a3.y"
+#line 749 "a3.y"
 
 
 void yyerror(char *message) {
@@ -2649,6 +2652,7 @@ int main(int argc, char *argv[]) {
     dup2(saved_stdout, fileno(stdout));
     close(saved_stdout);
 
+	firstPassTACs(tacList);
     assembly_list_t *assList = parseTACs(tacList);
 	stringifyAssList(assList);
 
@@ -2752,7 +2756,7 @@ void stringifyAssignmentStatement(assignment_statement_t *ass) {
 	}
 
 	tac_term_t *lValue = newTACTerm(VARIABLE, ass->lValue->depth, ass->lValue->subscripts, ass->lValue->displayName);
-tac_term_t *lTerm = newTACTerm(VARIABLE, 0, NULL, ass->exp->lValue);
+	tac_term_t *lTerm = newTACTerm(VARIABLE, 0, NULL, ass->exp->lValue);
     tac_exp_t *rValue = newTACExp(TAC_CONSTANT, 0, lTerm, NULL);
 	newTACAssignment(lValue, rValue);
 }
@@ -2763,10 +2767,19 @@ void stringifyExpression(expression_t *exp) {
 	tac_term_t *lTerm;
 	tac_exp_t *rValue;
     switch (exp->type) {
-		case CONSTANT:
+		case INT_CONSTANT:
 			sprintf(tempString, "t%d", tCount++);
 			lValue = newTACTerm(TEMPORARY, 0, NULL, tempString);
-			lTerm = newTACTerm(VARIABLE, 0, NULL, exp->lValue);
+			lTerm = newTACTerm(INTEGER_LITERAL, 0, NULL, exp->lValue);
+			rValue = newTACExp(TAC_CONSTANT, 0, lTerm, NULL);
+		    newTACAssignment(lValue, rValue);
+
+			sprintf(exp->lValue, "t%d", tCount - 1);
+			break;
+		case CHAR_CONSTANT:
+			sprintf(tempString, "t%d", tCount++);
+			lValue = newTACTerm(TEMPORARY, 0, NULL, tempString);
+			lTerm = newTACTerm(CHAR_LITERAL, 0, NULL, exp->lValue);
 			rValue = newTACExp(TAC_CONSTANT, 0, lTerm, NULL);
 		    newTACAssignment(lValue, rValue);
 
@@ -2798,9 +2811,15 @@ void stringifyReturnStatement(return_statement_t *ret) {
 		tac_term_t *lTerm;
 		tac_exp_t *rValue;
 		switch (ret->exp->type) {
-			case CONSTANT:
+			case INT_CONSTANT:
 				lValue = newTACTerm(RETVAL, 0, NULL, "retval");
-				lTerm = newTACTerm(VARIABLE, 0, NULL, ret->exp->lValue);
+				lTerm = newTACTerm(INTEGER_LITERAL, 0, NULL, ret->exp->lValue);
+				rValue = newTACExp(TAC_CONSTANT, 0, lTerm, NULL);
+				newTACAssignment(lValue, rValue);
+				break;
+			case CHAR_CONSTANT:
+				lValue = newTACTerm(RETVAL, 0, NULL, "retval");
+				lTerm = newTACTerm(CHAR_LITERAL, 0, NULL, ret->exp->lValue);
 				rValue = newTACExp(TAC_CONSTANT, 0, lTerm, NULL);
 				newTACAssignment(lValue, rValue);
 				break;
@@ -2814,6 +2833,7 @@ void stringifyReturnStatement(return_statement_t *ret) {
 				newTACAssignment(lValue, rValue);
 		}
 	}
+
 	newTACReturn("return");
 }
 
@@ -2972,16 +2992,60 @@ void stringifyBinOp(expression_t *exp, bin_op_t *binOp) {
 	sprintf(exp->lValue, "t%d", tCount);
 	expression_t *left = binOp->left;
 	expression_t *right = binOp->right;
-	if (left->type != CONSTANT)
-		left->stringify(left);
-	if (right->type != CONSTANT)
-		right->stringify(right);
+
+	tac_term_e leftType;
+	tac_term_e rightType;
+
+	switch (left->type) {
+		case BIN_OP:
+		    left->stringify(left);
+			leftType = TEMPORARY;
+			break;
+		case FUNCTION_CALL:
+		    left->stringify(left);
+			leftType = TEMPORARY;
+			break;
+		case CHAR_CONSTANT:
+			leftType = CHAR_LITERAL;
+			break;
+		case INT_CONSTANT:
+			leftType = INTEGER_LITERAL;
+			break;
+		case VAR_CONSTANT:
+			leftType = VARIABLE;
+			break;
+		default:
+		    error("Invalid expression type");
+	}
+
+	switch (right->type) {
+		case BIN_OP:
+		    right->stringify(right);
+			rightType = TEMPORARY;
+			break;
+		case FUNCTION_CALL:
+		    right->stringify(right);
+			rightType = TEMPORARY;
+			break;
+		case CHAR_CONSTANT:
+			rightType = CHAR_LITERAL;
+			break;
+		case INT_CONSTANT:
+			rightType = INTEGER_LITERAL;
+			break;
+		case VAR_CONSTANT:
+			rightType = VARIABLE;
+			break;
+		default:
+		    error("Invalid expression type");
+
+	}
 
     char tempString[MAX_IDENTIFIER_LENGTH];
 	sprintf(tempString, "t%d", tCount++);
 	tac_term_t *lValue = newTACTerm(TEMPORARY, 0, NULL, tempString);
-	tac_term_t *lTerm = newTACTerm(VARIABLE, 0, NULL, left->lValue);
-	tac_term_t *rTerm = newTACTerm(VARIABLE, 0, NULL, right->lValue);
+	tac_term_t *lTerm = newTACTerm(leftType, 0, NULL, left->lValue);
+	tac_term_t *rTerm = newTACTerm(rightType, 0, NULL, right->lValue);
 	tac_exp_t *rValue = newTACExp(TAC_BIN_OP, PLUS, lTerm, rTerm);
 
 	switch (binOp->type) {
@@ -3021,6 +3085,7 @@ void stringifyBinOp(expression_t *exp, bin_op_t *binOp) {
 		default:
 			error("Invalid binary operation");
 	}
+
 	newTACAssignment(lValue, rValue);
 }
 
@@ -3033,9 +3098,11 @@ void stringifyFunctionCall(function_call_t *fun) {
 	tac_term_t *lValue;
 	tac_term_t *lTerm;
 	tac_exp_t *rValue;
+
 	for (int i = 0; i < argCount; i++) {
 		arg_t *arg = args[i];
 		passedParams[passedParamCount] = malloc(MAX_IDENTIFIER_LENGTH * sizeof(char));
+
 		switch (arg->type) {
 			case STRING:
 				sprintf(tempString, "t%d", tCount);
@@ -3046,7 +3113,7 @@ void stringifyFunctionCall(function_call_t *fun) {
 				sprintf(passedParams[passedParamCount++], "t%d", tCount++);
 				break;
 			case EXPRESSION:
-				if (arg->value.exp->type != CONSTANT)
+				if (arg->value.exp->type != CHAR_CONSTANT && arg->value.exp->type != INT_CONSTANT && arg->value.exp->type != VAR_CONSTANT)
 					arg->value.exp->stringify(arg->value.exp);
 
 				sprintf(tempString, "t%d", tCount);
@@ -3060,6 +3127,7 @@ void stringifyFunctionCall(function_call_t *fun) {
 				error("Invalid argument");
 		}
 	}
+
 	for (int i = 0; i < passedParamCount; i++) {
 		sprintf(tempString, "param%d", i + 1);
 		tac_term_t *lValue = newTACTerm(PARAM, 0, NULL, tempString);
@@ -3137,7 +3205,7 @@ tac_exp_t *newTACExp(tac_exp_e type, bin_op_e op, tac_term_t *lTerm,
 	return tacExp;
 }
 
-void newTACLabel(tac_label_e type, char value[MAX_IDENTIFIER_LENGTH]) {
+void newTACLabel(label_e type, char value[MAX_IDENTIFIER_LENGTH]) {
     tac_label_t *tacLabel = (tac_label_t *)malloc(sizeof(tac_label_t));
 	tacLabel->type = type;
 	strcpy(tacLabel->value, value);
@@ -3145,7 +3213,7 @@ void newTACLabel(tac_label_e type, char value[MAX_IDENTIFIER_LENGTH]) {
 	newTAC(TAC_LABEL, tacLabel);
 }
 
-void newTACGoto(tac_goto_e type, char label[MAX_IDENTIFIER_LENGTH],
+void newTACGoto(goto_e type, char label[MAX_IDENTIFIER_LENGTH],
                 char condition[MAX_IDENTIFIER_LENGTH]) {
     tac_goto_t *tacGoto = (tac_goto_t *)calloc(1, sizeof(tac_goto_t));
 	tacGoto->type = type;
@@ -3299,7 +3367,7 @@ unsigned long hash(char *str) {
 	return hash % MAX_IDENTIFIERS;
 }
 
-hash_table_item_t *searchSymbol(char *key, hash_table_item_t* hashTable[]) {
+symbol_table_item_t *searchSymbol(char *key, symbol_table_item_t* hashTable[]) {
 
 	int hashIndex = hash(key);
 
@@ -3314,13 +3382,13 @@ hash_table_item_t *searchSymbol(char *key, hash_table_item_t* hashTable[]) {
 	return NULL;        
 }
 
-void insertSymbol(char *key, identifier_t *data, hash_table_item_t* hashTable[]) {
-	hash_table_item_t *item;
+void insertSymbol(char *key, identifier_t *data, symbol_table_item_t* hashTable[]) {
+	symbol_table_item_t *item;
 	item = searchSymbol(key, hashTable);
 	if (item != NULL)
 		return;
 	int hashIndex = hash(key);
-	item = (hash_table_item_t*) malloc(sizeof(hash_table_item_t));
+	item = (symbol_table_item_t*) malloc(sizeof(symbol_table_item_t));
 	item->data = data;
 	item->key = hashIndex;
 
@@ -3332,6 +3400,59 @@ void insertSymbol(char *key, identifier_t *data, hash_table_item_t* hashTable[])
 	hashTable[hashIndex] = item;
 }
 
+void firstPassTACs(tac_list_t *tacList) {
+	tac_t *tac;
+	int i = 0;
+	char tempStr[MAX_IDENTIFIER_LENGTH];
+	int currStackOffset = 0;
+
+	while (i < tacList->tacCount) {
+		tac = tacList->instructions[i];
+		if (tac->type == TAC_LABEL && tac->instruction.label->type == FUNCTION_LABEL) {
+			strcpy(currTACFunction, tac->instruction.label->value);
+			currStackOffset = 0;
+		}
+
+		else if (tac->type == TAC_RETURN) {
+			identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
+			id->type = INT;
+			strcpy(id->name, currTACFunction);
+			strcpy(id->displayName, currTACFunction);
+			id->stackOffset = currStackOffset;
+			insertSymbol(currTACFunction, id, symbolTable);
+		    bzero(currTACFunction, MAX_IDENTIFIER_LENGTH);
+		}
+
+		else if (tac->type == TAC_ASSIGNMENT) {
+			tac_ass_t *ass = tac->instruction.assignment;
+			if (ass->lValue->type != TEMPORARY && ass->lValue->type != VARIABLE)
+				goto continue_first_pass;
+
+		    sprintf(tempStr, "%s_%s", currTACFunction, ass->lValue->value);
+			symbol_table_item_t *item = searchSymbol(tempStr, symbolTable);
+
+			if (item != NULL) {
+				if (item->data->stackOffset == 0) {
+				    item->data->stackOffset = currStackOffset + 4;
+					currStackOffset += 4;
+				}
+				goto continue_first_pass;
+		    }
+
+			identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
+			tac_term_e rType = ass->rValue->lTerm->type;
+			id->type = rType == CHAR_LITERAL ? CHAR : INT;
+			strcpy(id->name, tempStr);
+			strcpy(id->displayName, ass->lValue->value);
+			id->stackOffset = currStackOffset + 4;
+			currStackOffset += 4;
+			insertSymbol(tempStr, id, symbolTable);
+		}
+continue_first_pass:
+		i++;
+	}
+}
+
 assembly_list_t *parseTACs(tac_list_t *tacList) {
 	tac_t *tac;
 	assembly_list_t *assList = (assembly_list_t *)calloc(1, sizeof(assembly_list_t));
@@ -3341,36 +3462,94 @@ assembly_list_t *parseTACs(tac_list_t *tacList) {
 		tac = tacList->instructions[i];
 		switch(tac->type) {
 		    case TAC_GLOBAL_DEC:
-				assList->instructions[assList->assCount++] = newAssemblyGlobalDec(tac->instruction.global);;
+				assList->instructions[assList->assCount++] = newAssemblyGlobalDec(tac->instruction.global);
 				break;
 		    case TAC_ASSIGNMENT:
 				break;
 		    case TAC_LABEL:
+				assList->instructions[assList->assCount++] = newAssemblyLabel(tac->instruction.label);
 				break;
 		    case TAC_GOTO:
+				assList->instructions[assList->assCount++] = newAssemblyGoto(tac->instruction.jump);
 				break;
 		    case TAC_CALL:
 				break;
 		    case TAC_RETURN:
+				assList->instructions[assList->assCount++] = newAssemblyReturn(tac->instruction.ret);
 				break;
 		}
 	}
+
 	return assList;
 }
 
 assembly_t *newAssemblyGlobalDec(tac_global_dec_t *tac) {
 	char temp[MAX_IDENTIFIER_LENGTH];
 	sprintf(temp, "global_%s", tac->value);
-	hash_table_item_t *item = searchSymbol(temp, symbolTable);
+	symbol_table_item_t *item = searchSymbol(temp, symbolTable);
 	if (item == NULL)
 		error("Global variable not found");
 
     assembly_bss_t *bss = (assembly_bss_t *)malloc(sizeof(assembly_bss_t));
 	bss->var = item->data;
 	bss->stringify = &stringifyBSS;
+
 	assembly_t *ass = (assembly_t *)malloc(sizeof(assembly_t));
 	ass->section = ASSEMBLY_BSS_SECTION;
 	ass->instruction.bss = bss;
+
+	return ass;
+}
+
+assembly_t *newAssemblyLabel(tac_label_t *tac) {
+	assembly_label_t *label = (assembly_label_t *)malloc(sizeof(assembly_label_t));
+	label->type = tac->type;
+	strcpy(label->value, tac->value);
+	label->stringify = &stringifyAssemblyLabel;
+
+    assembly_text_t *text = (assembly_text_t *)malloc(sizeof(assembly_text_t));
+	text->type = ASSEMBLY_LABEL;
+	text->instruction.label = label;
+	text->stringify = &stringifyText;
+
+	assembly_t *ass = (assembly_t *)malloc(sizeof(assembly_t));
+	ass->section = ASSEMBLY_TEXT_SECTION;
+	ass->instruction.text = text;
+
+	return ass;
+}
+
+assembly_t *newAssemblyReturn(tac_return_t *tac) {
+	assembly_return_t *ret = (assembly_return_t *)malloc(sizeof(assembly_return_t));
+	strcpy(ret->label, tac->label);
+	ret->stringify = &stringifyAssemblyReturn;
+
+    assembly_text_t *text = (assembly_text_t *)malloc(sizeof(assembly_text_t));
+	text->type = ASSEMBLY_RETURN;
+	text->instruction.ret = ret;
+	text->stringify = &stringifyText;
+
+	assembly_t *ass = (assembly_t *)malloc(sizeof(assembly_t));
+	ass->section = ASSEMBLY_TEXT_SECTION;
+	ass->instruction.text = text;
+
+	return ass;
+}
+
+assembly_t *newAssemblyGoto(tac_goto_t *tac) {
+	assembly_goto_t *jump = (assembly_goto_t *)malloc(sizeof(assembly_goto_t));
+	jump->type = tac->type;
+	strcpy(jump->label, tac->label);
+	jump->stringify = &stringifyAssemblyJump;
+
+    assembly_text_t *text = (assembly_text_t *)malloc(sizeof(assembly_text_t));
+	text->type = ASSEMBLY_GOTO;
+	text->instruction.jump = jump;
+	text->stringify = &stringifyText;
+
+	assembly_t *ass = (assembly_t *)malloc(sizeof(assembly_t));
+	ass->section = ASSEMBLY_TEXT_SECTION;
+	ass->instruction.text = text;
 
 	return ass;
 }
@@ -3391,18 +3570,24 @@ void stringifyAssList(assembly_list_t *assList) {
 				bssList->instructions[bssList->assCount++] = ass->instruction.bss;
 				break;
 		    case ASSEMBLY_DATA_SECTION:
+				dataList->instructions[dataList->assCount++] = ass->instruction.data;
 				break;
 		    case ASSEMBLY_TEXT_SECTION:
+				textList->instructions[textList->assCount++] = ass->instruction.text;
 				break;
 		}
 	}
+
 	stringifyBSSList(bssList);
+	printf("\n");
 	stringifyDataList(dataList);
+	printf("\n");
 	stringifyTextList(textList);
+	printf("\n");
 }
 
 void stringifyBSSList(assembly_bss_list_t *bssList) {
-    printf(".bss\n");
+    printf("\t.bss\n");
 	for (int i = 0; i < bssList->assCount; i++) {
 		bssList->instructions[i]->stringify(bssList->instructions[i]);
 		printf("\n");
@@ -3413,6 +3598,12 @@ void stringifyDataList(assembly_data_list_t *dataList) {
 }
 
 void stringifyTextList(assembly_text_list_t *textList) {
+    printf("\t.text\n");
+	assembly_text_t *text;
+	for (int i = 0; i < textList->assCount; i++) {
+		text = textList->instructions[i];
+		text->stringify(text);
+	}
 }
 
 void stringifyBSS(assembly_bss_t *ass) {
@@ -3423,11 +3614,78 @@ void stringifyBSS(assembly_bss_t *ass) {
 			space = 4 * (1 + var->depth);
 			break;
 		case CHAR:
-			space = 1 * ( + var->depth);
+			space = 1 * (1 + var->depth);
 			break;
 		default:
 		    error("Unsupported data type");
 	}
 	printf("%s: .space %d", ass->var->displayName, space);
+}
+
+void stringifyData(assembly_data_t *ass) {
+}
+
+void stringifyText(assembly_text_t *text) {
+    switch (text->type) {
+		case ASSEMBLY_LABEL:
+		    text->instruction.label->stringify(text->instruction.label);
+			break;
+	    case ASSEMBLY_ASSIGNMENT:
+		    text->instruction.assignment->stringify(text->instruction.assignment);
+			break;
+	    case ASSEMBLY_GOTO:
+		    text->instruction.jump->stringify(text->instruction.jump);
+			break;
+	    case ASSEMBLY_CALL:
+		    text->instruction.call->stringify(text->instruction.call);
+			break;
+	    case ASSEMBLY_RETURN:
+		    text->instruction.ret->stringify(text->instruction.ret);
+			break;
+    }
+}
+
+void stringifyAssemblyLabel(assembly_label_t *label) {
+	if (label->type == FUNCTION_LABEL) {
+		printf("\t.globl %s\n", label->value);
+	}
+
+	printf("%s:\n", label->value);
+
+	if (label->type == FUNCTION_LABEL) {
+		printf("\tpushl %%ebp\n");
+		printf("\tmovl %%esp, %%ebp\n");
+		symbol_table_item_t *item = searchSymbol(label->value, symbolTable);
+		if (item == NULL) {
+			printf("%s\n", label->value);
+			fflush(0);
+		    error("Function not found");
+		}
+		int stackOffset = item->data->stackOffset;
+		printf("\tsub $%d, %%esp\n", stackOffset);
+	}
+}
+
+void stringifyAssemblyAssignment(assembly_assignment_t *assignment) {
+}
+
+void stringifyAssemblyCall(assembly_call_t *call) {
+}
+
+void stringifyAssemblyJump(assembly_goto_t *jump) {
+    switch(jump->type) {
+		case IF_GOTO:
+		    break;
+		case GOTO:
+		    printf("\tgoto %s", jump->label);
+		    break;
+		default:
+		    error("Unsupported jump");
+	}
+}
+
+void stringifyAssemblyReturn(assembly_return_t *ret) {
+    printf("\tleave\n");
+	printf("\treturn\n");
 }
 
