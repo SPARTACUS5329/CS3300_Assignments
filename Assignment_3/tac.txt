@@ -1,7 +1,19 @@
 global b
+global i
+global s
+foo:
+r = param1
+retval = 0
+return
 main:
 t1 = 5 * 4
 t2 = 3 + t1
 a = t2
+t3 = a + 2
+b = t3
+t4 = a
+param1 = t4
+call foo
+t5 = retval
 retval = 0
 return

@@ -6,7 +6,7 @@
 main:
 	pushl %ebp
 	movl %esp, %ebp
-	sub $N, %esp
+	sub $56, %esp
 L1:
 	goto L3L2:
 L4:

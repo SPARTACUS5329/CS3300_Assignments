@@ -360,9 +360,9 @@ typedef struct TACAssExp {
 
 typedef struct TACAssTerm {
   tac_term_e type;
+  char value[MAX_IDENTIFIER_LENGTH];
   int depth;
   expression_t **subscripts;
-  char value[MAX_IDENTIFIER_LENGTH];
   void (*stringify)(tac_term_t *);
 } tac_term_t;
 
@@ -446,12 +446,16 @@ typedef struct AssemblyAssignment {
 } assembly_assignment_t;
 
 typedef struct AssemblyCall {
+  int argCount;
+  char scope[MAX_IDENTIFIER_LENGTH];
+  char arguments[MAX_ARGS][MAX_IDENTIFIER_LENGTH];
   char label[MAX_IDENTIFIER_LENGTH];
   void (*stringify)(assembly_call_t *);
 } assembly_call_t;
 
 typedef struct AssemblyGoto {
   goto_e type;
+  char condition[MAX_IDENTIFIER_LENGTH];
   char label[MAX_IDENTIFIER_LENGTH];
   void (*stringify)(assembly_goto_t *);
 } assembly_goto_t;
@@ -521,6 +525,9 @@ assembly_t *newAssemblyGlobalDec(tac_global_dec_t *tac);
 assembly_t *newAssemblyLabel(tac_label_t *tac);
 assembly_t *newAssemblyReturn(tac_return_t *tac);
 assembly_t *newAssemblyGoto(tac_goto_t *tac);
+assembly_t *newAssemblyCall(int argCount,
+                            char arguments[MAX_ARGS][MAX_IDENTIFIER_LENGTH],
+                            tac_call_t *tac);
 void stringifyAssList(assembly_list_t *assList);
 void stringifyBSSList(assembly_bss_list_t *bssList);
 void stringifyDataList(assembly_data_list_t *dataList);
