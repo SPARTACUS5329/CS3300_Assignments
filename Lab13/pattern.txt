@@ -1,5 +1,20 @@
 p = &a;
+q = &b;
+* p = q;
+r = &c;
+s = p;
+t = * p;
+* s = r;
+v = &p;
 
 %%
 
 PRINTSET p
+PRINTSET q
+PRINTSET r
+PRINTSET s
+PRINTSET v
+PRINTSET t
+PRINTSET a
+PRINTSET b
+PRINTSET c

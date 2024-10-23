@@ -110,8 +110,6 @@ extern char *yytext;
 
 symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 program_t *program;
-ass_list_t *assList;
-query_list_t *queryList;
 id_list_t *idList;
 
 
@@ -135,7 +133,7 @@ id_list_t *idList;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 26 "l13.y"
+#line 24 "l13.y"
 {
 	char *str;
 	int val;
@@ -146,7 +144,7 @@ typedef union YYSTYPE
 	query_list_t *queryList;
 }
 /* Line 193 of yacc.c.  */
-#line 150 "l13.tab.c"
+#line 148 "l13.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -159,7 +157,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 163 "l13.tab.c"
+#line 161 "l13.tab.c"
 
 #ifdef short
 # undef short
@@ -447,8 +445,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    45,    45,    53,    57,    65,    71,    78,    88,    93,
-     101,   115,   129,   143,   160
+       0,    43,    43,    50,    54,    62,    68,    75,    85,    89,
+      97,   111,   125,   139,   156
 };
 #endif
 
@@ -1363,16 +1361,15 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 45 "l13.y"
+#line 43 "l13.y"
     {
-		printf("Reaching\n");
 		program->assList = (yyvsp[(1) - (3)].assList);
 		program->queryList = (yyvsp[(3) - (3)].queryList);
 	;}
     break;
 
   case 3:
-#line 53 "l13.y"
+#line 50 "l13.y"
     {
 		(yyvsp[(1) - (2)].queryList)->queries[(yyvsp[(1) - (2)].queryList)->queryCount++] = (yyvsp[(2) - (2)].query);
 		(yyval.queryList) = (yyvsp[(1) - (2)].queryList);
@@ -1380,18 +1377,18 @@ yyreduce:
     break;
 
   case 4:
-#line 57 "l13.y"
+#line 54 "l13.y"
     {
-		query_list_t *queryList = (query_list_t *)malloc(sizeof(query_list_t));
+		query_list_t *queryList = (query_list_t *)calloc(1, sizeof(query_list_t));
 		queryList->queries = (query_t **)calloc(MAX_QUERIES, sizeof(query_t *));
 		(yyval.queryList) = queryList;
 	;}
     break;
 
   case 5:
-#line 65 "l13.y"
+#line 62 "l13.y"
     {
-		query_t *query = (query_t *)malloc(sizeof(query_t));
+		query_t *query = (query_t *)calloc(1, sizeof(query_t));
 		query->type = PRINTSET;
 		query->id1 = (yyvsp[(2) - (2)].id);
 		(yyval.query) = query;
@@ -1399,9 +1396,9 @@ yyreduce:
     break;
 
   case 6:
-#line 71 "l13.y"
+#line 68 "l13.y"
     {
-		query_t *query = (query_t *)malloc(sizeof(query_t));
+		query_t *query = (query_t *)calloc(1, sizeof(query_t));
 		query->type = POINTSTO;
 		query->id1 = (yyvsp[(2) - (4)].id);
 		query->id2 = (yyvsp[(4) - (4)].id);
@@ -1410,9 +1407,9 @@ yyreduce:
     break;
 
   case 7:
-#line 78 "l13.y"
+#line 75 "l13.y"
     {
-		query_t *query = (query_t *)malloc(sizeof(query_t));
+		query_t *query = (query_t *)calloc(1, sizeof(query_t));
 		query->type = DEREFERENCEABLE;
 		query->id1 = (yyvsp[(2) - (4)].id);
 		query->id2 = (yyvsp[(4) - (4)].id);
@@ -1421,27 +1418,26 @@ yyreduce:
     break;
 
   case 8:
-#line 88 "l13.y"
+#line 85 "l13.y"
     {
 		(yyvsp[(1) - (2)].assList)->lines[(yyvsp[(1) - (2)].assList)->assCount++] = (yyvsp[(2) - (2)].ass);
 		(yyval.assList) = (yyvsp[(1) - (2)].assList);
-		printf("Reaching %s %s\n", (yyval.assList)->lines[0]->lValue->value, (yyval.assList)->lines[0]->rValue->value);
 	;}
     break;
 
   case 9:
-#line 93 "l13.y"
+#line 89 "l13.y"
     {
-		ass_list_t *assList = (ass_list_t *)malloc(sizeof(ass_list_t));
+		ass_list_t *assList = (ass_list_t *)calloc(1, sizeof(ass_list_t));
 		assList->lines = (ass_t **)calloc(MAX_LINES, sizeof(ass_t *));
 		(yyval.assList) = assList;
 	;}
     break;
 
   case 10:
-#line 101 "l13.y"
+#line 97 "l13.y"
     {
-		ass_t *ass = (ass_t *)malloc(sizeof(ass_t *));
+		ass_t *ass = (ass_t *)calloc(1, sizeof(ass_t));
 		ass->leftOp = NONE;
 		ass->rightOp = NONE;
 		symbol_table_item_t *item = searchSymbol((yyvsp[(1) - (4)].id)->value, symbolTable);
@@ -1457,9 +1453,9 @@ yyreduce:
     break;
 
   case 11:
-#line 115 "l13.y"
+#line 111 "l13.y"
     {
-		ass_t *ass = (ass_t *)malloc(sizeof(ass_t *));
+		ass_t *ass = (ass_t *)malloc(sizeof(ass_t));
 		ass->leftOp = STAR;
 		ass->rightOp = NONE;
 		symbol_table_item_t *item = searchSymbol((yyvsp[(2) - (5)].id)->value, symbolTable);
@@ -1475,9 +1471,9 @@ yyreduce:
     break;
 
   case 12:
-#line 129 "l13.y"
+#line 125 "l13.y"
     {
-		ass_t *ass = (ass_t *)malloc(sizeof(ass_t *));
+		ass_t *ass = (ass_t *)malloc(sizeof(ass_t));
 		ass->leftOp = NONE;
 		ass->rightOp = STAR;
 		symbol_table_item_t *item = searchSymbol((yyvsp[(1) - (5)].id)->value, symbolTable);
@@ -1493,9 +1489,9 @@ yyreduce:
     break;
 
   case 13:
-#line 143 "l13.y"
+#line 139 "l13.y"
     {
-		ass_t *ass = (ass_t *)malloc(sizeof(ass_t *));
+		ass_t *ass = (ass_t *)malloc(sizeof(ass_t));
 		ass->leftOp = NONE;
 		ass->rightOp = AND;
 		symbol_table_item_t *item = searchSymbol((yyvsp[(1) - (5)].id)->value, symbolTable);
@@ -1511,7 +1507,7 @@ yyreduce:
     break;
 
   case 14:
-#line 160 "l13.y"
+#line 156 "l13.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->value, mytext);
@@ -1523,7 +1519,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1527 "l13.tab.c"
+#line 1523 "l13.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1737,7 +1733,7 @@ yyreturn:
 }
 
 
-#line 169 "l13.y"
+#line 165 "l13.y"
 
 
 void yyerror(char *message) {
@@ -1757,13 +1753,13 @@ int main() {
 
 	yyparse();
 
-	for (int i = 0; i < 2; i++)
-		parseAssignments();
+	while (parseAssignments(program->assList));
 
 	query_t *query;
 	bool res;
-	for (int i = 0; i < queryList->queryCount; i++) {
-		query = queryList->queries[i];
+
+	for (int i = 0; i < program->queryList->queryCount; i++) {
+		query = program->queryList->queries[i];
 		switch (query->type) {
 			case PRINTSET:
 				printSet(query->id1);
@@ -1788,10 +1784,15 @@ void flushVisited() {
 }
 
 void printSet(identifier_t *id) {
+	char set[id->numPoints][MAX_IDENTIFIER_LENGTH];
+	for (int i = 0; i < id->numPoints; i++)
+		strcpy(set[i], id->points[i]->value);
+
+	qsort(set, id->numPoints, MAX_IDENTIFIER_LENGTH, compareLex);
 	printf("{");
 
 	for (int i = 0; i < id->numPoints; i++) {
-		printf("%s", id->points[i]->value);
+		printf("%s", set[i]);
 		if (i < id->numPoints - 1)
 			printf(",");
 	}
@@ -1822,42 +1823,66 @@ bool dereferenceable(identifier_t *id1, identifier_t *id2) {
 	return false;
 }
 
-void parseAssignments() {
+bool parseAssignments(ass_list_t *assList) {
 	ass_t *ass;
 	identifier_t *lValue, *rValue;
 	op_e leftOp, rightOp;
+	bool res = false;
+
 	for (int i = 0; i < assList->assCount; i++) {
 		ass = assList->lines[i];
 		leftOp = ass->leftOp;
 		rightOp = ass->rightOp;
 		lValue = ass->lValue;
 		rValue = ass->rValue;
-		if (leftOp == NONE && rightOp == NONE)
-			transferPoints(lValue, rValue);
-		else if (leftOp == NONE && rightOp == AND)
-			addPoint(lValue, rValue);
-		else if (leftOp == STAR && rightOp == NONE)
-			for (int j = 0; j < lValue->numPoints; j++)
-				transferPoints(lValue->points[j], rValue);
-		else if (leftOp == NONE && rightOp == STAR)
-			for (int j = 0; j < rValue->numPoints; j++)
-				transferPoints(lValue, rValue->points[j]);
-		else
+		if (leftOp == NONE && rightOp == NONE) {
+			if (transferPoints(lValue, rValue))  {
+				res = true;
+			}
+		}
+		else if (leftOp == NONE && rightOp == AND) {
+			if (addPoint(lValue, rValue)) {
+				res = true;
+			}
+		}
+		else if (leftOp == STAR && rightOp == NONE) {
+			for (int j = 0; j < lValue->numPoints; j++) {
+				if (transferPoints(lValue->points[j], rValue)) {
+					res = true;
+				}
+			}
+		}
+		else if (leftOp == NONE && rightOp == STAR) {
+			for (int j = 0; j < rValue->numPoints; j++) {
+				if (transferPoints(lValue, rValue->points[j])) {
+					res = true;
+				}
+			}
+		}
+		else {
 			error("Invalid operation");
+		}
 	}
+
+	return res;
 }
 
-void transferPoints(identifier_t *lValue, identifier_t *rValue) {
+bool transferPoints(identifier_t *lValue, identifier_t *rValue) {
+	bool res = false;
 	for (int i = 0; i < rValue->numPoints; i++)
-		addPoint(lValue, rValue->points[i]);
+		if (addPoint(lValue, rValue->points[i]))
+			res = true;
+
+	return res;
 }
 
-void addPoint(identifier_t *lValue, identifier_t *rValue) {
+bool addPoint(identifier_t *lValue, identifier_t *rValue) {
 	for (int i = 0; i < lValue->numPoints; i++)
 		if (lValue->points[i] == rValue)
-			return;
+			return false;
 
 	lValue->points[lValue->numPoints++] = rValue;
+	return true;
 }
 
 unsigned long hash(char *str) {
@@ -1901,7 +1926,13 @@ symbol_table_item_t *insertSymbol(char *key, identifier_t *data, symbol_table_it
 	}
 
 	hashTable[hashIndex] = item;
-	// idList->ids[idList->idCount++] = item->data;
+	idList->ids[idList->idCount++] = item->data;
 	return item;
+}
+
+int compareLex(const void *a, const void *b) {
+    const char *strA = (const char *)a;
+    const char *strB = (const char *)b;
+    return strcmp(strA, strB);
 }
 
