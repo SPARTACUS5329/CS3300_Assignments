@@ -1,0 +1,4 @@
+flex l4.l
+bison -d l4.y
+gcc lex.yy.c y.tab.c -o test -ll -ly
+./test < sample.txt

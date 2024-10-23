@@ -1,0 +1,1 @@
+(a&~c&~f&~o&~v)|(~a&c&f&~o&~v)|(~a&~c&~f&o&~v)|(~a&c&~f&o&~v)|(a&c&f&o&~v)|(~a&~c&~f&~o&v)|(a&~c&~f&~o&v)|(a&c&~f&~o&v)|(a&~c&f&~o&v)|(~a&c&f&~o&v)|(~a&c&~f&o&v)|(~a&~c&f&o&v)|(~a&c&f&o&v)

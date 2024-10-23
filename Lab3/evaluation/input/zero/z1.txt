@@ -1,0 +1,6 @@
+aa = 3
+bb = 3
+cc = bb * aa + bb
+print cc
+dd = 0
+ee = cc/-dd

@@ -914,7 +914,7 @@ void stringifyExpression(expression_t *exp) {
 		case INT_CONSTANT:
 			sprintf(tempString, "t%d", tCount++);
 			lValue = newTACTerm(TEMPORARY, 0, NULL, tempString);
-			lTerm = newTACTerm(INTEGER_LITERAL, 0, NULL, exp->lValue);
+			lTerm = newTACTerm(INT_LITERAL, 0, NULL, exp->lValue);
 			rValue = newTACExp(TAC_CONSTANT, 0, lTerm, NULL);
 		    newTACAssignment(lValue, rValue);
 
@@ -966,7 +966,7 @@ void stringifyReturnStatement(return_statement_t *ret) {
 		switch (ret->exp->type) {
 			case INT_CONSTANT:
 				lValue = newTACTerm(RETVAL, 0, NULL, "retval");
-				lTerm = newTACTerm(INTEGER_LITERAL, 0, NULL, ret->exp->lValue);
+				lTerm = newTACTerm(INT_LITERAL, 0, NULL, ret->exp->lValue);
 				rValue = newTACExp(TAC_CONSTANT, 0, lTerm, NULL);
 				newTACAssignment(lValue, rValue);
 				break;
@@ -1168,7 +1168,7 @@ void stringifyBinOp(expression_t *exp, bin_op_t *binOp) {
 			leftType = CHAR_LITERAL;
 			break;
 		case INT_CONSTANT:
-			leftType = INTEGER_LITERAL;
+			leftType = INT_LITERAL;
 			break;
 		case VAR_CONSTANT:
 			leftType = VARIABLE;
@@ -1190,7 +1190,7 @@ void stringifyBinOp(expression_t *exp, bin_op_t *binOp) {
 			rightType = CHAR_LITERAL;
 			break;
 		case INT_CONSTANT:
-			rightType = INTEGER_LITERAL;
+			rightType = INT_LITERAL;
 			break;
 		case VAR_CONSTANT:
 			rightType = VARIABLE;
@@ -1587,12 +1587,27 @@ void firstPassTACs(tac_list_t *tacList) {
 			if (ass->lValue->type != TEMPORARY && ass->lValue->type != VARIABLE)
 				goto continue_first_pass;
 
+			if (ass->rValue->lTerm->type == PARAM) {
+				int baseOffset = 0;
+				while (tacList->instructions[i]->type == TAC_ASSIGNMENT && tacList->instructions[i]->instruction.assignment->rValue->lTerm->type == PARAM) {
+					sprintf(tempStr, "%s_%s", currTACFunction, tacList->instructions[i]->instruction.assignment->lValue->value);
+					symbol_table_item_t *item = searchSymbol(tempStr, symbolTable);
+					if (item == NULL)
+						error("Undefined parameter");
+
+					item->data->stackOffset = baseOffset + 4;
+					baseOffset += 4;
+				    i++;
+				}
+				continue;
+			}
+
 		    sprintf(tempStr, "%s_%s", currTACFunction, ass->lValue->value);
 			symbol_table_item_t *item = searchSymbol(tempStr, symbolTable);
 
 			if (item != NULL) {
 				if (item->data->stackOffset == 0) {
-				    item->data->stackOffset = currStackOffset + 4;
+				    item->data->stackOffset = -(currStackOffset + 4);
 					currStackOffset += 4;
 				}
 				goto continue_first_pass;
@@ -1609,7 +1624,7 @@ void firstPassTACs(tac_list_t *tacList) {
 		    sprintf(tempStr, "%s_%s", currTACFunction, ass->lValue->value);
 			strcpy(id->name, tempStr);
 			strcpy(id->displayName, ass->lValue->value);
-			id->stackOffset = currStackOffset + 4;
+			id->stackOffset = -(currStackOffset + 4);
 			currStackOffset += 4;
 			insertSymbol(tempStr, id, symbolTable);
 		}
@@ -1627,6 +1642,7 @@ assembly_list_t *parseTACs(tac_list_t *tacList) {
     int i = 0, j;
 	char callArgs[MAX_ARGS][MAX_IDENTIFIER_LENGTH];
 	int callArgCount = 0;
+
     while (i < tacList->tacCount) {
 		tac = tacList->instructions[i];
 		switch(tac->type) {
@@ -1634,6 +1650,9 @@ assembly_list_t *parseTACs(tac_list_t *tacList) {
 				assList->instructions[assList->assCount++] = newAssemblyGlobalDec(tac->instruction.global);
 				break;
 		    case TAC_ASSIGNMENT:
+				if (tac->instruction.assignment->lValue->type == PARAM || tac->instruction.assignment->rValue->lTerm->type == PARAM)
+				    break;
+				assList->instructions[assList->assCount++] = newAssemblyAssignment(tac->instruction.assignment);
 				break;
 		    case TAC_LABEL:
 				if (tac->instruction.label->type == FUNCTION_LABEL)
@@ -1678,6 +1697,32 @@ assembly_t *newAssemblyGlobalDec(tac_global_dec_t *tac) {
 	assembly_t *ass = (assembly_t *)malloc(sizeof(assembly_t));
 	ass->section = ASSEMBLY_BSS_SECTION;
 	ass->instruction.bss = bss;
+
+	return ass;
+}
+
+assembly_t *newAssemblyAssignment(tac_ass_t *tac) {
+	assembly_assignment_t *assign = (assembly_assignment_t *)malloc(sizeof(assembly_assignment_t));
+	assign->lValue = newAssemblyTerm(tac->lValue);
+	assembly_term_t *lTerm = newAssemblyTerm(tac->rValue->lTerm);
+	assembly_term_t *rTerm;
+
+	if (tac->rValue->type == TAC_BIN_OP)
+		rTerm = newAssemblyTerm(tac->rValue->rTerm);
+    else
+		rTerm = NULL;
+
+	assign->rValue = newAssemblyExp(tac->rValue->type, tac->rValue->op, lTerm, rTerm);
+	assign->stringify = &stringifyAssemblyAssignment;
+
+    assembly_text_t *text = (assembly_text_t *)malloc(sizeof(assembly_text_t));
+	text->type = ASSEMBLY_ASSIGNMENT;
+	text->instruction.assignment = assign;
+	text->stringify = &stringifyText;
+
+	assembly_t *ass = (assembly_t *)malloc(sizeof(assembly_t));
+	ass->section = ASSEMBLY_TEXT_SECTION;
+	ass->instruction.text = text;
 
 	return ass;
 }
@@ -1757,6 +1802,49 @@ assembly_t *newAssemblyGoto(tac_goto_t *tac) {
 	ass->instruction.text = text;
 
 	return ass;
+}
+
+assembly_exp_t *newAssemblyExp(tac_exp_e type, bin_op_e op, assembly_term_t *lTerm, assembly_term_t *rTerm) {
+    assembly_exp_t *exp = (assembly_exp_t *)calloc(1, sizeof(assembly_exp_t));
+	exp->type = type;
+	exp->op = op;
+	exp->lTerm = lTerm;
+	exp->rTerm = rTerm;
+	exp->stringify = &stringifyAssemblyExp;
+	return exp;
+}
+
+assembly_term_t *newAssemblyTerm(tac_term_t *tac) {
+    assembly_term_t *term = (assembly_term_t *)calloc(1, sizeof(assembly_term_t));
+
+	switch (tac->type) {
+		case TEMPORARY:	
+		    term->type = ASSEMBLY_VARIABLE;
+			break;
+		case VARIABLE:	
+		    term->type = ASSEMBLY_VARIABLE;
+			break;
+		case RETVAL:	
+		    term->type = EAX;
+			break;
+		case STRING_LITERAL:	
+		    term->type = FMT;
+			break;
+		case CHAR_LITERAL:	
+		    term->type = CHAR_IMMEDIATE;
+			break;
+		case INT_LITERAL:	
+		    term->type = INT_IMMEDIATE;
+			break;
+		default:
+		    error("Invalid term type");
+	}
+
+	term->depth = tac->depth;
+	term->subscripts = tac->subscripts;
+	strcpy(term->value, tac->value);
+	term->stringify = &stringifyAssemblyTerm;
+	return term;
 }
 
 void stringifyAssList(assembly_list_t *assList) {
@@ -1849,9 +1937,8 @@ void stringifyText(assembly_text_t *text) {
 }
 
 void stringifyAssemblyLabel(assembly_label_t *label) {
-	if (label->type == FUNCTION_LABEL) {
-		printf("\t.globl %s\n", label->value);
-	}
+	if (label->type == FUNCTION_LABEL)
+		printf("\n\t.globl %s\n", label->value);
 
 	printf("%s:\n", label->value);
 
@@ -1880,7 +1967,7 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 		item = searchSymbol(tempStr, symbolTable);
 
 		if (item != NULL) {
-			printf("\tpushl -%d(%%ebp)\n", item->data->stackOffset);
+			printf("\tpushl %d(%%ebp)\n", item->data->stackOffset);
 			continue;
 		}
 
@@ -1899,7 +1986,7 @@ void stringifyAssemblyJump(assembly_goto_t *jump) {
 		case IF_GOTO:
 		    break;
 		case GOTO:
-		    printf("\tgoto %s", jump->label);
+		    printf("\tjmp %s\n", jump->label);
 		    break;
 		default:
 		    error("Unsupported jump");
@@ -1908,5 +1995,15 @@ void stringifyAssemblyJump(assembly_goto_t *jump) {
 
 void stringifyAssemblyReturn(assembly_return_t *ret) {
     printf("\tleave\n");
-	printf("\treturn\n");
+	printf("\tret\n");
+}
+
+void stringifyAssemblyTerm(assembly_term_t *term) {
+}
+
+void stringifyAssemblyExp(assembly_exp_t *exp) {
+}
+
+bool isComparison(bin_op_e op) {
+    return op == COMPAR_EQ || op == COMPAR_NE || op == COMPAR_LT || op == COMPAR_GT || op == COMPAR_LE || op == COMPAR_GE;
 }

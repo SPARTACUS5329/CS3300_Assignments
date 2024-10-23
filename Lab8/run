@@ -1,0 +1,4 @@
+flex l8.l
+bison -d l8.y
+gcc lex.yy.c l8.tab.c
+./a.out < sample.txt

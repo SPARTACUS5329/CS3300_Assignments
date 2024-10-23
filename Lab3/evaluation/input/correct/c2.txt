@@ -1,0 +1,14 @@
+aa = -3 -- 6--3
+print aa
+aa = 3
+print aa
+aa = aa * aa
+print aa
+bb=-99
+cc=100
+dd = cc+bb
+print dd
+ee = 7
+ff = ee
+print ff
+

@@ -1,0 +1,5 @@
+clear
+flex l13.l
+bison -d l13.y
+gcc lex.yy.c l13.tab.c
+./a.out < pattern.txt

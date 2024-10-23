@@ -1,0 +1,2 @@
+18
+divide by zero not allowed

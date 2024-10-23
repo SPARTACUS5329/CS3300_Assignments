@@ -1,0 +1,14 @@
+aa = 1
+bb = 2
+cc = 3
+dd = 4
+ee = 5
+result = aa @ bb @ cc + dd - ee * dd / cc # ee
+print result
+ff = 3*-aa-1
+print ff
+gg = ee -- bb -- aa
+print gg
+hh = ee/2/aa
+print hh
+

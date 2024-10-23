@@ -44,8 +44,8 @@ typedef struct TACGlobalDec tac_global_dec_t;
 typedef struct TACAssignment tac_ass_t;
 typedef struct TACLabel tac_label_t;
 typedef struct TACGoto tac_goto_t;
-typedef struct TACAssTerm tac_term_t;
-typedef struct TACAssExp tac_exp_t;
+typedef struct TACExp tac_exp_t;
+typedef struct TACTerm tac_term_t;
 typedef struct TACCall tac_call_t;
 typedef struct TACReturn tac_return_t;
 typedef struct Assembly assembly_t;
@@ -60,6 +60,19 @@ typedef struct AssemblyAssignment assembly_assignment_t;
 typedef struct AssemblyCall assembly_call_t;
 typedef struct AssemblyGoto assembly_goto_t;
 typedef struct AssemblyReturn assembly_return_t;
+typedef struct AssemblyExp assembly_exp_t;
+typedef struct AssemblyTerm assembly_term_t;
+typedef struct X86Instruction x86_instruction;
+typedef struct X86DataMovement x86_data_movement;
+typedef struct X86Arithmetic x86_arithmetic;
+typedef struct X86Logic x86_logic;
+typedef struct X86ControlfLOW x86_control_flow;
+typedef struct X86Jump x86_jump;
+typedef struct X86Compar x86_compar;
+typedef struct X86Stack x86_stack;
+typedef struct X86Section x86_section;
+typedef struct X86Label x86_label;
+typedef struct X86Location x86_location;
 
 typedef enum {
   PLUS,
@@ -95,6 +108,44 @@ typedef enum {
 } tac_e;
 
 typedef enum {
+  X86_DATA_MOVEMENT,
+  X86_ARITHMETIC,
+  X86_LOGIC,
+  X86_CONTROL_FLOW,
+  X86_JUMP,
+  X86_COMPAR,
+  X86_STACK,
+  X86_SECTION,
+  X86_LABEL
+} x86_e;
+
+typedef enum { X86_MOV, X86_LEA } x86_data_movement_e;
+
+typedef enum { X86_ADD, X86_SUB, X86_MUL, X86_DIV } x86_arithmetic_e;
+
+typedef enum { X86_AND, X86_OR, X86_NOT } x86_logic_e;
+
+typedef enum { X86_CALL, X86_RET } x86_control_flow_e;
+
+typedef enum {
+  X86_JE,
+  X86_JNE,
+  X86_JG,
+  X86_JL,
+  X86_JGE,
+  X86_JLE,
+  X86_JMP
+} x86_jump_e;
+
+typedef enum { X86_CMP } x86_compare_e;
+
+typedef enum { X86_PUSH, X86_POP } x86_stack_e;
+
+typedef enum { X86_DATA, X86_BSS, X86_TEXT, X86_GLOBL } x86_section_e;
+
+typedef enum { X86_REGISTER, X86_MEMORY } x86_location_e;
+
+typedef enum {
   ASSEMBLY_DATA_SECTION,
   ASSEMBLY_BSS_SECTION,
   ASSEMBLY_TEXT_SECTION
@@ -111,8 +162,16 @@ typedef enum {
   VARIABLE,
   STRING_LITERAL,
   CHAR_LITERAL,
-  INTEGER_LITERAL
+  INT_LITERAL
 } tac_term_e;
+
+typedef enum {
+  ASSEMBLY_VARIABLE,
+  EAX,
+  FMT,
+  CHAR_IMMEDIATE,
+  INT_IMMEDIATE
+} assembly_term_e;
 
 typedef enum { IF_GOTO, GOTO } goto_e;
 
@@ -350,7 +409,7 @@ typedef struct TACAssignment {
   void (*stringify)(tac_ass_t *);
 } tac_ass_t;
 
-typedef struct TACAssExp {
+typedef struct TACExp {
   tac_exp_e type;
   bin_op_e op;
   tac_term_t *lTerm;
@@ -358,7 +417,7 @@ typedef struct TACAssExp {
   void (*stringify)(tac_exp_t *);
 } tac_exp_t;
 
-typedef struct TACAssTerm {
+typedef struct TACTerm {
   tac_term_e type;
   char value[MAX_IDENTIFIER_LENGTH];
   int depth;
@@ -442,8 +501,26 @@ typedef struct AssemblyText {
 } assembly_text_t;
 
 typedef struct AssemblyAssignment {
+  assembly_term_t *lValue;
+  assembly_exp_t *rValue;
   void (*stringify)(assembly_assignment_t *);
 } assembly_assignment_t;
+
+typedef struct AssemblyExp {
+  tac_exp_e type;
+  bin_op_e op;
+  assembly_term_t *lTerm;
+  assembly_term_t *rTerm;
+  void (*stringify)(assembly_exp_t *);
+} assembly_exp_t;
+
+typedef struct AssemblyTerm {
+  assembly_term_e type;
+  char value[MAX_IDENTIFIER_LENGTH];
+  int depth;
+  expression_t **subscripts;
+  void (*stringify)(assembly_term_t *);
+} assembly_term_t;
 
 typedef struct AssemblyCall {
   int argCount;
@@ -470,6 +547,77 @@ typedef struct AssemblyLabel {
   char value[MAX_IDENTIFIER_LENGTH];
   void (*stringify)(assembly_label_t *);
 } assembly_label_t;
+
+typedef struct X86Instruction {
+  x86_e type;
+  union {
+    x86_data_movement *dataMovement;
+    x86_arithmetic *arithmetic;
+    x86_logic *logic;
+    x86_control_flow *controlFlow;
+    x86_jump *jump;
+    x86_compar *compar;
+    x86_stack *stack;
+    x86_section *section;
+    x86_label *label;
+  } instruction;
+} x86_instruction;
+
+typedef struct X86DataMovement {
+  x86_data_movement_e op;
+  x86_location *src;
+  x86_location *dest;
+} x86_data_movement;
+
+typedef struct X86Arithmetic {
+  x86_arithmetic_e op;
+  x86_location *src;
+  x86_location *dest;
+} x86_arithmetic;
+
+typedef struct X86Logic {
+  x86_logic_e op;
+  x86_location *src;
+  x86_location *dest;
+} x86_logic;
+
+typedef struct X86ControlfLOW {
+  x86_control_flow_e op;
+  char label[MAX_IDENTIFIER_LENGTH];
+} x86_control_flow;
+
+typedef struct X86Jump {
+  x86_jump_e op;
+  char label[MAX_IDENTIFIER_LENGTH];
+} x86_jump;
+
+typedef struct X86Compar {
+  x86_compare_e op;
+  x86_location *src;
+  x86_location *dest;
+} x86_compar;
+
+typedef struct X86Stack {
+  x86_stack_e op;
+  x86_location *src;
+} x86_stack;
+
+typedef struct X86Section {
+  x86_section_e type;
+  char label[MAX_IDENTIFIER_LENGTH];
+} x86_section;
+
+typedef struct X86Label {
+  char label[MAX_IDENTIFIER_LENGTH];
+} x86_label;
+
+typedef struct X86Location {
+  x86_location_e type;
+  union {
+    char reg;
+    int stackOffset;
+  } value;
+} x86_location;
 
 typedef struct SymbolTableItem {
   identifier_t *data;
@@ -528,6 +676,10 @@ assembly_t *newAssemblyGoto(tac_goto_t *tac);
 assembly_t *newAssemblyCall(int argCount,
                             char arguments[MAX_ARGS][MAX_IDENTIFIER_LENGTH],
                             tac_call_t *tac);
+assembly_t *newAssemblyAssignment(tac_ass_t *tac);
+assembly_term_t *newAssemblyTerm(tac_term_t *tac);
+assembly_exp_t *newAssemblyExp(tac_exp_e type, bin_op_e op,
+                               assembly_term_t *lTerm, assembly_term_t *rTerm);
 void stringifyAssList(assembly_list_t *assList);
 void stringifyBSSList(assembly_bss_list_t *bssList);
 void stringifyDataList(assembly_data_list_t *dataList);
@@ -540,3 +692,6 @@ void stringifyAssemblyAssignment(assembly_assignment_t *assignment);
 void stringifyAssemblyCall(assembly_call_t *call);
 void stringifyAssemblyJump(assembly_goto_t *jump);
 void stringifyAssemblyReturn(assembly_return_t *ret);
+void stringifyAssemblyTerm(assembly_term_t *term);
+void stringifyAssemblyExp(assembly_exp_t *exp);
+bool isComparison(bin_op_e op);

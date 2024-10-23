@@ -1,0 +1,4 @@
+xx = 5
+yy = xx / -1
+print yy
+zz2 = yy

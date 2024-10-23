@@ -1,0 +1,5 @@
+aa = 20
+bb = aa*5+5
+print bb
+cc = bb * udvar2
+print cc

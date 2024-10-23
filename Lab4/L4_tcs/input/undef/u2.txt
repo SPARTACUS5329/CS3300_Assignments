@@ -1,0 +1,7 @@
+b_ = 9
+{
+    _b = 7
+    print _b
+}
+print b_
+print _var_not_Exists_

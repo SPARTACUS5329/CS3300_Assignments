@@ -1,0 +1,6 @@
+_aa = 2
+{
+   aa =  5
+   print aa
+}
+print aa

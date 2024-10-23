@@ -1,0 +1,14 @@
+if (x < y) {
+  while (y < x) {
+    x = x - 2
+  }
+  print x
+} else {
+  print zz
+  while (x < y) {
+     if (zz < y) {
+         zz = zz + 1
+     }
+  }
+}
+2

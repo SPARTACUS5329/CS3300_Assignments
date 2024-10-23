@@ -2,18 +2,24 @@ global b
 global i
 global s
 foo:
-r = param1
+a = param1
+t1 = a
+param1 = t1
+call foo
+t2 = retval
 retval = 0
 return
 main:
-t1 = 5 * 4
-t2 = 3 + t1
-a = t2
-t3 = a + 2
-b = t3
-t4 = a
-param1 = t4
+t3 = 3
+a = t3
+t4 = a < 3
+if (t4) goto L1
+goto L2
+L1:
+t5 = a
+param1 = t5
 call foo
-t5 = retval
+t6 = retval
+L2:
 retval = 0
 return

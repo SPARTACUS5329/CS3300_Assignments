@@ -1,0 +1,10 @@
+x = 6
+if (x < y) {
+  x = x + y
+  y = 7
+} else {
+  z = 2 - x
+  print z
+}
+print x
+10

@@ -1,0 +1,4 @@
+flex l6.l
+bison -d l6.y
+gcc lex.yy.c l6.tab.c
+./a.out < pattern.txt

@@ -1,0 +1,6 @@
+xx =-1
+yy = -xx--xx--xx
+zz = -xx/-xx
+print yy
+print zz
+-xx= -1

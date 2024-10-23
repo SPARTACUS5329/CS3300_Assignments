@@ -1,0 +1,4 @@
+print udvar
+aa = 1
+bb = aa+aa-aa
+print bb

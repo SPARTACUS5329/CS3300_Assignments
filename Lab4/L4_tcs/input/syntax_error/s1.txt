@@ -1,0 +1,8 @@
+b_ = 3
+print b_
+{
+    b_ = 99
+    print b_
+    a_a124bcBczcBbCbcXc___bcbYdfd9__ = 4
+    print a_a124bcBczcBbCbcXc___bcbYdfd9__
+}

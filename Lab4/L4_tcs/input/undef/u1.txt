@@ -1,0 +1,7 @@
+b_ = 3
+print b_
+{
+    a_a124bcBczcBbCbcXc___bcbYdfd9_ = 4
+    print a_a124bcBczcBbCbcXc___bcbYdfd9_
+    print _var_not_Exists_
+}

@@ -1,0 +1,39 @@
+x = 6
+if(x < y){
+    print z
+    if(z < 5){
+        while(y < 2){
+            z = z + y + x
+        }
+    }
+    else{
+        while(a < 5){
+            a = a + a - a
+            if(a < 5){
+                b = 1 + z + y
+            }
+        }
+
+        if(x < 2){
+            print b
+            print a
+            b = b + b
+        }
+        else{
+            if(y < 2){
+                print z
+                z = a + b + c
+            }
+            else{
+                while(c < 10){
+                    while(c < 20){
+                        while(c < 30){
+                            c = x + b
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+1

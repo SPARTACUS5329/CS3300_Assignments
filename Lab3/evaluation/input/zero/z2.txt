@@ -1,0 +1,7 @@
+aa = 2
+print aa
+bb = 3
+cc =4
+dd = -cc*-cc+aa+aa/2
+print dd
+ee = dd/dd

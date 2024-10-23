@@ -1,0 +1,17 @@
+// tac
+t4 = t1 < t2
+
+// asm
+	mov eax, [ebp - 4]
+	cmp eax, [ebp - 8]
+	jl t4_true
+	jmp t4_false
+
+t4_true:
+	mov [ebp - 4], 1
+	jpm t4_exit
+
+t4_false:
+	mov [ebp - 4], 0
+
+t4_exit:

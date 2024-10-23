@@ -1,0 +1,20 @@
+void f() { g(); return; }
+void g() { f(); return; }
+void h() { return; }
+void d() { h(); return; }
+
+int main() {
+    int x; int y; int z; int k;
+    x = 2; y = x + 1; z = y + y;
+    k = ((5-x)+(z+y)) + ((z+y)+(5-x));
+    if ((z==((x+1)+(x+1))) && (k>10)){g();}
+    if (k == 10) {f();} else {h();}
+    return 0;
+}
+
+%%
+
+DEPTH h
+CO-RECURSIVE f, g
+DEAD f
+DEPTH d
