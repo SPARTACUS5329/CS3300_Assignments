@@ -8,6 +8,7 @@
 #define MAX_EXPRESSION_LENGTH 200
 #define MAX_LINES 2000
 #define MAX_TAC_INSTRUCTIONS 2000
+#define MAX_X86_INSTRUCTIONS 10000
 #define MAX_DEPTH 20
 #define MAX_ASSEMBLY_INSTRUCTIONS 2000
 #define streq(str1, str2, n) (strncmp(str1, str2, n) == 0)
@@ -62,17 +63,18 @@ typedef struct AssemblyGoto assembly_goto_t;
 typedef struct AssemblyReturn assembly_return_t;
 typedef struct AssemblyExp assembly_exp_t;
 typedef struct AssemblyTerm assembly_term_t;
-typedef struct X86Instruction x86_instruction;
-typedef struct X86DataMovement x86_data_movement;
-typedef struct X86Arithmetic x86_arithmetic;
-typedef struct X86Logic x86_logic;
-typedef struct X86ControlfLOW x86_control_flow;
-typedef struct X86Jump x86_jump;
-typedef struct X86Compar x86_compar;
-typedef struct X86Stack x86_stack;
-typedef struct X86Section x86_section;
-typedef struct X86Label x86_label;
-typedef struct X86Location x86_location;
+typedef struct X86Instruction x86_t;
+typedef struct X86DataMovement x86_data_movement_t;
+typedef struct X86Arithmetic x86_arithmetic_t;
+typedef struct X86Logic x86_logic_t;
+typedef struct X86ControlFlow x86_control_flow_t;
+typedef struct X86Jump x86_jump_t;
+typedef struct X86Compar x86_compar_t;
+typedef struct X86Stack x86_stack_t;
+typedef struct X86Section x86_section_t;
+typedef struct X86Label x86_label_t;
+typedef struct X86Location x86_location_t;
+typedef struct X86SpaceAllocation x86_space_allocation_t;
 
 typedef enum {
   PLUS,
@@ -108,6 +110,7 @@ typedef enum {
 } tac_e;
 
 typedef enum {
+  X86_SPACE_ALLOCATION,
   X86_DATA_MOVEMENT,
   X86_ARITHMETIC,
   X86_LOGIC,
@@ -119,13 +122,13 @@ typedef enum {
   X86_LABEL
 } x86_e;
 
-typedef enum { X86_MOV, X86_LEA } x86_data_movement_e;
+typedef enum { X86_MOV, X86_LEA, X86_SET } x86_data_movement_e;
 
 typedef enum { X86_ADD, X86_SUB, X86_MUL, X86_DIV } x86_arithmetic_e;
 
 typedef enum { X86_AND, X86_OR, X86_NOT } x86_logic_e;
 
-typedef enum { X86_CALL, X86_RET } x86_control_flow_e;
+typedef enum { X86_CALL, X86_RET, X86_LEAVE } x86_control_flow_e;
 
 typedef enum {
   X86_JE,
@@ -143,7 +146,13 @@ typedef enum { X86_PUSH, X86_POP } x86_stack_e;
 
 typedef enum { X86_DATA, X86_BSS, X86_TEXT, X86_GLOBL } x86_section_e;
 
-typedef enum { X86_REGISTER, X86_MEMORY } x86_location_e;
+typedef enum {
+  X86_REGISTER,
+  X86_MEMORY,
+  X86_GLOBAL,
+  X86_CHAR_IMMEDIATE,
+  X86_INT_IMMEDIATE
+} x86_location_e;
 
 typedef enum {
   ASSEMBLY_DATA_SECTION,
@@ -154,6 +163,8 @@ typedef enum {
 typedef enum { FUNCTION_LABEL, JUMP_LABEL } label_e;
 
 typedef enum { TAC_BIN_OP, TAC_CONSTANT } tac_exp_e;
+
+typedef enum { ASSEMBLY_BIN_OP, ASSEMBLY_CONSTANT } assembly_exp_e;
 
 typedef enum {
   TEMPORARY,
@@ -507,7 +518,7 @@ typedef struct AssemblyAssignment {
 } assembly_assignment_t;
 
 typedef struct AssemblyExp {
-  tac_exp_e type;
+  assembly_exp_e type;
   bin_op_e op;
   assembly_term_t *lTerm;
   assembly_term_t *rTerm;
@@ -516,10 +527,10 @@ typedef struct AssemblyExp {
 
 typedef struct AssemblyTerm {
   assembly_term_e type;
+  char scope[MAX_IDENTIFIER_LENGTH];
   char value[MAX_IDENTIFIER_LENGTH];
   int depth;
   expression_t **subscripts;
-  void (*stringify)(assembly_term_t *);
 } assembly_term_t;
 
 typedef struct AssemblyCall {
@@ -548,76 +559,90 @@ typedef struct AssemblyLabel {
   void (*stringify)(assembly_label_t *);
 } assembly_label_t;
 
+typedef struct X86List {
+  int x86Count;
+  x86_t **instructions;
+} x86_list_t;
+
 typedef struct X86Instruction {
   x86_e type;
   union {
-    x86_data_movement *dataMovement;
-    x86_arithmetic *arithmetic;
-    x86_logic *logic;
-    x86_control_flow *controlFlow;
-    x86_jump *jump;
-    x86_compar *compar;
-    x86_stack *stack;
-    x86_section *section;
-    x86_label *label;
+    x86_space_allocation_t *spaceAllocation;
+    x86_data_movement_t *dataMovement;
+    x86_arithmetic_t *arithmetic;
+    x86_logic_t *logic;
+    x86_control_flow_t *controlFlow;
+    x86_jump_t *jump;
+    x86_compar_t *compar;
+    x86_stack_t *stack;
+    x86_section_t *section;
+    x86_label_t *label;
   } instruction;
-} x86_instruction;
+} x86_t;
+
+typedef struct X86SpaceAllocation {
+  int space;
+  char value[MAX_IDENTIFIER_LENGTH];
+} x86_space_allocation_t;
 
 typedef struct X86DataMovement {
   x86_data_movement_e op;
-  x86_location *src;
-  x86_location *dest;
-} x86_data_movement;
+  x86_location_t *src;
+  x86_location_t *dest;
+} x86_data_movement_t;
 
 typedef struct X86Arithmetic {
   x86_arithmetic_e op;
-  x86_location *src;
-  x86_location *dest;
-} x86_arithmetic;
+  x86_location_t *src;
+  x86_location_t *dest;
+} x86_arithmetic_t;
 
 typedef struct X86Logic {
   x86_logic_e op;
-  x86_location *src;
-  x86_location *dest;
-} x86_logic;
+  x86_location_t *src;
+  x86_location_t *dest;
+} x86_logic_t;
 
-typedef struct X86ControlfLOW {
+typedef struct X86ControlFlow {
   x86_control_flow_e op;
   char label[MAX_IDENTIFIER_LENGTH];
-} x86_control_flow;
+} x86_control_flow_t;
 
 typedef struct X86Jump {
   x86_jump_e op;
   char label[MAX_IDENTIFIER_LENGTH];
-} x86_jump;
+} x86_jump_t;
 
 typedef struct X86Compar {
   x86_compare_e op;
-  x86_location *src;
-  x86_location *dest;
-} x86_compar;
+  x86_location_t *src;
+  x86_location_t *dest;
+} x86_compar_t;
 
 typedef struct X86Stack {
   x86_stack_e op;
-  x86_location *src;
-} x86_stack;
+  x86_location_t *location;
+} x86_stack_t;
 
 typedef struct X86Section {
   x86_section_e type;
   char label[MAX_IDENTIFIER_LENGTH];
-} x86_section;
+} x86_section_t;
 
 typedef struct X86Label {
   char label[MAX_IDENTIFIER_LENGTH];
-} x86_label;
+} x86_label_t;
 
 typedef struct X86Location {
   x86_location_e type;
   union {
+    int intImmediate;
+    char charImmediate;
     char reg;
     int stackOffset;
+    char var[MAX_IDENTIFIER_LENGTH];
   } value;
-} x86_location;
+} x86_location_t;
 
 typedef struct SymbolTableItem {
   identifier_t *data;
@@ -692,6 +717,12 @@ void stringifyAssemblyAssignment(assembly_assignment_t *assignment);
 void stringifyAssemblyCall(assembly_call_t *call);
 void stringifyAssemblyJump(assembly_goto_t *jump);
 void stringifyAssemblyReturn(assembly_return_t *ret);
-void stringifyAssemblyTerm(assembly_term_t *term);
 void stringifyAssemblyExp(assembly_exp_t *exp);
 bool isComparison(bin_op_e op);
+void newX86Stack(x86_stack_e op, x86_location_t *location);
+x86_arithmetic_t *newX86Arithmetic(x86_arithmetic_e op, x86_location_t *src,
+                                   x86_location_t *dest);
+void addX86Instruction(void *instruction, x86_e type);
+void stringifyX86List(x86_list_t *x86List);
+void stringifyX86Location(x86_location_t *location);
+x86_location_t *getX86Location(assembly_term_t *term);

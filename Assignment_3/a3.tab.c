@@ -161,6 +161,8 @@ static int lCount = 1;
 symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 program_t *program;
 tac_list_t *tacList;
+x86_list_t *x86List;
+x86_location_t *EBP_REGISTER, *ESP_REGISTER, *EAX_REGISTER, *ZEROF_REGISTER;
 
 
 
@@ -184,7 +186,7 @@ tac_list_t *tacList;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 45 "a3.y"
+#line 47 "a3.y"
 {
 	char *str;
 	int val;
@@ -213,7 +215,7 @@ typedef union YYSTYPE
 	condition_t *con;
 }
 /* Line 193 of yacc.c.  */
-#line 217 "a3.tab.c"
+#line 219 "a3.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -226,7 +228,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 230 "a3.tab.c"
+#line 232 "a3.tab.c"
 
 #ifdef short
 # undef short
@@ -540,14 +542,14 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   100,   100,   115,   119,   127,   136,   140,   149,   160,
-     166,   173,   181,   188,   195,   202,   209,   216,   223,   233,
-     243,   249,   256,   262,   270,   287,   310,   337,   344,   351,
-     357,   368,   373,   377,   384,   390,   400,   412,   424,   436,
-     448,   460,   468,   471,   479,   506,   517,   524,   530,   538,
-     545,   549,   558,   567,   576,   587,   594,   601,   607,   610,
-     643,   646,   652,   659,   669,   679,   696,   703,   709,   715,
-     722,   730,   741,   747,   758
+       0,   102,   102,   117,   121,   129,   138,   142,   151,   162,
+     168,   175,   183,   190,   197,   204,   211,   218,   225,   235,
+     245,   251,   258,   264,   272,   289,   312,   339,   346,   353,
+     359,   370,   375,   379,   386,   392,   402,   414,   426,   438,
+     450,   462,   470,   473,   481,   508,   519,   526,   532,   540,
+     547,   551,   560,   569,   578,   589,   596,   603,   609,   612,
+     645,   648,   654,   661,   671,   681,   698,   705,   711,   717,
+     724,   732,   743,   749,   760
 };
 #endif
 
@@ -1568,7 +1570,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 100 "a3.y"
+#line 102 "a3.y"
     {
 		function_def_list_t *funDefList = (function_def_list_t *)malloc(sizeof(function_def_list_t));
 		funDefList->functions = (function_def_t **)malloc(MAX_IDENTIFIERS * sizeof(function_def_t *));
@@ -1584,7 +1586,7 @@ yyreduce:
     break;
 
   case 4:
-#line 119 "a3.y"
+#line 121 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = DECLARATION;
@@ -1596,7 +1598,7 @@ yyreduce:
     break;
 
   case 5:
-#line 127 "a3.y"
+#line 129 "a3.y"
     {
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
@@ -1606,7 +1608,7 @@ yyreduce:
     break;
 
   case 6:
-#line 136 "a3.y"
+#line 138 "a3.y"
     {
 		(yyvsp[(2) - (2)].combinedFunDefList)->functions[(yyvsp[(2) - (2)].combinedFunDefList)->functionCount++] = (yyvsp[(1) - (2)].funDef);
 		(yyval.combinedFunDefList) = (yyvsp[(2) - (2)].combinedFunDefList);
@@ -1614,7 +1616,7 @@ yyreduce:
     break;
 
   case 7:
-#line 140 "a3.y"
+#line 142 "a3.y"
     {
 		combined_function_definitions_t *combinedFunctions = (combined_function_definitions_t *)malloc(sizeof(combined_function_definitions_t));
 		combinedFunctions->functions = (function_def_t **)malloc(MAX_LINES * sizeof(function_def_t *));
@@ -1624,7 +1626,7 @@ yyreduce:
     break;
 
   case 8:
-#line 149 "a3.y"
+#line 151 "a3.y"
     {
 		function_def_t *fun = (function_def_t *)malloc(sizeof(function_def_t));
 		strcpy(fun->name, "main");
@@ -1636,14 +1638,14 @@ yyreduce:
     break;
 
   case 9:
-#line 160 "a3.y"
+#line 162 "a3.y"
     {
 		strcpy(currScope, "main");
 	;}
     break;
 
   case 10:
-#line 166 "a3.y"
+#line 168 "a3.y"
     {
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
@@ -1654,7 +1656,7 @@ yyreduce:
     break;
 
   case 11:
-#line 173 "a3.y"
+#line 175 "a3.y"
     {
 		(yyvsp[(1) - (2)].lineList)->lines[(yyvsp[(1) - (2)].lineList)->lineCount++] = (yyvsp[(2) - (2)].line);
 		(yyval.lineList) = (yyvsp[(1) - (2)].lineList);
@@ -1662,7 +1664,7 @@ yyreduce:
     break;
 
   case 12:
-#line 181 "a3.y"
+#line 183 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = DECLARATION;
@@ -1673,7 +1675,7 @@ yyreduce:
     break;
 
   case 13:
-#line 188 "a3.y"
+#line 190 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = ASSIGNMENT;
@@ -1684,7 +1686,7 @@ yyreduce:
     break;
 
   case 14:
-#line 195 "a3.y"
+#line 197 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = EXPRESSION_STATEMENT;
@@ -1695,7 +1697,7 @@ yyreduce:
     break;
 
   case 15:
-#line 202 "a3.y"
+#line 204 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = RETURN;
@@ -1706,7 +1708,7 @@ yyreduce:
     break;
 
   case 16:
-#line 209 "a3.y"
+#line 211 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = IF_ELSE;
@@ -1717,7 +1719,7 @@ yyreduce:
     break;
 
   case 17:
-#line 216 "a3.y"
+#line 218 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = LOOP;
@@ -1728,7 +1730,7 @@ yyreduce:
     break;
 
   case 18:
-#line 223 "a3.y"
+#line 225 "a3.y"
     {
 		line_t *line = (line_t *)malloc(sizeof(line_t));
 		line->type = FUNCTION;
@@ -1739,7 +1741,7 @@ yyreduce:
     break;
 
   case 19:
-#line 233 "a3.y"
+#line 235 "a3.y"
     {
 		declaration_statement_t *dec = (declaration_statement_t *)malloc(sizeof(declaration_statement_t));
 		dec->type = (yyvsp[(1) - (3)].dataType);
@@ -1750,7 +1752,7 @@ yyreduce:
     break;
 
   case 20:
-#line 243 "a3.y"
+#line 245 "a3.y"
     {
 		declaration_list_t *decList = (declaration_list_t *)malloc(sizeof(declaration_list_t));
 		decList->declarations = (declaration_t **)malloc(MAX_LINES * sizeof(declaration_t *));
@@ -1760,7 +1762,7 @@ yyreduce:
     break;
 
   case 21:
-#line 249 "a3.y"
+#line 251 "a3.y"
     {
 		(yyvsp[(3) - (3)].decList)->declarations[(yyvsp[(3) - (3)].decList)->decCount++] = (yyvsp[(1) - (3)].dec);
 		(yyval.decList) = (yyvsp[(3) - (3)].decList);
@@ -1768,7 +1770,7 @@ yyreduce:
     break;
 
   case 22:
-#line 256 "a3.y"
+#line 258 "a3.y"
     {
 		declaration_t *dec = (declaration_t *)malloc(sizeof(declaration_t));
 		dec->lValue = (yyvsp[(1) - (3)].id);
@@ -1778,7 +1780,7 @@ yyreduce:
     break;
 
   case 23:
-#line 262 "a3.y"
+#line 264 "a3.y"
     {
 		declaration_t *dec = (declaration_t *)malloc(sizeof(declaration_t));
 		dec->lValue = (yyvsp[(1) - (1)].id);
@@ -1787,7 +1789,7 @@ yyreduce:
     break;
 
   case 24:
-#line 270 "a3.y"
+#line 272 "a3.y"
     {
 		symbol_table_item_t *item = searchSymbol((yyvsp[(1) - (4)].id)->name, symbolTable);
 		if (item == NULL)
@@ -1805,7 +1807,7 @@ yyreduce:
     break;
 
   case 25:
-#line 287 "a3.y"
+#line 289 "a3.y"
     {
 		char tempStr[MAX_IDENTIFIER_LENGTH];
 		sprintf(tempStr, "global_%s", (yyvsp[(1) - (1)].str));
@@ -1832,7 +1834,7 @@ yyreduce:
     break;
 
   case 26:
-#line 310 "a3.y"
+#line 312 "a3.y"
     {
 		char tempStr[MAX_IDENTIFIER_LENGTH];
 		sprintf(tempStr, "global_%s", (yyvsp[(1) - (2)].str));
@@ -1860,7 +1862,7 @@ yyreduce:
     break;
 
   case 27:
-#line 337 "a3.y"
+#line 339 "a3.y"
     {
 		subscript_list_t *subscriptList = (subscript_list_t *)malloc(sizeof(subscript_list_t));
 		subscriptList->depth = 1;
@@ -1871,7 +1873,7 @@ yyreduce:
     break;
 
   case 28:
-#line 344 "a3.y"
+#line 346 "a3.y"
     {
 		(yyvsp[(1) - (2)].subscriptList)->subscripts[(yyvsp[(1) - (2)].subscriptList)->depth++] = (yyvsp[(2) - (2)].exp);
 		(yyval.subscriptList) = (yyvsp[(1) - (2)].subscriptList);
@@ -1879,14 +1881,14 @@ yyreduce:
     break;
 
   case 29:
-#line 351 "a3.y"
+#line 353 "a3.y"
     {
 		(yyval.exp) = (yyvsp[(2) - (3)].exp);
 	;}
     break;
 
   case 30:
-#line 357 "a3.y"
+#line 359 "a3.y"
     {
 		arg_list_t *argList = (yyvsp[(3) - (4)].argList);
 		function_call_t *fun = (function_call_t *)malloc(sizeof(function_call_t));
@@ -1898,7 +1900,7 @@ yyreduce:
     break;
 
   case 31:
-#line 368 "a3.y"
+#line 370 "a3.y"
     {
 		(yyval.argList) = (arg_list_t *)malloc(sizeof(arg_list_t));
 		(yyval.argList)->args = (arg_t **)malloc(MAX_ARGS * sizeof(arg_t *));
@@ -1907,7 +1909,7 @@ yyreduce:
     break;
 
   case 32:
-#line 373 "a3.y"
+#line 375 "a3.y"
     {
 		(yyvsp[(1) - (3)].argList)->args[(yyvsp[(1) - (3)].argList)->argCount++] = (yyvsp[(3) - (3)].arg);
 		(yyval.argList) = (yyvsp[(1) - (3)].argList);
@@ -1915,7 +1917,7 @@ yyreduce:
     break;
 
   case 33:
-#line 377 "a3.y"
+#line 379 "a3.y"
     {
 		(yyval.argList) = (arg_list_t *)malloc(sizeof(arg_list_t));
 		(yyval.argList)->args = (arg_t **)malloc(MAX_ARGS * sizeof(arg_t *));
@@ -1923,7 +1925,7 @@ yyreduce:
     break;
 
   case 34:
-#line 384 "a3.y"
+#line 386 "a3.y"
     {
 		arg_t *arg = (arg_t *)malloc(sizeof(arg_t));
 		arg->type = EXPRESSION;
@@ -1933,7 +1935,7 @@ yyreduce:
     break;
 
   case 35:
-#line 390 "a3.y"
+#line 392 "a3.y"
     {
 		arg_t *arg = (arg_t *)malloc(sizeof(arg_t));
 		arg->type = STRING;
@@ -1944,7 +1946,7 @@ yyreduce:
     break;
 
   case 36:
-#line 400 "a3.y"
+#line 402 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -1960,7 +1962,7 @@ yyreduce:
     break;
 
   case 37:
-#line 412 "a3.y"
+#line 414 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -1976,7 +1978,7 @@ yyreduce:
     break;
 
   case 38:
-#line 424 "a3.y"
+#line 426 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -1992,7 +1994,7 @@ yyreduce:
     break;
 
   case 39:
-#line 436 "a3.y"
+#line 438 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -2008,7 +2010,7 @@ yyreduce:
     break;
 
   case 40:
-#line 448 "a3.y"
+#line 450 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -2024,7 +2026,7 @@ yyreduce:
     break;
 
   case 41:
-#line 460 "a3.y"
+#line 462 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = INT_CONSTANT;
@@ -2036,14 +2038,14 @@ yyreduce:
     break;
 
   case 42:
-#line 468 "a3.y"
+#line 470 "a3.y"
     {
 		(yyval.exp) = (yyvsp[(2) - (3)].exp);
     ;}
     break;
 
   case 43:
-#line 471 "a3.y"
+#line 473 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		strcpy(exp->lValue, "retval");
@@ -2055,7 +2057,7 @@ yyreduce:
     break;
 
   case 44:
-#line 479 "a3.y"
+#line 481 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 
@@ -2083,7 +2085,7 @@ yyreduce:
     break;
 
   case 45:
-#line 506 "a3.y"
+#line 508 "a3.y"
     {
 		function_def_t *fun = (function_def_t *)malloc(sizeof(function_def_t));
 		strcpy(fun->name, (yyvsp[(2) - (6)].str));
@@ -2095,7 +2097,7 @@ yyreduce:
     break;
 
   case 46:
-#line 517 "a3.y"
+#line 519 "a3.y"
     {
 		strcpy(currScope, (yyvsp[(1) - (1)].str));
 		(yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2103,7 +2105,7 @@ yyreduce:
     break;
 
   case 47:
-#line 524 "a3.y"
+#line 526 "a3.y"
     {
 		return_statement_t *ret = (return_statement_t *)malloc(sizeof(return_statement_t));
 		ret->exp = (yyvsp[(2) - (3)].exp);
@@ -2113,7 +2115,7 @@ yyreduce:
     break;
 
   case 48:
-#line 530 "a3.y"
+#line 532 "a3.y"
     {
 		return_statement_t *ret = (return_statement_t *)malloc(sizeof(return_statement_t));
 		ret->stringify = &stringifyReturnStatement;
@@ -2122,7 +2124,7 @@ yyreduce:
     break;
 
   case 49:
-#line 538 "a3.y"
+#line 540 "a3.y"
     {
 		param_list_t *paramList = (param_list_t *)malloc(sizeof(param_list_t));
 		paramList->params = (param_t **)malloc(MAX_ARGS * sizeof(param_t *));
@@ -2133,7 +2135,7 @@ yyreduce:
     break;
 
   case 50:
-#line 545 "a3.y"
+#line 547 "a3.y"
     {
 		(yyvsp[(1) - (3)].paramList)->params[(yyvsp[(1) - (3)].paramList)->paramCount++] = (yyvsp[(3) - (3)].param);
 		(yyval.paramList) = (yyvsp[(1) - (3)].paramList);
@@ -2141,7 +2143,7 @@ yyreduce:
     break;
 
   case 51:
-#line 549 "a3.y"
+#line 551 "a3.y"
     {
 		param_list_t *paramList = (param_list_t *)malloc(sizeof(param_list_t));
 		paramList->params = (param_t **)malloc(MAX_ARGS * sizeof(param_t *));
@@ -2151,7 +2153,7 @@ yyreduce:
     break;
 
   case 52:
-#line 558 "a3.y"
+#line 560 "a3.y"
     {
 		param_t *param = (param_t *)malloc(sizeof(param_t));
 		param->type = (yyvsp[(1) - (2)].dataType);
@@ -2161,7 +2163,7 @@ yyreduce:
     break;
 
   case 53:
-#line 567 "a3.y"
+#line 569 "a3.y"
     {
 		if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 		ifElse->isMatched = true;
@@ -2174,7 +2176,7 @@ yyreduce:
     break;
 
   case 54:
-#line 576 "a3.y"
+#line 578 "a3.y"
     {
 		if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 		ifElse->isMatched = false;
@@ -2186,7 +2188,7 @@ yyreduce:
     break;
 
   case 55:
-#line 587 "a3.y"
+#line 589 "a3.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = SHORT_AND;
@@ -2197,7 +2199,7 @@ yyreduce:
     break;
 
   case 56:
-#line 594 "a3.y"
+#line 596 "a3.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = SHORT_OR;
@@ -2208,7 +2210,7 @@ yyreduce:
     break;
 
   case 57:
-#line 601 "a3.y"
+#line 603 "a3.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = NOT;
@@ -2218,14 +2220,14 @@ yyreduce:
     break;
 
   case 58:
-#line 607 "a3.y"
+#line 609 "a3.y"
     {
 		(yyval.con) = (yyvsp[(2) - (3)].con);
 	;}
     break;
 
   case 59:
-#line 610 "a3.y"
+#line 612 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -2259,21 +2261,21 @@ yyreduce:
     break;
 
   case 60:
-#line 643 "a3.y"
+#line 645 "a3.y"
     {
 		(yyval.exp) = (yyvsp[(1) - (1)].exp);
 	;}
     break;
 
   case 61:
-#line 646 "a3.y"
+#line 648 "a3.y"
     {
 		(yyval.exp) = (yyvsp[(1) - (1)].con)->exp;
 	;}
     break;
 
   case 62:
-#line 652 "a3.y"
+#line 654 "a3.y"
     {
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = WHILE;
@@ -2284,7 +2286,7 @@ yyreduce:
     break;
 
   case 63:
-#line 659 "a3.y"
+#line 661 "a3.y"
     {
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = FOR;
@@ -2295,7 +2297,7 @@ yyreduce:
     break;
 
   case 64:
-#line 669 "a3.y"
+#line 671 "a3.y"
     {
 		while_loop_t *loop = (while_loop_t *)malloc(sizeof(while_loop_t));
 		loop->condition = (yyvsp[(3) - (5)].con);
@@ -2306,7 +2308,7 @@ yyreduce:
     break;
 
   case 65:
-#line 679 "a3.y"
+#line 681 "a3.y"
     {
 		for_loop_t *loop = (for_loop_t *)malloc(sizeof(for_loop_t));
 		loop->initial = (yyvsp[(3) - (10)].assignmentStatement);
@@ -2324,7 +2326,7 @@ yyreduce:
     break;
 
   case 66:
-#line 696 "a3.y"
+#line 698 "a3.y"
     {
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
@@ -2335,14 +2337,14 @@ yyreduce:
     break;
 
   case 67:
-#line 703 "a3.y"
+#line 705 "a3.y"
     {
 		(yyval.lineList) = (yyvsp[(2) - (3)].lineList);
 	;}
     break;
 
   case 68:
-#line 709 "a3.y"
+#line 711 "a3.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, (yyvsp[(1) - (1)].str));
@@ -2352,7 +2354,7 @@ yyreduce:
     break;
 
   case 69:
-#line 715 "a3.y"
+#line 717 "a3.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, (yyvsp[(1) - (2)].str));
@@ -2363,7 +2365,7 @@ yyreduce:
     break;
 
   case 70:
-#line 722 "a3.y"
+#line 724 "a3.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, mytext);
@@ -2375,7 +2377,7 @@ yyreduce:
     break;
 
   case 71:
-#line 730 "a3.y"
+#line 732 "a3.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, mytext);
@@ -2387,14 +2389,14 @@ yyreduce:
     break;
 
   case 72:
-#line 741 "a3.y"
+#line 743 "a3.y"
     {
 		(yyval.str) = strdup(mytext);
 	;}
     break;
 
   case 73:
-#line 747 "a3.y"
+#line 749 "a3.y"
     {
 		strcpy(currType, mytext);
 		if (streq(mytext, "int", 3))
@@ -2407,7 +2409,7 @@ yyreduce:
     break;
 
   case 74:
-#line 758 "a3.y"
+#line 760 "a3.y"
     {
 		(yyval.str) = strdup(mytext);
 	;}
@@ -2415,7 +2417,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2419 "a3.tab.c"
+#line 2421 "a3.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2629,7 +2631,7 @@ yyreturn:
 }
 
 
-#line 763 "a3.y"
+#line 765 "a3.y"
 
 
 void yyerror(char *message) {
@@ -2646,6 +2648,8 @@ int main(int argc, char *argv[]) {
     program = (program_t *)malloc(sizeof(program_t));
 	tacList = (tac_list_t *)malloc(sizeof(tac_list_t));
 	tacList->instructions = (tac_t **)calloc(MAX_TAC_INSTRUCTIONS, sizeof(tac_t *));
+	x86List = (x86_list_t *)malloc(sizeof(x86_list_t));
+	x86List->instructions = (x86_t **)calloc(MAX_X86_INSTRUCTIONS, sizeof(x86_t *));
 
 	yyparse();
 
@@ -2668,6 +2672,27 @@ int main(int argc, char *argv[]) {
 
 	firstPassTACs(tacList);
     assembly_list_t *assList = parseTACs(tacList);
+
+	EBP_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	EBP_REGISTER->type = X86_REGISTER;
+	EBP_REGISTER->value.reg = 'B';
+
+	ESP_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	ESP_REGISTER->type = X86_REGISTER;
+	ESP_REGISTER->value.reg = 'S';
+
+	EAX_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	EAX_REGISTER->type = X86_REGISTER;
+	EAX_REGISTER->value.reg = 'a';
+
+	ZEROF_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	ZEROF_REGISTER->type = X86_REGISTER;
+	ZEROF_REGISTER->value.reg = 'Z';
+
+    file = freopen("a.s", "w", stdout);
+    if (file == NULL)
+        error("Error opening file");
+
 	stringifyAssList(assList);
 
     return 0;
@@ -3447,7 +3472,7 @@ void firstPassTACs(tac_list_t *tacList) {
 			id->type = INT;
 			strcpy(id->name, currTACFunction);
 			strcpy(id->displayName, currTACFunction);
-			id->stackOffset = currStackOffset;
+			id->stackOffset = currStackOffset + 4;
 			insertSymbol(currTACFunction, id, symbolTable);
 		    bzero(currTACFunction, MAX_IDENTIFIER_LENGTH);
 		}
@@ -3458,14 +3483,14 @@ void firstPassTACs(tac_list_t *tacList) {
 				goto continue_first_pass;
 
 			if (ass->rValue->lTerm->type == PARAM) {
-				int baseOffset = 0;
+				int baseOffset = 8;
 				while (tacList->instructions[i]->type == TAC_ASSIGNMENT && tacList->instructions[i]->instruction.assignment->rValue->lTerm->type == PARAM) {
 					sprintf(tempStr, "%s_%s", currTACFunction, tacList->instructions[i]->instruction.assignment->lValue->value);
 					symbol_table_item_t *item = searchSymbol(tempStr, symbolTable);
 					if (item == NULL)
 						error("Undefined parameter");
 
-					item->data->stackOffset = baseOffset + 4;
+					item->data->stackOffset = baseOffset;
 					baseOffset += 4;
 				    i++;
 				}
@@ -3676,7 +3701,14 @@ assembly_t *newAssemblyGoto(tac_goto_t *tac) {
 
 assembly_exp_t *newAssemblyExp(tac_exp_e type, bin_op_e op, assembly_term_t *lTerm, assembly_term_t *rTerm) {
     assembly_exp_t *exp = (assembly_exp_t *)calloc(1, sizeof(assembly_exp_t));
-	exp->type = type;
+	switch (type) {
+		case TAC_BIN_OP:
+			exp->type = ASSEMBLY_BIN_OP;
+		    break;
+		case TAC_CONSTANT:
+			exp->type = ASSEMBLY_CONSTANT;
+		    break;
+	}
 	exp->op = op;
 	exp->lTerm = lTerm;
 	exp->rTerm = rTerm;
@@ -3713,7 +3745,7 @@ assembly_term_t *newAssemblyTerm(tac_term_t *tac) {
 	term->depth = tac->depth;
 	term->subscripts = tac->subscripts;
 	strcpy(term->value, tac->value);
-	term->stringify = &stringifyAssemblyTerm;
+	strcpy(term->scope, currScope);
 	return term;
 }
 
@@ -3742,15 +3774,16 @@ void stringifyAssList(assembly_list_t *assList) {
 	}
 
 	stringifyBSSList(bssList);
-	printf("\n");
 	stringifyDataList(dataList);
-	printf("\n");
 	stringifyTextList(textList);
-	printf("\n");
+	stringifyX86List(x86List);
 }
 
 void stringifyBSSList(assembly_bss_list_t *bssList) {
-    printf("\t.bss\n");
+    x86_section_t *x86Section = (x86_section_t *)malloc(sizeof(x86_section_t));
+	x86Section->type = X86_BSS;
+	addX86Instruction(x86Section, X86_SECTION);
+
 	for (int i = 0; i < bssList->assCount; i++)
 		bssList->instructions[i]->stringify(bssList->instructions[i]);
 }
@@ -3759,7 +3792,10 @@ void stringifyDataList(assembly_data_list_t *dataList) {
 }
 
 void stringifyTextList(assembly_text_list_t *textList) {
-    printf("\t.text\n");
+    x86_section_t *x86Section = (x86_section_t *)malloc(sizeof(x86_section_t));
+	x86Section->type = X86_TEXT;
+	addX86Instruction(x86Section, X86_SECTION);
+
 	assembly_text_t *text;
 	for (int i = 0; i < textList->assCount; i++) {
 		text = textList->instructions[i];
@@ -3780,7 +3816,10 @@ void stringifyBSS(assembly_bss_t *ass) {
 		default:
 		    error("Unsupported data type");
 	}
-	printf("%s: .space %d\n", ass->var->displayName, space);
+	x86_space_allocation_t *x86SpaceAllocation = (x86_space_allocation_t *)malloc(sizeof(x86_space_allocation_t));
+	x86SpaceAllocation->space = space;
+	strcpy(x86SpaceAllocation->value, ass->var->displayName);
+	addX86Instruction(x86SpaceAllocation, X86_SPACE_ALLOCATION);
 }
 
 void stringifyData(assembly_data_t *ass) {
@@ -3807,26 +3846,83 @@ void stringifyText(assembly_text_t *text) {
 }
 
 void stringifyAssemblyLabel(assembly_label_t *label) {
-	if (label->type == FUNCTION_LABEL)
-		printf("\n\t.globl %s\n", label->value);
+	if (label->type == FUNCTION_LABEL) {
+		x86_section_t *x86Section = (x86_section_t *)malloc(sizeof(x86_section_t));
+		x86Section->type = X86_GLOBL;
+		strcpy(x86Section->label, label->value);
+		addX86Instruction(x86Section, X86_SECTION);
+	}
 
-	printf("%s:\n", label->value);
+    x86_label_t *x86Label = (x86_label_t *)malloc(sizeof(x86_label_t));
+    strcpy(x86Label->label, label->value);
+    addX86Instruction(x86Label, X86_LABEL);
 
 	if (label->type == FUNCTION_LABEL) {
-		printf("\tpushl %%ebp\n");
-		printf("\tmovl %%esp, %%ebp\n");
+		newX86Stack(X86_PUSH, EBP_REGISTER);
+		
+		x86_data_movement_t *x86DataMovement = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+		x86DataMovement->op = X86_MOV;
+		x86DataMovement->src = ESP_REGISTER;
+		x86DataMovement->dest = EBP_REGISTER;
+		addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
+
 		symbol_table_item_t *item = searchSymbol(label->value, symbolTable);
-		if (item == NULL) {
-			printf("%s\n", label->value);
-			fflush(0);
+		if (item == NULL)
 		    error("Function not found");
-		}
+
 		int stackOffset = item->data->stackOffset;
-		printf("\tsub $%d, %%esp\n", stackOffset);
+		x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+		x86Location->type = X86_INT_IMMEDIATE;
+		x86Location->value.intImmediate = stackOffset;
+		newX86Arithmetic(X86_SUB, x86Location, ESP_REGISTER);
 	}
 }
 
 void stringifyAssemblyAssignment(assembly_assignment_t *assignment) {
+    assignment->rValue->stringify(assignment->rValue);
+	x86_location_t *x86Location = getX86Location(assignment->lValue);
+
+	x86_data_movement_t *x86DataMovement = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+	x86DataMovement->op = X86_MOV;
+	x86DataMovement->src = EAX_REGISTER;
+	x86DataMovement->dest = x86Location;
+	addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
+}
+
+x86_location_t *getX86Location(assembly_term_t *term) {
+	if (term == NULL)
+		return NULL;
+
+	char tempStr[MAX_IDENTIFIER_LENGTH];
+	x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+	symbol_table_item_t *item;
+
+	switch (term->type) {
+		case ASSEMBLY_VARIABLE:
+			sprintf(tempStr, "%s_%s", term->scope, term->value);
+			item = searchSymbol(tempStr, symbolTable);
+			if (item == NULL)
+				error("Assembly assignment lValue not found");
+
+		    x86Location->type = X86_MEMORY;
+			x86Location->value.stackOffset = item->data->stackOffset;
+		    break;
+		case EAX:
+		    x86Location = EAX_REGISTER;
+		    break;
+		case FMT:
+		    break;
+		case CHAR_IMMEDIATE:
+		    x86Location->type = X86_CHAR_IMMEDIATE;
+			x86Location->value.charImmediate = term->value[0];
+		    break;
+		case INT_IMMEDIATE:
+		    x86Location->type = X86_INT_IMMEDIATE;
+			x86Location->value.intImmediate = atoi(term->value);
+		    break;
+	}
+
+	return x86Location;
 }
 
 void stringifyAssemblyCall(assembly_call_t *call) {
@@ -3837,7 +3933,11 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 		item = searchSymbol(tempStr, symbolTable);
 
 		if (item != NULL) {
-			printf("\tpushl %d(%%ebp)\n", item->data->stackOffset);
+		    x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+		    x86Location->type = X86_MEMORY;
+			x86Location->value.stackOffset = item->data->stackOffset;
+
+		    newX86Stack(X86_PUSH, x86Location);
 			continue;
 		}
 
@@ -3846,17 +3946,59 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 		if (item == NULL)
 		    error("Undefined variable");
 
-		printf("\tpushl %s\n", item->data->displayName);
+		x86_stack_t *x86Stack = (x86_stack_t *)malloc(sizeof(x86_stack_t));
+		x86Stack->op = X86_PUSH;
+
+		x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+		x86Location->type = X86_GLOBAL;
+		strcpy(x86Location->value.var, item->data->displayName);
+
+		x86Stack->location = x86Location;
+		addX86Instruction(x86Stack, X86_STACK);
 	}
-	printf("\tcall %s\n", call->label);
+
+	x86_control_flow_t *x86Call = (x86_control_flow_t *)malloc(sizeof(x86_control_flow_t));
+	x86Call->op = X86_CALL;
+	strcpy(x86Call->label, call->label);
+	addX86Instruction(x86Call, X86_CONTROL_FLOW);
 }
 
 void stringifyAssemblyJump(assembly_goto_t *jump) {
+    x86_jump_t *x86Jump = (x86_jump_t *)malloc(sizeof(x86_jump_t));
+	strcpy(x86Jump->label, jump->label);
+	x86_compar_t *x86Compar = (x86_compar_t *)malloc(sizeof(x86_compar_t));
+
     switch(jump->type) {
 		case IF_GOTO:
+		    // x86Compar->op = X86_CMP;
+			// x86Compar->src = x86LocationLTerm;
+			// x86Compar->dest = x86LocationRTerm;
+			// addX86Instruction(x86Compar, X86_COMPAR)
+
+		    // switch (exp->op) {
+				// case COMPAR_EQ:
+				    // x86Jump->op = X86_JE;
+					// break;
+				// case COMPAR_NE:
+				    // x86Jump->op = X86_JNE;
+					// break;
+				// case COMPAR_LT:
+				    // x86Jump->op = X86_JLT;
+					// break;
+				// case COMPAR_GT:
+				    // x86Jump->op = X86_JGT;
+					// break;
+				// case COMPAR_LE:
+				    // x86Jump->op = X86_JLE;
+					// break;
+				// case COMPAR_GE:
+				    // x86Jump->op = X86_JGE;
+					// break;
+				// }
 		    break;
 		case GOTO:
-		    printf("\tjmp %s\n", jump->label);
+			x86Jump->op = X86_JMP;
+			addX86Instruction(x86Jump, X86_JUMP);
 		    break;
 		default:
 		    error("Unsupported jump");
@@ -3864,17 +4006,298 @@ void stringifyAssemblyJump(assembly_goto_t *jump) {
 }
 
 void stringifyAssemblyReturn(assembly_return_t *ret) {
-    printf("\tleave\n");
-	printf("\tret\n");
-}
+	x86_control_flow_t *leave = (x86_control_flow_t *)malloc(sizeof(x86_control_flow_t));
+	leave->op = X86_LEAVE;
+	addX86Instruction(leave, X86_CONTROL_FLOW);
 
-void stringifyAssemblyTerm(assembly_term_t *term) {
+	x86_control_flow_t *x86Ret = (x86_control_flow_t *)malloc(sizeof(x86_control_flow_t));
+	x86Ret->op = X86_RET;
+	addX86Instruction(x86Ret, X86_CONTROL_FLOW);
 }
 
 void stringifyAssemblyExp(assembly_exp_t *exp) {
+	x86_location_t *x86LocationLTerm = getX86Location(exp->lTerm);
+	x86_location_t *x86LocationRTerm = getX86Location(exp->rTerm);
+	x86_data_movement_t *x86DataMovement = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+	x86_compar_t *x86Compar = (x86_compar_t *)malloc(sizeof(x86_compar_t));
+	x86_jump_t *x86Jump = (x86_jump_t *)malloc(sizeof(x86_jump_t));
+	x86_arithmetic_t *x86Arithmetic = (x86_arithmetic_t *)malloc(sizeof(x86_arithmetic_t));
+
+    switch (exp->type) {
+		case ASSEMBLY_BIN_OP:
+			if (isComparison(exp->op)) {
+				x86Compar->op = X86_CMP;
+				x86Compar->src = x86LocationLTerm;
+				x86Compar->dest = x86LocationRTerm;
+				addX86Instruction(x86Compar, X86_COMPAR);
+
+				x86DataMovement->op = X86_SET;
+				x86DataMovement->src = ZEROF_REGISTER;
+				x86DataMovement->dest = EAX_REGISTER;
+				addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
+			} else {
+				x86DataMovement->op = X86_MOV;
+				x86DataMovement->src = x86LocationLTerm;
+				x86DataMovement->dest = EAX_REGISTER;
+				addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
+
+				switch (exp->op) {
+				    case PLUS:
+						x86Arithmetic = newX86Arithmetic(X86_ADD, x86LocationRTerm, EAX_REGISTER);
+						break;
+				    case MINUS:
+						x86Arithmetic = newX86Arithmetic(X86_SUB, x86LocationRTerm, EAX_REGISTER);
+						break;
+				    case MULTIPLY:
+						x86Arithmetic = newX86Arithmetic(X86_MUL, x86LocationRTerm, EAX_REGISTER);
+						break;
+				    case DIVIDE:
+						x86Arithmetic = newX86Arithmetic(X86_DIV, x86LocationRTerm, EAX_REGISTER);
+						break;
+				    default:
+						error("Invalid binary arithmetic operation");
+				}
+				addX86Instruction(x86Arithmetic, X86_ARITHMETIC);
+			}
+		    break;
+		case ASSEMBLY_CONSTANT:
+		    x86DataMovement->op = X86_MOV;
+			x86DataMovement->src = x86LocationLTerm;
+			x86DataMovement->dest = EAX_REGISTER;
+			addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
+		    break;
+	}
 }
 
 bool isComparison(bin_op_e op) {
     return op == COMPAR_EQ || op == COMPAR_NE || op == COMPAR_LT || op == COMPAR_GT || op == COMPAR_LE || op == COMPAR_GE;
+}
+
+void newX86Stack(x86_stack_e op, x86_location_t *location) {
+	x86_stack_t *x86 = (x86_stack_t *)malloc(sizeof(x86_stack_t));
+	x86->op = op;
+	x86->location = location;
+	addX86Instruction(x86, X86_STACK);
+}
+
+x86_arithmetic_t *newX86Arithmetic(x86_arithmetic_e op, x86_location_t *src, x86_location_t *dest) {
+	x86_arithmetic_t *x86 = (x86_arithmetic_t *)calloc(1, sizeof(x86_arithmetic_t));
+	x86->op = op;
+	x86->src = src;
+	x86->dest = dest;
+	addX86Instruction(x86, X86_ARITHMETIC);
+	return x86;
+}
+
+void addX86Instruction(void *instruction, x86_e type) {
+    x86_t *x86 = (x86_t *)malloc(sizeof(x86_t));
+	x86->type = type;
+
+	switch (x86->type) {
+		case X86_SPACE_ALLOCATION:
+			x86->instruction.spaceAllocation = (x86_space_allocation_t *)instruction;
+		    break;
+		case X86_DATA_MOVEMENT:
+			x86->instruction.dataMovement = (x86_data_movement_t *)instruction;
+		    break;
+		case X86_ARITHMETIC:
+			x86->instruction.arithmetic = (x86_arithmetic_t *)instruction;
+		    break;
+		case X86_LOGIC:
+			x86->instruction.logic = (x86_logic_t *)instruction;
+		    break;
+		case X86_CONTROL_FLOW:
+			x86->instruction.controlFlow = (x86_control_flow_t *)instruction;
+		    break;
+		case X86_JUMP:
+			x86->instruction.jump = (x86_jump_t *)instruction;
+		    break;
+		case X86_COMPAR:
+			x86->instruction.compar = (x86_compar_t *)instruction;
+		    break;
+		case X86_STACK:
+			x86->instruction.stack = (x86_stack_t *)instruction;
+		    break;
+		case X86_SECTION:
+			x86->instruction.section = (x86_section_t *)instruction;
+		    break;
+		case X86_LABEL:
+			x86->instruction.label = (x86_label_t *)instruction;
+		    break;
+	}
+
+	x86List->instructions[x86List->x86Count++] = x86;
+}
+
+void stringifyX86List(x86_list_t *x86List) {
+	x86_t *x86;
+    for (int i = 0; i < x86List->x86Count; i++) {
+		x86 = x86List->instructions[i];
+		switch (x86->type) {
+		    case X86_SPACE_ALLOCATION:
+				printf("%s: .space %d", x86->instruction.spaceAllocation->value, x86->instruction.spaceAllocation->space);
+				break;
+		    case X86_DATA_MOVEMENT:
+				if (x86->instruction.dataMovement->src == x86->instruction.dataMovement->dest)
+				    break;
+
+				switch (x86->instruction.dataMovement->op) {
+				    case X86_MOV:
+						printf("movl");
+						printf(" ");
+						stringifyX86Location(x86->instruction.dataMovement->src);
+						printf(", ");
+						stringifyX86Location(x86->instruction.dataMovement->dest);
+						break;
+				    case X86_LEA:
+						printf("leal");
+						printf(" ");
+						stringifyX86Location(x86->instruction.dataMovement->src);
+						printf(", ");
+						stringifyX86Location(x86->instruction.dataMovement->dest);
+						break;
+				    case X86_SET:
+						if (x86->instruction.dataMovement->src != ZEROF_REGISTER)
+						    error("SET instruction is supported only for ZEROF");
+						printf("setz %%al\n");
+						printf("movzbl %%al, %%eax");
+						break;
+				}
+				break;
+		    case X86_ARITHMETIC:
+				switch (x86->instruction.arithmetic->op) {
+				    case X86_ADD:
+						printf("addl");
+						break;
+					case X86_SUB:
+						printf("subl");
+						break;
+					case X86_MUL:
+						printf("imull");
+						break;
+					case X86_DIV:
+						printf("idivl");
+						break;
+				}
+				printf(" ");
+				stringifyX86Location(x86->instruction.arithmetic->src);
+				if (x86->instruction.arithmetic->dest != NULL) {
+				    printf(", ");
+					stringifyX86Location(x86->instruction.arithmetic->dest);
+				}
+				break;
+		    case X86_LOGIC:
+				break;
+		    case X86_CONTROL_FLOW:
+				switch (x86->instruction.controlFlow->op) {
+				    case X86_CALL:
+						printf("call %s", x86->instruction.controlFlow->label);
+						break;
+				    case X86_RET:
+						printf("ret");
+						break;
+				    case X86_LEAVE:
+						printf("leave");
+						break;
+				}
+				break;
+		    case X86_JUMP:
+				switch (x86->instruction.jump->op) {
+				    case X86_JE:
+						printf("je");
+						break;
+				    case X86_JNE:
+						printf("jne");
+						break;
+				    case X86_JG:
+						printf("jg");
+						break;
+				    case X86_JL:
+						printf("jl");
+						break;
+				    case X86_JGE:
+						printf("jge");
+						break;
+				    case X86_JLE:
+						printf("jle");
+						break;
+				    case X86_JMP:
+						printf("jmp");
+						break;
+				}
+				printf(" %s", x86->instruction.jump->label);
+				break;
+		    case X86_COMPAR:
+				printf("cmpl ");
+				stringifyX86Location(x86->instruction.compar->src);
+				printf(", ");
+				stringifyX86Location(x86->instruction.compar->dest);
+				break;
+		    case X86_STACK:
+				switch (x86->instruction.stack->op) {
+				    case X86_PUSH:
+						printf("pushl");
+						break;
+				    case X86_POP:
+						printf("popl");
+						break;
+				}
+				printf(" ");
+				stringifyX86Location(x86->instruction.stack->location);
+				break;
+		    case X86_SECTION:
+				switch (x86->instruction.section->type) {
+				    case X86_DATA:
+						printf(".data");
+						break;
+					case X86_BSS:
+						printf(".bss");
+						break;
+					case X86_TEXT:
+						printf(".text");
+						break;
+					case X86_GLOBL:
+						printf(".global %s", x86->instruction.section->label);
+						break;
+				}
+				break;
+		    case X86_LABEL:
+				printf("%s:", x86->instruction.label->label);
+				break;
+		}
+		printf("\n");
+	}
+}
+
+void stringifyX86Location(x86_location_t *location) {
+    switch (location->type) {
+		case X86_REGISTER:
+			switch (location->value.reg) {
+				case 'S':
+				    printf("%%esp");
+					break;
+				case 'B':
+				    printf("%%ebp");
+					break;
+				case 'a':
+				    printf("%%eax");
+					break;
+				default:
+				    error("Register type not supported");
+			}
+		    break;
+		case X86_MEMORY:
+			printf("%d(%%ebp)", location->value.stackOffset);
+		    break;
+		case X86_GLOBAL:
+			printf("%s", location->value.var);
+		    break;
+		case X86_INT_IMMEDIATE:
+			printf("$%d", location->value.intImmediate);
+		    break;
+		case X86_CHAR_IMMEDIATE:
+			printf("$\'%c\'", location->value.charImmediate);
+		    break;
+	}
 }
 

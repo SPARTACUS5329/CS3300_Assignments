@@ -20,6 +20,8 @@ static int lCount = 1;
 symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 program_t *program;
 tac_list_t *tacList;
+x86_list_t *x86List;
+x86_location_t *EBP_REGISTER, *ESP_REGISTER, *EAX_REGISTER, *ZEROF_REGISTER;
 
 %}
 
@@ -776,6 +778,8 @@ int main(int argc, char *argv[]) {
     program = (program_t *)malloc(sizeof(program_t));
 	tacList = (tac_list_t *)malloc(sizeof(tac_list_t));
 	tacList->instructions = (tac_t **)calloc(MAX_TAC_INSTRUCTIONS, sizeof(tac_t *));
+	x86List = (x86_list_t *)malloc(sizeof(x86_list_t));
+	x86List->instructions = (x86_t **)calloc(MAX_X86_INSTRUCTIONS, sizeof(x86_t *));
 
 	yyparse();
 
@@ -798,6 +802,27 @@ int main(int argc, char *argv[]) {
 
 	firstPassTACs(tacList);
     assembly_list_t *assList = parseTACs(tacList);
+
+	EBP_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	EBP_REGISTER->type = X86_REGISTER;
+	EBP_REGISTER->value.reg = 'B';
+
+	ESP_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	ESP_REGISTER->type = X86_REGISTER;
+	ESP_REGISTER->value.reg = 'S';
+
+	EAX_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	EAX_REGISTER->type = X86_REGISTER;
+	EAX_REGISTER->value.reg = 'a';
+
+	ZEROF_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	ZEROF_REGISTER->type = X86_REGISTER;
+	ZEROF_REGISTER->value.reg = 'Z';
+
+    file = freopen("a.s", "w", stdout);
+    if (file == NULL)
+        error("Error opening file");
+
 	stringifyAssList(assList);
 
     return 0;
@@ -1577,7 +1602,7 @@ void firstPassTACs(tac_list_t *tacList) {
 			id->type = INT;
 			strcpy(id->name, currTACFunction);
 			strcpy(id->displayName, currTACFunction);
-			id->stackOffset = currStackOffset;
+			id->stackOffset = currStackOffset + 4;
 			insertSymbol(currTACFunction, id, symbolTable);
 		    bzero(currTACFunction, MAX_IDENTIFIER_LENGTH);
 		}
@@ -1588,14 +1613,14 @@ void firstPassTACs(tac_list_t *tacList) {
 				goto continue_first_pass;
 
 			if (ass->rValue->lTerm->type == PARAM) {
-				int baseOffset = 0;
+				int baseOffset = 8;
 				while (tacList->instructions[i]->type == TAC_ASSIGNMENT && tacList->instructions[i]->instruction.assignment->rValue->lTerm->type == PARAM) {
 					sprintf(tempStr, "%s_%s", currTACFunction, tacList->instructions[i]->instruction.assignment->lValue->value);
 					symbol_table_item_t *item = searchSymbol(tempStr, symbolTable);
 					if (item == NULL)
 						error("Undefined parameter");
 
-					item->data->stackOffset = baseOffset + 4;
+					item->data->stackOffset = baseOffset;
 					baseOffset += 4;
 				    i++;
 				}
@@ -1806,7 +1831,14 @@ assembly_t *newAssemblyGoto(tac_goto_t *tac) {
 
 assembly_exp_t *newAssemblyExp(tac_exp_e type, bin_op_e op, assembly_term_t *lTerm, assembly_term_t *rTerm) {
     assembly_exp_t *exp = (assembly_exp_t *)calloc(1, sizeof(assembly_exp_t));
-	exp->type = type;
+	switch (type) {
+		case TAC_BIN_OP:
+			exp->type = ASSEMBLY_BIN_OP;
+		    break;
+		case TAC_CONSTANT:
+			exp->type = ASSEMBLY_CONSTANT;
+		    break;
+	}
 	exp->op = op;
 	exp->lTerm = lTerm;
 	exp->rTerm = rTerm;
@@ -1843,7 +1875,7 @@ assembly_term_t *newAssemblyTerm(tac_term_t *tac) {
 	term->depth = tac->depth;
 	term->subscripts = tac->subscripts;
 	strcpy(term->value, tac->value);
-	term->stringify = &stringifyAssemblyTerm;
+	strcpy(term->scope, currScope);
 	return term;
 }
 
@@ -1872,15 +1904,16 @@ void stringifyAssList(assembly_list_t *assList) {
 	}
 
 	stringifyBSSList(bssList);
-	printf("\n");
 	stringifyDataList(dataList);
-	printf("\n");
 	stringifyTextList(textList);
-	printf("\n");
+	stringifyX86List(x86List);
 }
 
 void stringifyBSSList(assembly_bss_list_t *bssList) {
-    printf("\t.bss\n");
+    x86_section_t *x86Section = (x86_section_t *)malloc(sizeof(x86_section_t));
+	x86Section->type = X86_BSS;
+	addX86Instruction(x86Section, X86_SECTION);
+
 	for (int i = 0; i < bssList->assCount; i++)
 		bssList->instructions[i]->stringify(bssList->instructions[i]);
 }
@@ -1889,7 +1922,10 @@ void stringifyDataList(assembly_data_list_t *dataList) {
 }
 
 void stringifyTextList(assembly_text_list_t *textList) {
-    printf("\t.text\n");
+    x86_section_t *x86Section = (x86_section_t *)malloc(sizeof(x86_section_t));
+	x86Section->type = X86_TEXT;
+	addX86Instruction(x86Section, X86_SECTION);
+
 	assembly_text_t *text;
 	for (int i = 0; i < textList->assCount; i++) {
 		text = textList->instructions[i];
@@ -1910,7 +1946,10 @@ void stringifyBSS(assembly_bss_t *ass) {
 		default:
 		    error("Unsupported data type");
 	}
-	printf("%s: .space %d\n", ass->var->displayName, space);
+	x86_space_allocation_t *x86SpaceAllocation = (x86_space_allocation_t *)malloc(sizeof(x86_space_allocation_t));
+	x86SpaceAllocation->space = space;
+	strcpy(x86SpaceAllocation->value, ass->var->displayName);
+	addX86Instruction(x86SpaceAllocation, X86_SPACE_ALLOCATION);
 }
 
 void stringifyData(assembly_data_t *ass) {
@@ -1937,26 +1976,83 @@ void stringifyText(assembly_text_t *text) {
 }
 
 void stringifyAssemblyLabel(assembly_label_t *label) {
-	if (label->type == FUNCTION_LABEL)
-		printf("\n\t.globl %s\n", label->value);
+	if (label->type == FUNCTION_LABEL) {
+		x86_section_t *x86Section = (x86_section_t *)malloc(sizeof(x86_section_t));
+		x86Section->type = X86_GLOBL;
+		strcpy(x86Section->label, label->value);
+		addX86Instruction(x86Section, X86_SECTION);
+	}
 
-	printf("%s:\n", label->value);
+    x86_label_t *x86Label = (x86_label_t *)malloc(sizeof(x86_label_t));
+    strcpy(x86Label->label, label->value);
+    addX86Instruction(x86Label, X86_LABEL);
 
 	if (label->type == FUNCTION_LABEL) {
-		printf("\tpushl %%ebp\n");
-		printf("\tmovl %%esp, %%ebp\n");
+		newX86Stack(X86_PUSH, EBP_REGISTER);
+		
+		x86_data_movement_t *x86DataMovement = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+		x86DataMovement->op = X86_MOV;
+		x86DataMovement->src = ESP_REGISTER;
+		x86DataMovement->dest = EBP_REGISTER;
+		addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
+
 		symbol_table_item_t *item = searchSymbol(label->value, symbolTable);
-		if (item == NULL) {
-			printf("%s\n", label->value);
-			fflush(0);
+		if (item == NULL)
 		    error("Function not found");
-		}
+
 		int stackOffset = item->data->stackOffset;
-		printf("\tsub $%d, %%esp\n", stackOffset);
+		x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+		x86Location->type = X86_INT_IMMEDIATE;
+		x86Location->value.intImmediate = stackOffset;
+		newX86Arithmetic(X86_SUB, x86Location, ESP_REGISTER);
 	}
 }
 
 void stringifyAssemblyAssignment(assembly_assignment_t *assignment) {
+    assignment->rValue->stringify(assignment->rValue);
+	x86_location_t *x86Location = getX86Location(assignment->lValue);
+
+	x86_data_movement_t *x86DataMovement = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+	x86DataMovement->op = X86_MOV;
+	x86DataMovement->src = EAX_REGISTER;
+	x86DataMovement->dest = x86Location;
+	addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
+}
+
+x86_location_t *getX86Location(assembly_term_t *term) {
+	if (term == NULL)
+		return NULL;
+
+	char tempStr[MAX_IDENTIFIER_LENGTH];
+	x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+	symbol_table_item_t *item;
+
+	switch (term->type) {
+		case ASSEMBLY_VARIABLE:
+			sprintf(tempStr, "%s_%s", term->scope, term->value);
+			item = searchSymbol(tempStr, symbolTable);
+			if (item == NULL)
+				error("Assembly assignment lValue not found");
+
+		    x86Location->type = X86_MEMORY;
+			x86Location->value.stackOffset = item->data->stackOffset;
+		    break;
+		case EAX:
+		    x86Location = EAX_REGISTER;
+		    break;
+		case FMT:
+		    break;
+		case CHAR_IMMEDIATE:
+		    x86Location->type = X86_CHAR_IMMEDIATE;
+			x86Location->value.charImmediate = term->value[0];
+		    break;
+		case INT_IMMEDIATE:
+		    x86Location->type = X86_INT_IMMEDIATE;
+			x86Location->value.intImmediate = atoi(term->value);
+		    break;
+	}
+
+	return x86Location;
 }
 
 void stringifyAssemblyCall(assembly_call_t *call) {
@@ -1967,7 +2063,11 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 		item = searchSymbol(tempStr, symbolTable);
 
 		if (item != NULL) {
-			printf("\tpushl %d(%%ebp)\n", item->data->stackOffset);
+		    x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+		    x86Location->type = X86_MEMORY;
+			x86Location->value.stackOffset = item->data->stackOffset;
+
+		    newX86Stack(X86_PUSH, x86Location);
 			continue;
 		}
 
@@ -1976,17 +2076,59 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 		if (item == NULL)
 		    error("Undefined variable");
 
-		printf("\tpushl %s\n", item->data->displayName);
+		x86_stack_t *x86Stack = (x86_stack_t *)malloc(sizeof(x86_stack_t));
+		x86Stack->op = X86_PUSH;
+
+		x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+		x86Location->type = X86_GLOBAL;
+		strcpy(x86Location->value.var, item->data->displayName);
+
+		x86Stack->location = x86Location;
+		addX86Instruction(x86Stack, X86_STACK);
 	}
-	printf("\tcall %s\n", call->label);
+
+	x86_control_flow_t *x86Call = (x86_control_flow_t *)malloc(sizeof(x86_control_flow_t));
+	x86Call->op = X86_CALL;
+	strcpy(x86Call->label, call->label);
+	addX86Instruction(x86Call, X86_CONTROL_FLOW);
 }
 
 void stringifyAssemblyJump(assembly_goto_t *jump) {
+    x86_jump_t *x86Jump = (x86_jump_t *)malloc(sizeof(x86_jump_t));
+	strcpy(x86Jump->label, jump->label);
+	x86_compar_t *x86Compar = (x86_compar_t *)malloc(sizeof(x86_compar_t));
+
     switch(jump->type) {
 		case IF_GOTO:
+		    // x86Compar->op = X86_CMP;
+			// x86Compar->src = x86LocationLTerm;
+			// x86Compar->dest = x86LocationRTerm;
+			// addX86Instruction(x86Compar, X86_COMPAR)
+
+		    // switch (exp->op) {
+				// case COMPAR_EQ:
+				    // x86Jump->op = X86_JE;
+					// break;
+				// case COMPAR_NE:
+				    // x86Jump->op = X86_JNE;
+					// break;
+				// case COMPAR_LT:
+				    // x86Jump->op = X86_JLT;
+					// break;
+				// case COMPAR_GT:
+				    // x86Jump->op = X86_JGT;
+					// break;
+				// case COMPAR_LE:
+				    // x86Jump->op = X86_JLE;
+					// break;
+				// case COMPAR_GE:
+				    // x86Jump->op = X86_JGE;
+					// break;
+				// }
 		    break;
 		case GOTO:
-		    printf("\tjmp %s\n", jump->label);
+			x86Jump->op = X86_JMP;
+			addX86Instruction(x86Jump, X86_JUMP);
 		    break;
 		default:
 		    error("Unsupported jump");
@@ -1994,16 +2136,297 @@ void stringifyAssemblyJump(assembly_goto_t *jump) {
 }
 
 void stringifyAssemblyReturn(assembly_return_t *ret) {
-    printf("\tleave\n");
-	printf("\tret\n");
-}
+	x86_control_flow_t *leave = (x86_control_flow_t *)malloc(sizeof(x86_control_flow_t));
+	leave->op = X86_LEAVE;
+	addX86Instruction(leave, X86_CONTROL_FLOW);
 
-void stringifyAssemblyTerm(assembly_term_t *term) {
+	x86_control_flow_t *x86Ret = (x86_control_flow_t *)malloc(sizeof(x86_control_flow_t));
+	x86Ret->op = X86_RET;
+	addX86Instruction(x86Ret, X86_CONTROL_FLOW);
 }
 
 void stringifyAssemblyExp(assembly_exp_t *exp) {
+	x86_location_t *x86LocationLTerm = getX86Location(exp->lTerm);
+	x86_location_t *x86LocationRTerm = getX86Location(exp->rTerm);
+	x86_data_movement_t *x86DataMovement = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+	x86_compar_t *x86Compar = (x86_compar_t *)malloc(sizeof(x86_compar_t));
+	x86_jump_t *x86Jump = (x86_jump_t *)malloc(sizeof(x86_jump_t));
+	x86_arithmetic_t *x86Arithmetic = (x86_arithmetic_t *)malloc(sizeof(x86_arithmetic_t));
+
+    switch (exp->type) {
+		case ASSEMBLY_BIN_OP:
+			if (isComparison(exp->op)) {
+				x86Compar->op = X86_CMP;
+				x86Compar->src = x86LocationLTerm;
+				x86Compar->dest = x86LocationRTerm;
+				addX86Instruction(x86Compar, X86_COMPAR);
+
+				x86DataMovement->op = X86_SET;
+				x86DataMovement->src = ZEROF_REGISTER;
+				x86DataMovement->dest = EAX_REGISTER;
+				addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
+			} else {
+				x86DataMovement->op = X86_MOV;
+				x86DataMovement->src = x86LocationLTerm;
+				x86DataMovement->dest = EAX_REGISTER;
+				addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
+
+				switch (exp->op) {
+				    case PLUS:
+						x86Arithmetic = newX86Arithmetic(X86_ADD, x86LocationRTerm, EAX_REGISTER);
+						break;
+				    case MINUS:
+						x86Arithmetic = newX86Arithmetic(X86_SUB, x86LocationRTerm, EAX_REGISTER);
+						break;
+				    case MULTIPLY:
+						x86Arithmetic = newX86Arithmetic(X86_MUL, x86LocationRTerm, EAX_REGISTER);
+						break;
+				    case DIVIDE:
+						x86Arithmetic = newX86Arithmetic(X86_DIV, x86LocationRTerm, EAX_REGISTER);
+						break;
+				    default:
+						error("Invalid binary arithmetic operation");
+				}
+				addX86Instruction(x86Arithmetic, X86_ARITHMETIC);
+			}
+		    break;
+		case ASSEMBLY_CONSTANT:
+		    x86DataMovement->op = X86_MOV;
+			x86DataMovement->src = x86LocationLTerm;
+			x86DataMovement->dest = EAX_REGISTER;
+			addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
+		    break;
+	}
 }
 
 bool isComparison(bin_op_e op) {
     return op == COMPAR_EQ || op == COMPAR_NE || op == COMPAR_LT || op == COMPAR_GT || op == COMPAR_LE || op == COMPAR_GE;
+}
+
+void newX86Stack(x86_stack_e op, x86_location_t *location) {
+	x86_stack_t *x86 = (x86_stack_t *)malloc(sizeof(x86_stack_t));
+	x86->op = op;
+	x86->location = location;
+	addX86Instruction(x86, X86_STACK);
+}
+
+x86_arithmetic_t *newX86Arithmetic(x86_arithmetic_e op, x86_location_t *src, x86_location_t *dest) {
+	x86_arithmetic_t *x86 = (x86_arithmetic_t *)calloc(1, sizeof(x86_arithmetic_t));
+	x86->op = op;
+	x86->src = src;
+	x86->dest = dest;
+	addX86Instruction(x86, X86_ARITHMETIC);
+	return x86;
+}
+
+void addX86Instruction(void *instruction, x86_e type) {
+    x86_t *x86 = (x86_t *)malloc(sizeof(x86_t));
+	x86->type = type;
+
+	switch (x86->type) {
+		case X86_SPACE_ALLOCATION:
+			x86->instruction.spaceAllocation = (x86_space_allocation_t *)instruction;
+		    break;
+		case X86_DATA_MOVEMENT:
+			x86->instruction.dataMovement = (x86_data_movement_t *)instruction;
+		    break;
+		case X86_ARITHMETIC:
+			x86->instruction.arithmetic = (x86_arithmetic_t *)instruction;
+		    break;
+		case X86_LOGIC:
+			x86->instruction.logic = (x86_logic_t *)instruction;
+		    break;
+		case X86_CONTROL_FLOW:
+			x86->instruction.controlFlow = (x86_control_flow_t *)instruction;
+		    break;
+		case X86_JUMP:
+			x86->instruction.jump = (x86_jump_t *)instruction;
+		    break;
+		case X86_COMPAR:
+			x86->instruction.compar = (x86_compar_t *)instruction;
+		    break;
+		case X86_STACK:
+			x86->instruction.stack = (x86_stack_t *)instruction;
+		    break;
+		case X86_SECTION:
+			x86->instruction.section = (x86_section_t *)instruction;
+		    break;
+		case X86_LABEL:
+			x86->instruction.label = (x86_label_t *)instruction;
+		    break;
+	}
+
+	x86List->instructions[x86List->x86Count++] = x86;
+}
+
+void stringifyX86List(x86_list_t *x86List) {
+	x86_t *x86;
+    for (int i = 0; i < x86List->x86Count; i++) {
+		x86 = x86List->instructions[i];
+		switch (x86->type) {
+		    case X86_SPACE_ALLOCATION:
+				printf("%s: .space %d", x86->instruction.spaceAllocation->value, x86->instruction.spaceAllocation->space);
+				break;
+		    case X86_DATA_MOVEMENT:
+				if (x86->instruction.dataMovement->src == x86->instruction.dataMovement->dest)
+				    break;
+
+				switch (x86->instruction.dataMovement->op) {
+				    case X86_MOV:
+						printf("movl");
+						printf(" ");
+						stringifyX86Location(x86->instruction.dataMovement->src);
+						printf(", ");
+						stringifyX86Location(x86->instruction.dataMovement->dest);
+						break;
+				    case X86_LEA:
+						printf("leal");
+						printf(" ");
+						stringifyX86Location(x86->instruction.dataMovement->src);
+						printf(", ");
+						stringifyX86Location(x86->instruction.dataMovement->dest);
+						break;
+				    case X86_SET:
+						if (x86->instruction.dataMovement->src != ZEROF_REGISTER)
+						    error("SET instruction is supported only for ZEROF");
+						printf("setz %%al\n");
+						printf("movzbl %%al, %%eax");
+						break;
+				}
+				break;
+		    case X86_ARITHMETIC:
+				switch (x86->instruction.arithmetic->op) {
+				    case X86_ADD:
+						printf("addl");
+						break;
+					case X86_SUB:
+						printf("subl");
+						break;
+					case X86_MUL:
+						printf("imull");
+						break;
+					case X86_DIV:
+						printf("idivl");
+						break;
+				}
+				printf(" ");
+				stringifyX86Location(x86->instruction.arithmetic->src);
+				if (x86->instruction.arithmetic->dest != NULL) {
+				    printf(", ");
+					stringifyX86Location(x86->instruction.arithmetic->dest);
+				}
+				break;
+		    case X86_LOGIC:
+				break;
+		    case X86_CONTROL_FLOW:
+				switch (x86->instruction.controlFlow->op) {
+				    case X86_CALL:
+						printf("call %s", x86->instruction.controlFlow->label);
+						break;
+				    case X86_RET:
+						printf("ret");
+						break;
+				    case X86_LEAVE:
+						printf("leave");
+						break;
+				}
+				break;
+		    case X86_JUMP:
+				switch (x86->instruction.jump->op) {
+				    case X86_JE:
+						printf("je");
+						break;
+				    case X86_JNE:
+						printf("jne");
+						break;
+				    case X86_JG:
+						printf("jg");
+						break;
+				    case X86_JL:
+						printf("jl");
+						break;
+				    case X86_JGE:
+						printf("jge");
+						break;
+				    case X86_JLE:
+						printf("jle");
+						break;
+				    case X86_JMP:
+						printf("jmp");
+						break;
+				}
+				printf(" %s", x86->instruction.jump->label);
+				break;
+		    case X86_COMPAR:
+				printf("cmpl ");
+				stringifyX86Location(x86->instruction.compar->src);
+				printf(", ");
+				stringifyX86Location(x86->instruction.compar->dest);
+				break;
+		    case X86_STACK:
+				switch (x86->instruction.stack->op) {
+				    case X86_PUSH:
+						printf("pushl");
+						break;
+				    case X86_POP:
+						printf("popl");
+						break;
+				}
+				printf(" ");
+				stringifyX86Location(x86->instruction.stack->location);
+				break;
+		    case X86_SECTION:
+				switch (x86->instruction.section->type) {
+				    case X86_DATA:
+						printf(".data");
+						break;
+					case X86_BSS:
+						printf(".bss");
+						break;
+					case X86_TEXT:
+						printf(".text");
+						break;
+					case X86_GLOBL:
+						printf(".global %s", x86->instruction.section->label);
+						break;
+				}
+				break;
+		    case X86_LABEL:
+				printf("%s:", x86->instruction.label->label);
+				break;
+		}
+		printf("\n");
+	}
+}
+
+void stringifyX86Location(x86_location_t *location) {
+    switch (location->type) {
+		case X86_REGISTER:
+			switch (location->value.reg) {
+				case 'S':
+				    printf("%%esp");
+					break;
+				case 'B':
+				    printf("%%ebp");
+					break;
+				case 'a':
+				    printf("%%eax");
+					break;
+				default:
+				    error("Register type not supported");
+			}
+		    break;
+		case X86_MEMORY:
+			printf("%d(%%ebp)", location->value.stackOffset);
+		    break;
+		case X86_GLOBAL:
+			printf("%s", location->value.var);
+		    break;
+		case X86_INT_IMMEDIATE:
+			printf("$%d", location->value.intImmediate);
+		    break;
+		case X86_CHAR_IMMEDIATE:
+			printf("$\'%c\'", location->value.charImmediate);
+		    break;
+	}
 }
