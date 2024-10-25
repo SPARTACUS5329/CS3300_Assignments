@@ -2,4 +2,3 @@ sizeof function for including arrays
 IF_GOTO stringification
 check str[a + 2]
 multiline comments
-implement cdecl call

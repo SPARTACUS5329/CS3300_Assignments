@@ -3172,12 +3172,23 @@ void stringifyFunctionCall(function_call_t *fun) {
 				sprintf(passedParams[passedParamCount++], "t%d", tCount++);
 				break;
 			case EXPRESSION:
-				if (arg->value.exp->type != CHAR_CONSTANT && arg->value.exp->type != INT_CONSTANT && arg->value.exp->type != VAR_CONSTANT)
-					arg->value.exp->stringify(arg->value.exp);
+				switch(arg->value.exp->type) {
+				    case CHAR_CONSTANT:
+						lTerm = newTACTerm(CHAR_LITERAL, 0, NULL, arg->value.exp->lValue);
+						break;
+				    case INT_CONSTANT:
+						lTerm = newTACTerm(INT_LITERAL, 0, NULL, arg->value.exp->lValue);
+						break;
+				    case VAR_CONSTANT:
+						lTerm = newTACTerm(VARIABLE, 0, NULL, arg->value.exp->lValue);
+						break;
+				    default:
+					    arg->value.exp->stringify(arg->value.exp);
+						lTerm = newTACTerm(VARIABLE, 0, NULL, arg->value.exp->lValue);
+				}
 
 				sprintf(tempString, "t%d", tCount);
 				lValue = newTACTerm(TEMPORARY, 0, NULL, tempString);
-				lTerm = newTACTerm(VARIABLE, 0, NULL, arg->value.exp->lValue);
 				rValue = newTACExp(TAC_CONSTANT, 0, lTerm, NULL);
 				newTACAssignment(lValue, rValue);
 				sprintf(passedParams[passedParamCount++], "t%d", tCount++);
@@ -3521,7 +3532,11 @@ void firstPassTACs(tac_list_t *tacList) {
 			identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 			tac_term_e rType = ass->rValue->lTerm->type;
 			id->type = rType == CHAR_LITERAL ? CHAR : INT;
-		    sprintf(tempStr, "%s_%s", currTACFunction, ass->lValue->value);
+			if (rType == STRING_LITERAL) {
+				sprintf(tempStr, "global_%s", ass->lValue->value);
+			} else {
+				sprintf(tempStr, "%s_%s", currTACFunction, ass->lValue->value);
+			}
 			strcpy(id->name, tempStr);
 			strcpy(id->displayName, ass->lValue->value);
 			id->stackOffset = -(currStackOffset + 4);
@@ -3754,7 +3769,7 @@ assembly_term_t *newAssemblyTerm(tac_term_t *tac) {
 		case CHAR_LITERAL:	
 		    term->type = CHAR_IMMEDIATE;
 			break;
-		case INT_LITERAL:	
+		case INT_LITERAL:
 		    term->type = INT_IMMEDIATE;
 			break;
 		default:
@@ -3934,8 +3949,10 @@ x86_location_t *getX86Location(assembly_term_t *term) {
 		case ASSEMBLY_VARIABLE:
 			sprintf(tempStr, "%s_%s", term->scope, term->value);
 			item = searchSymbol(tempStr, symbolTable);
-			if (item == NULL)
+			if (item == NULL) {
+				printf("%s\n", tempStr);
 				error("Assembly assignment lValue not found");
+			}
 
 		    x86Location->type = X86_MEMORY;
 			x86Location->value.stackOffset = item->data->stackOffset;
@@ -3994,6 +4011,11 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 	x86Call->op = X86_CALL;
 	strcpy(x86Call->label, call->label);
 	addX86Instruction(x86Call, X86_CONTROL_FLOW);
+
+	x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+	x86Location->type = X86_INT_IMMEDIATE;
+	x86Location->value.intImmediate = 4 * call->argCount;
+	newX86Arithmetic(X86_ADD, x86Location, ESP_REGISTER);
 }
 
 void stringifyAssemblyJump(assembly_goto_t *jump) {
@@ -4318,7 +4340,7 @@ void stringifyX86List(x86_list_t *x86List) {
 						printf(".text");
 						break;
 					case X86_GLOBL:
-						printf(".global %s", x86->instruction.section->label);
+						printf(".globl %s", x86->instruction.section->label);
 						break;
 				}
 				break;
