@@ -125,11 +125,20 @@ typedef enum {
 
 typedef enum { X86_SPACE, X86_ASCIZ } x86_format_e;
 
-typedef enum { X86_MOV, X86_LEA, X86_SET } x86_data_movement_e;
+typedef enum {
+  X86_MOV,
+  X86_LEA,
+  X86_SETE,
+  X86_SETNE,
+  X86_SETL,
+  X86_SETG,
+  X86_SETLE,
+  X86_SETGE
+} x86_data_movement_e;
 
 typedef enum { X86_ADD, X86_SUB, X86_MUL, X86_DIV } x86_arithmetic_e;
 
-typedef enum { X86_AND, X86_OR, X86_NOT } x86_logic_e;
+typedef enum { X86_AND, X86_OR, X86_NOT, X86_XOR } x86_logic_e;
 
 typedef enum { X86_CALL, X86_RET, X86_LEAVE } x86_control_flow_e;
 

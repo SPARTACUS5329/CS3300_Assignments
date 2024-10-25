@@ -2241,16 +2241,44 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 	x86_compar_t *x86Compar = (x86_compar_t *)malloc(sizeof(x86_compar_t));
 	x86_jump_t *x86Jump = (x86_jump_t *)malloc(sizeof(x86_jump_t));
 	x86_arithmetic_t *x86Arithmetic = (x86_arithmetic_t *)malloc(sizeof(x86_arithmetic_t));
+	x86_logic_t *x86Logic = (x86_logic_t *)malloc(sizeof(x86_logic_t));
 
     switch (exp->type) {
 		case ASSEMBLY_BIN_OP:
 			if (isComparison(exp->op)) {
+				x86Logic->op = X86_XOR;
+				x86Logic->src = EAX_REGISTER;
+				x86Logic->dest = EAX_REGISTER;
+				addX86Instruction(x86Logic, X86_LOGIC);
+
 				x86Compar->op = X86_CMP;
 				x86Compar->src = x86LocationLTerm;
 				x86Compar->dest = x86LocationRTerm;
 				addX86Instruction(x86Compar, X86_COMPAR);
 
-				x86DataMovement->op = X86_SET;
+				switch (exp->op) {
+				    case COMPAR_EQ:
+						x86DataMovement->op = X86_SETE;
+						break;
+				    case COMPAR_NE:
+						x86DataMovement->op = X86_SETNE;
+						break;
+				    case COMPAR_LT:
+						x86DataMovement->op = X86_SETL;
+						break;
+				    case COMPAR_GT:
+						x86DataMovement->op = X86_SETG;
+						break;
+				    case COMPAR_LE:
+						x86DataMovement->op = X86_SETLE;
+						break;
+				    case COMPAR_GE:
+						x86DataMovement->op = X86_SETGE;
+						break;
+				    default:
+						error("Invalid comparison operator");
+				}
+
 				x86DataMovement->src = ZEROF_REGISTER;
 				x86DataMovement->dest = EAX_REGISTER;
 				addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
@@ -2389,11 +2417,23 @@ void stringifyX86List(x86_list_t *x86List) {
 						printf(", ");
 						stringifyX86Location(x86->instruction.dataMovement->dest);
 						break;
-				    case X86_SET:
-						if (x86->instruction.dataMovement->src != ZEROF_REGISTER)
-						    error("SET instruction is supported only for ZEROF");
-						printf("setz %%al\n");
-						printf("movzbl %%al, %%eax");
+				    case X86_SETE:
+						printf("sete %%al\n");
+						break;
+				    case X86_SETNE:
+						printf("setne %%al\n");
+						break;
+				    case X86_SETL:
+						printf("setl %%al\n");
+						break;
+				    case X86_SETG:
+						printf("setg %%al\n");
+						break;
+				    case X86_SETGE:
+						printf("setge %%al\n");
+						break;
+				    case X86_SETLE:
+						printf("setle %%al\n");
 						break;
 				}
 				break;
@@ -2420,6 +2460,26 @@ void stringifyX86List(x86_list_t *x86List) {
 				}
 				break;
 		    case X86_LOGIC:
+				switch (x86->instruction.logic->op) {
+				    case X86_AND:
+						printf("andl");
+						break;
+					case X86_NOT:
+						printf("notl");
+						break;
+					case X86_OR:
+						printf("orl");
+						break;
+					case X86_XOR:
+						printf("xorl");
+						break;
+				}
+				printf(" ");
+				stringifyX86Location(x86->instruction.logic->src);
+				if (x86->instruction.logic->dest != NULL) {
+				    printf(", ");
+					stringifyX86Location(x86->instruction.arithmetic->dest);
+				}
 				break;
 		    case X86_CONTROL_FLOW:
 				switch (x86->instruction.controlFlow->op) {
@@ -2514,6 +2574,9 @@ void stringifyX86Location(x86_location_t *location) {
 					break;
 				case 'a':
 				    printf("%%eax");
+					break;
+				case 'b':
+				    printf("%%ebx");
 					break;
 				default:
 				    error("Register type not supported");

@@ -39,9 +39,10 @@ call foo
 addl $4, %esp
 
 movl %eax, -28(%ebp)
+xorl %eax, %eax
 cmpl -8(%ebp), $3
-setz %al
-movzbl %al, %eax
+setl %al
+
 movl %eax, -32(%ebp)
 cmpl -32(%ebp), $1
 je L1
