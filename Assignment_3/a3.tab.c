@@ -3613,7 +3613,6 @@ assembly_t *newAssemblyAssignment(tac_ass_t *tac) {
 
 		ass->section = ASSEMBLY_DATA_SECTION;
 		ass->instruction.data = data;
-		printf("Reaching\n\n\n\n");
 		return ass;
 	}
 
@@ -4199,7 +4198,13 @@ void stringifyX86List(x86_list_t *x86List) {
 
 				switch (x86->instruction.dataMovement->op) {
 				    case X86_MOV:
-						printf("movl");
+						switch (x86->instruction.dataMovement->src->type) {
+						    case X86_CHAR_IMMEDIATE:
+								printf("movb");
+								break;
+						    default:
+								printf("movl");
+						}
 						printf(" ");
 						stringifyX86Location(x86->instruction.dataMovement->src);
 						printf(", ");

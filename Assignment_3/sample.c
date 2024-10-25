@@ -13,6 +13,9 @@ int main() {
   else
     a = 1;
 
+  char str[10];
+  str[0] = 'A';
+
   printf("Hello");
 
   return 0;

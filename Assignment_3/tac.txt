@@ -20,9 +20,12 @@ L2:
 t4 = 1
 a = t4
 L3:
-t5 = "Hello"
-param1 = t5
+t5 = 'A'
+t6 = 0
+str[t6] = t5
+t7 = "Hello"
+param1 = t7
 call printf
-t6 = retval
+t8 = retval
 retval = 0
 return

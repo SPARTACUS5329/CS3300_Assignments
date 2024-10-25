@@ -3,7 +3,7 @@ b: .space 4
 i: .space 4
 s: .space 1
 .data
-t5: .asciz "Hello"
+t7: .asciz "Hello"
 .text
 .global foo
 foo:
@@ -18,7 +18,7 @@ ret
 main:
 pushl %ebp
 movl %esp, %ebp
-subl $32, %esp
+subl $44, %esp
 movl $3, %eax
 movl %eax, -4(%ebp)
 movl -4(%ebp), %eax
@@ -42,10 +42,16 @@ movl %eax, -20(%ebp)
 movl -20(%ebp), %eax
 movl %eax, -8(%ebp)
 L3:
-pushl -24(%ebp)
+movb $'A', %eax
+movl %eax, -24(%ebp)
+movl $0, %eax
+movl %eax, -28(%ebp)
+movl -24(%ebp), %eax
+movl %eax, -32(%ebp)
+pushl -36(%ebp)
 call printf
 
-movl %eax, -28(%ebp)
+movl %eax, -40(%ebp)
 movl $0, %eax
 
 leave
