@@ -1,3 +1,4 @@
+global b
 foo:
 x = param1
 retval = 0
@@ -5,24 +6,30 @@ return
 main:
 t1 = 3
 a = t1
-t2 = 2
-param1 = t2
+t2 = 17
+b = t2
+t3 = 2
+param1 = t3
 call foo
-t3 = retval
-t4 = a < 3
-if (t4) goto L1
+t4 = retval
+t5 = b
+param1 = t5
+call foo
+t6 = retval
+t7 = a < 3
+if (t7) goto L1
 goto L2
 L1:
-t5 = 3
-a = t5
+t8 = 3
+a = t8
 goto L3
 L2:
-t6 = 2
-a = t6
+t9 = 2
+a = t9
 L3:
-t7 = "Something\n"
-param1 = t7
+t10 = "Something\n"
+param1 = t10
 call printf
-t8 = retval
+t11 = retval
 retval = 0
 return

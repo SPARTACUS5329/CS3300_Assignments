@@ -1,11 +1,15 @@
 #include <stdio.h>
+int b;
 
 int foo(int x) { return 0; }
 
 int main() {
   int a = 3;
 
+  b = 17;
+
   foo(2);
+  foo(b);
 
   if (a < 3)
     a = 3;

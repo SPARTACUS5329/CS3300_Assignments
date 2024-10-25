@@ -3531,11 +3531,12 @@ void firstPassTACs(tac_list_t *tacList) {
 
 			identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 			tac_term_e rType = ass->rValue->lTerm->type;
-			id->type = rType == CHAR_LITERAL ? CHAR : INT;
 			if (rType == STRING_LITERAL) {
 				sprintf(tempStr, "global_%s", ass->lValue->value);
+				id->type = DATA_STRING;
 			} else {
 				sprintf(tempStr, "%s_%s", currTACFunction, ass->lValue->value);
+				id->type = rType == CHAR_LITERAL ? CHAR : INT;
 			}
 			strcpy(id->name, tempStr);
 			strcpy(id->displayName, ass->lValue->value);
@@ -3779,7 +3780,14 @@ assembly_term_t *newAssemblyTerm(tac_term_t *tac) {
 	term->depth = tac->depth;
 	term->subscripts = tac->subscripts;
 	strcpy(term->value, tac->value);
-	strcpy(term->scope, currScope);
+
+	char tempStr[MAX_IDENTIFIER_LENGTH];
+	sprintf(tempStr, "global_%s", tac->value);
+	symbol_table_item_t *item = searchSymbol(tempStr, symbolTable);
+	if (item == NULL)
+		strcpy(term->scope, currScope);
+	else
+		strcpy(term->scope, "global");
 	return term;
 }
 
@@ -3949,18 +3957,24 @@ x86_location_t *getX86Location(assembly_term_t *term) {
 		case ASSEMBLY_VARIABLE:
 			sprintf(tempStr, "%s_%s", term->scope, term->value);
 			item = searchSymbol(tempStr, symbolTable);
-			if (item == NULL) {
-				printf("%s\n", tempStr);
-				error("Assembly assignment lValue not found");
-			}
 
-		    x86Location->type = X86_MEMORY;
-			x86Location->value.stackOffset = item->data->stackOffset;
+			if (item == NULL)
+				error("Assembly assignment lValue not found");
+
+		    if (streq(term->scope, "global", 6)) {
+				if (item->data->type == DATA_STRING)
+				    x86Location->type = X86_DATA_FMT;
+				else
+				    x86Location->type = X86_GLOBAL;
+
+				strcpy(x86Location->value.var, term->value);
+			} else {
+				x86Location->type = X86_MEMORY;
+				x86Location->value.stackOffset = item->data->stackOffset;
+			}
 		    break;
 		case EAX:
 		    x86Location = EAX_REGISTER;
-		    break;
-		case FMT:
 		    break;
 		case CHAR_IMMEDIATE:
 		    x86Location->type = X86_CHAR_IMMEDIATE;
@@ -3970,6 +3984,8 @@ x86_location_t *getX86Location(assembly_term_t *term) {
 		    x86Location->type = X86_INT_IMMEDIATE;
 			x86Location->value.intImmediate = atoi(term->value);
 		    break;
+		default:
+		    error("Invalid type term type");
 	}
 
 	return x86Location;
@@ -4000,7 +4016,11 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 		x86Stack->op = X86_PUSH;
 
 		x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
-		x86Location->type = X86_GLOBAL;
+		if (item->data->type == DATA_STRING)
+		    x86Location->type = X86_DATA_FMT;
+		else
+		    x86Location->type = X86_GLOBAL;
+
 		strcpy(x86Location->value.var, item->data->displayName);
 
 		x86Stack->location = x86Location;
@@ -4374,6 +4394,9 @@ void stringifyX86Location(x86_location_t *location) {
 		    break;
 		case X86_GLOBAL:
 			printf("%s", location->value.var);
+		    break;
+		case X86_DATA_FMT:
+			printf("$%s", location->value.var);
 		    break;
 		case X86_INT_IMMEDIATE:
 			printf("$%d", location->value.intImmediate);

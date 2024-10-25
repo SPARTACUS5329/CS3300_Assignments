@@ -152,6 +152,7 @@ typedef enum { X86_DATA, X86_BSS, X86_TEXT, X86_GLOBL } x86_section_e;
 typedef enum {
   X86_REGISTER,
   X86_MEMORY,
+  X86_DATA_FMT,
   X86_GLOBAL,
   X86_CHAR_IMMEDIATE,
   X86_INT_IMMEDIATE
@@ -197,7 +198,7 @@ typedef enum {
   FUNCTION_CALL
 } expr_e;
 
-typedef enum { INT, FLOAT, CHAR } data_type_e;
+typedef enum { INT, FLOAT, CHAR, DATA_STRING } data_type_e;
 
 typedef enum { WHILE, FOR } loop_e;
 
