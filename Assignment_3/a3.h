@@ -1,5 +1,6 @@
 #pragma once
 #include <stdbool.h>
+#define MAX_STRING_LITERAL_LENGTH 10000
 #define MAX_IDENTIFIERS 2000
 #define MAX_ARGS 2000
 #define MAX_ARG_SIZE 2000
@@ -121,6 +122,8 @@ typedef enum {
   X86_SECTION,
   X86_LABEL
 } x86_e;
+
+typedef enum { X86_SPACE, X86_ASCIZ } x86_format_e;
 
 typedef enum { X86_MOV, X86_LEA, X86_SET } x86_data_movement_e;
 
@@ -495,7 +498,8 @@ typedef struct AssemblyBSS {
 
 typedef struct AssemblyData {
   int id;
-  char *value;
+  char value[MAX_STRING_LITERAL_LENGTH];
+  char key[MAX_IDENTIFIER_LENGTH];
   void (*stringify)(assembly_data_t *);
 } assembly_data_t;
 
@@ -543,6 +547,7 @@ typedef struct AssemblyCall {
 
 typedef struct AssemblyGoto {
   goto_e type;
+  char scope[MAX_IDENTIFIER_LENGTH];
   char condition[MAX_IDENTIFIER_LENGTH];
   char label[MAX_IDENTIFIER_LENGTH];
   void (*stringify)(assembly_goto_t *);
@@ -581,7 +586,11 @@ typedef struct X86Instruction {
 } x86_t;
 
 typedef struct X86SpaceAllocation {
-  int space;
+  x86_format_e type;
+  union {
+    int space;
+    char str[MAX_STRING_LITERAL_LENGTH];
+  } allocation;
   char value[MAX_IDENTIFIER_LENGTH];
 } x86_space_allocation_t;
 

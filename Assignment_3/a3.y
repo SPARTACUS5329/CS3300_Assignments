@@ -16,12 +16,13 @@ expression_t args[MAX_FUNCTION_CALLS][MAX_ARGS];
 int lineNumber = 1;
 static int tCount = 1;
 static int lCount = 1;
+static int globalDataCount = 0;
 
 symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 program_t *program;
 tac_list_t *tacList;
 x86_list_t *x86List;
-x86_location_t *EBP_REGISTER, *ESP_REGISTER, *EAX_REGISTER, *ZEROF_REGISTER;
+x86_location_t *EBP_REGISTER, *ESP_REGISTER, *EAX_REGISTER, *ZEROF_REGISTER, *ONE;
 
 %}
 
@@ -818,6 +819,10 @@ int main(int argc, char *argv[]) {
 	ZEROF_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
 	ZEROF_REGISTER->type = X86_REGISTER;
 	ZEROF_REGISTER->value.reg = 'Z';
+
+	ONE = (x86_location_t *)malloc(sizeof(x86_location_t));
+	ONE->type = X86_INT_IMMEDIATE;
+	ONE->value.intImmediate = 1;
 
     file = freopen("a.s", "w", stdout);
     if (file == NULL)
@@ -1727,6 +1732,20 @@ assembly_t *newAssemblyGlobalDec(tac_global_dec_t *tac) {
 }
 
 assembly_t *newAssemblyAssignment(tac_ass_t *tac) {
+    assembly_t *ass = (assembly_t *)malloc(sizeof(assembly_t));
+
+	if (tac->rValue->lTerm->type == STRING_LITERAL) {
+		assembly_data_t *data = (assembly_data_t *)malloc(sizeof(assembly_data_t));
+		data->id = globalDataCount++;
+		strcpy(data->key, tac->lValue->value);
+		strcpy(data->value, tac->rValue->lTerm->value);
+		data->stringify = &stringifyData;
+
+		ass->section = ASSEMBLY_DATA_SECTION;
+		ass->instruction.data = data;
+		return ass;
+	}
+
 	assembly_assignment_t *assign = (assembly_assignment_t *)malloc(sizeof(assembly_assignment_t));
 	assign->lValue = newAssemblyTerm(tac->lValue);
 	assembly_term_t *lTerm = newAssemblyTerm(tac->rValue->lTerm);
@@ -1745,7 +1764,6 @@ assembly_t *newAssemblyAssignment(tac_ass_t *tac) {
 	text->instruction.assignment = assign;
 	text->stringify = &stringifyText;
 
-	assembly_t *ass = (assembly_t *)malloc(sizeof(assembly_t));
 	ass->section = ASSEMBLY_TEXT_SECTION;
 	ass->instruction.text = text;
 
@@ -1813,6 +1831,7 @@ assembly_t *newAssemblyGoto(tac_goto_t *tac) {
 	assembly_goto_t *jump = (assembly_goto_t *)malloc(sizeof(assembly_goto_t));
 	jump->type = tac->type;
 	strcpy(jump->label, tac->label);
+	strcpy(jump->scope, currScope);
 	if (jump->type == IF_GOTO)
 		strcpy(jump->condition, tac->condition);
 	jump->stringify = &stringifyAssemblyJump;
@@ -1919,6 +1938,13 @@ void stringifyBSSList(assembly_bss_list_t *bssList) {
 }
 
 void stringifyDataList(assembly_data_list_t *dataList) {
+    x86_section_t *x86Section = (x86_section_t *)malloc(sizeof(x86_section_t));
+	x86Section->type = X86_DATA;
+	addX86Instruction(x86Section, X86_SECTION);
+
+	for (int i = 0; i < dataList->assCount; i++) {
+		dataList->instructions[i]->stringify(dataList->instructions[i]);
+	}
 }
 
 void stringifyTextList(assembly_text_list_t *textList) {
@@ -1946,13 +1972,20 @@ void stringifyBSS(assembly_bss_t *ass) {
 		default:
 		    error("Unsupported data type");
 	}
-	x86_space_allocation_t *x86SpaceAllocation = (x86_space_allocation_t *)malloc(sizeof(x86_space_allocation_t));
-	x86SpaceAllocation->space = space;
-	strcpy(x86SpaceAllocation->value, ass->var->displayName);
-	addX86Instruction(x86SpaceAllocation, X86_SPACE_ALLOCATION);
+
+	x86_space_allocation_t *x86 = (x86_space_allocation_t *)malloc(sizeof(x86_space_allocation_t));
+	x86->type = X86_SPACE;
+	x86->allocation.space = space;
+	strcpy(x86->value, ass->var->displayName);
+	addX86Instruction(x86, X86_SPACE_ALLOCATION);
 }
 
 void stringifyData(assembly_data_t *ass) {
+    x86_space_allocation_t *x86 = (x86_space_allocation_t *)malloc(sizeof(x86_space_allocation_t));
+	x86->type = X86_ASCIZ;
+	strcpy(x86->allocation.str, ass->value);
+	strcpy(x86->value, ass->key);
+	addX86Instruction(x86, X86_SPACE_ALLOCATION);
 }
 
 void stringifyText(assembly_text_t *text) {
@@ -2044,7 +2077,7 @@ x86_location_t *getX86Location(assembly_term_t *term) {
 		    break;
 		case CHAR_IMMEDIATE:
 		    x86Location->type = X86_CHAR_IMMEDIATE;
-			x86Location->value.charImmediate = term->value[0];
+			x86Location->value.charImmediate = term->value[1];
 		    break;
 		case INT_IMMEDIATE:
 		    x86Location->type = X86_INT_IMMEDIATE;
@@ -2095,15 +2128,29 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 
 void stringifyAssemblyJump(assembly_goto_t *jump) {
     x86_jump_t *x86Jump = (x86_jump_t *)malloc(sizeof(x86_jump_t));
-	strcpy(x86Jump->label, jump->label);
 	x86_compar_t *x86Compar = (x86_compar_t *)malloc(sizeof(x86_compar_t));
+	x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+	symbol_table_item_t *item;
+	char tempStr[MAX_IDENTIFIER_LENGTH];
+
+	strcpy(x86Jump->label, jump->label);
 
     switch(jump->type) {
 		case IF_GOTO:
-		    // x86Compar->op = X86_CMP;
-			// x86Compar->src = x86LocationLTerm;
-			// x86Compar->dest = x86LocationRTerm;
-			// addX86Instruction(x86Compar, X86_COMPAR)
+			sprintf(tempStr, "%s_%s", jump->scope, jump->condition);
+			item = searchSymbol(tempStr, symbolTable);
+			if (item == NULL)
+				error("IF_GOTO condition not found");
+
+		    int stackOffset = item->data->stackOffset;
+			x86Location->type = X86_MEMORY;
+			x86Location->value.intImmediate = stackOffset;
+
+		    x86Compar->op = X86_CMP;
+			x86Compar->src = x86Location;
+			x86Compar->dest = ONE;
+			addX86Instruction(x86Compar, X86_COMPAR);
+			addX86Instruction(x86Jump, X86_JUMP);
 
 		    // switch (exp->op) {
 				// case COMPAR_EQ:
@@ -2265,7 +2312,15 @@ void stringifyX86List(x86_list_t *x86List) {
 		x86 = x86List->instructions[i];
 		switch (x86->type) {
 		    case X86_SPACE_ALLOCATION:
-				printf("%s: .space %d", x86->instruction.spaceAllocation->value, x86->instruction.spaceAllocation->space);
+				printf("%s: ", x86->instruction.spaceAllocation->value);
+				switch (x86->instruction.spaceAllocation->type) {
+				    case X86_SPACE:
+						printf(".space %d", x86->instruction.spaceAllocation->allocation.space);
+						break;
+					case X86_ASCIZ:
+						printf(".asciz %s", x86->instruction.spaceAllocation->allocation.str);
+						break;
+				}
 				break;
 		    case X86_DATA_MOVEMENT:
 				if (x86->instruction.dataMovement->src == x86->instruction.dataMovement->dest)

@@ -2,24 +2,27 @@ global b
 global i
 global s
 foo:
-a = param1
-t1 = a
-param1 = t1
-call foo
-t2 = retval
+str = param1
+a = param2
 retval = 0
 return
 main:
-t3 = 3
-a = t3
-t4 = a < 3
-if (t4) goto L1
+t1 = 3
+a = t1
+t2 = a < 3
+if (t2) goto L1
 goto L2
 L1:
-t5 = a
-param1 = t5
-call foo
-t6 = retval
+t3 = 2
+a = t3
+goto L3
 L2:
+t4 = 1
+a = t4
+L3:
+t5 = "Hello"
+param1 = t5
+call printf
+t6 = retval
 retval = 0
 return
