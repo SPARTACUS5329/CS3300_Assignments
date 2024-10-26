@@ -3,7 +3,7 @@
 t25: .asciz "%s\n"
 .text
 .globl main
-main:
+.main:
 pushl %ebp
 movl %esp, %ebp
 subl $134, %esp
@@ -16,23 +16,27 @@ movl %eax, -12(%ebp)
 movl -12(%ebp), %eax
 movl %eax, -16(%ebp)
 xorl %eax, %eax
-cmpl -8(%ebp), $3
+movl -8(%ebp), %ecx
+cmpl %ecx, $3
 setle %al
 
 movl %eax, -20(%ebp)
-cmpl -20(%ebp), $1
+movl -20(%ebp), %ecx
+cmpl %ecx, $1
 je .L3
 jmp .L2
-L3:
+.L3:
 xorl %eax, %eax
-cmpl -16(%ebp), $7
+movl -16(%ebp), %ecx
+cmpl %ecx, $7
 sete %al
 
 movl %eax, -24(%ebp)
-cmpl -24(%ebp), $1
+movl -24(%ebp), %ecx
+cmpl %ecx, $1
 je .L1
 jmp .L2
-L1:
+.L1:
 movb $'P', %eax
 movl %eax, -28(%ebp)
 movl $0, %eax
@@ -66,7 +70,7 @@ leal -36(%ebp, %eax), %ebx
 movl -66(%ebp), %eax
 movl %eax, (%ebx)
 jmp .L4
-L2:
+.L2:
 movb $'N', %eax
 movl %eax, -74(%ebp)
 movl $0, %eax
@@ -115,7 +119,7 @@ movl -118(%ebp), %eax
 leal -36(%ebp, %eax), %ebx
 movl -114(%ebp), %eax
 movl %eax, (%ebx)
-L4:
+.L4:
 leal -36(%ebp), %eax
 movl %eax, -126(%ebp)
 pushl -126(%ebp)

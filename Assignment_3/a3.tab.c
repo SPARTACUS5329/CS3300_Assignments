@@ -4104,6 +4104,8 @@ void stringifyAssemblyJump(assembly_goto_t *jump) {
 	x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
 	symbol_table_item_t *item;
 	char tempStr[MAX_IDENTIFIER_LENGTH];
+	x86_data_movement_t *x86DataMovementIntermediate = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+	x86DataMovementIntermediate->isDestAddress = false;
 
 	strcpy(x86Jump->label, jump->label);
 
@@ -4118,8 +4120,13 @@ void stringifyAssemblyJump(assembly_goto_t *jump) {
 			x86Location->type = X86_MEMORY;
 			x86Location->value.stackOffset = stackOffset;
 
+			x86DataMovementIntermediate->op = X86_MOV;
+			x86DataMovementIntermediate->src = x86Location;
+			x86DataMovementIntermediate->dest = ECX_REGISTER;
+			addX86Instruction(x86DataMovementIntermediate, X86_DATA_MOVEMENT);
+
 		    x86Compar->op = X86_CMP;
-			x86Compar->src = x86Location;
+			x86Compar->src = ECX_REGISTER;
 			x86Compar->dest = ONE;
 			addX86Instruction(x86Compar, X86_COMPAR);
 			addX86Instruction(x86Jump, X86_JUMP);
@@ -4150,6 +4157,9 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 	x86_data_movement_t *x86DataMovement = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
 	x86DataMovement->isDestAddress = false;
 
+	x86_data_movement_t *x86DataMovementIntermediate = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+	x86DataMovementIntermediate->isDestAddress = false;
+
 	x86_compar_t *x86Compar = (x86_compar_t *)malloc(sizeof(x86_compar_t));
 	x86_jump_t *x86Jump = (x86_jump_t *)malloc(sizeof(x86_jump_t));
 	x86_arithmetic_t *x86Arithmetic = (x86_arithmetic_t *)malloc(sizeof(x86_arithmetic_t));
@@ -4163,8 +4173,13 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 				x86Logic->dest = EAX_REGISTER;
 				addX86Instruction(x86Logic, X86_LOGIC);
 
+				x86DataMovementIntermediate->op = X86_MOV;
+				x86DataMovementIntermediate->src = x86LocationLTerm;
+				x86DataMovementIntermediate->dest = ECX_REGISTER;
+				addX86Instruction(x86DataMovementIntermediate, X86_DATA_MOVEMENT);
+
 				x86Compar->op = X86_CMP;
-				x86Compar->src = x86LocationLTerm;
+				x86Compar->src = ECX_REGISTER;
 				x86Compar->dest = x86LocationRTerm;
 				addX86Instruction(x86Compar, X86_COMPAR);
 
@@ -4486,7 +4501,7 @@ void stringifyX86List(x86_list_t *x86List) {
 				}
 				break;
 		    case X86_LABEL:
-				printf("%s:", x86->instruction.label->label);
+				printf(".%s:", x86->instruction.label->label);
 				break;
 		}
 		printf("\n");
