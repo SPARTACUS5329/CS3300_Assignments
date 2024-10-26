@@ -58,7 +58,7 @@ extern int lineNumber;
 
 [0-9]+         { strcpy(mytext, yytext); return NUMBER; }
 \"[^\"]*\"          { strcpy(mytext, yytext); return STRING_TOK; }
-\'[^\']\'          { strcpy(mytext, yytext); return CHAR_TOK; }
+\'([^\']|\\\'|\\0|\\\\|\\n)\'          { strcpy(mytext, yytext); return CHAR_TOK; }
 [a-zA-Z_][a-zA-Z0-9_]* { strcpy(mytext, yytext); return IDENTIFIER; }
 
 "//".* {}
@@ -66,6 +66,7 @@ extern int lineNumber;
 
 [ \t]	{ }
 [\n]	{ lineNumber++; }
+[\0]	{ return CHAR_TOK; }
 
 .	{yyerror("unknown character");}
 %%

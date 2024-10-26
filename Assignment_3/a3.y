@@ -2620,7 +2620,23 @@ x86_location_t *getX86Location(assembly_term_t *term) {
 		    break;
 		case CHAR_IMMEDIATE:
 		    x86Location->type = X86_CHAR_IMMEDIATE;
-			x86Location->value.charImmediate = term->value[1];
+
+			if (term->value[1] != '\\')
+				x86Location->value.charImmediate = term->value[1];
+				break;
+
+		    switch (term->value[2]) {
+				case '0':
+				    x86Location->value.charImmediate = '\0';
+					break;
+				case 'n':
+				    x86Location->value.charImmediate = '\n';
+					break;
+				case '\\':
+				    x86Location->value.charImmediate = '\\';
+					break;
+		    }
+
 		    break;
 		case INT_IMMEDIATE:
 		    x86Location->type = X86_INT_IMMEDIATE;
@@ -2669,7 +2685,19 @@ void stringifyX86Location(x86_location_t *location) {
 			printf("$%d", location->value.intImmediate);
 		    break;
 		case X86_CHAR_IMMEDIATE:
-			printf("$\'%c\'", location->value.charImmediate);
+			switch (location->value.charImmediate) {
+				case '\0':
+				    printf("$0");
+					break;
+				case '\n':
+				    printf("$10");
+					break;
+				case '\\':
+				    printf("$92");
+					break;
+				default:
+				    printf("$\'%c\'", location->value.charImmediate);
+			}
 		    break;
 	}
 }

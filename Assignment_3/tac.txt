@@ -1,8 +1,11 @@
 main:
-t1 = 3
+t1 = 1
 a = t1
-t2 = 'A'
-t3 = a + 5
+t2 = 'B'
+t3 = 1
 str[t3] = t2
+t4 = '\0'
+t5 = a + 1
+str[t5] = t4
 retval = 0
 return

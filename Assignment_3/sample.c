@@ -7,9 +7,10 @@ int main() {
   // printf("Something\n"); // And this is also working
   // comments should be fine
   int a;
-  a = 3;
+  a = 1;
   char str[20];
-  str[a + 5] = 'A';
+  str[1] = 'B';
+  str[a + 1] = '\0';
 
   return 0;
 }
