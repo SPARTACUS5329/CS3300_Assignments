@@ -607,6 +607,8 @@ typedef struct X86SpaceAllocation {
 typedef struct X86DataMovement {
   x86_data_movement_e op;
   x86_location_t *src;
+  x86_location_t *opReg;
+  bool isDestAddress;
   x86_location_t *dest;
 } x86_data_movement_t;
 

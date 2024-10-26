@@ -22,7 +22,7 @@ symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 program_t *program;
 tac_list_t *tacList;
 x86_list_t *x86List;
-x86_location_t *EBP_REGISTER, *ESP_REGISTER, *EAX_REGISTER, *ZEROF_REGISTER, *ONE;
+x86_location_t *EBP_REGISTER, *ESP_REGISTER, *EAX_REGISTER, *EBX_REGISTER, *ECX_REGISTER, *ZEROF_REGISTER, *ONE;
 
 %}
 
@@ -322,12 +322,14 @@ assignable:
 	        strcat(id->name, "_");
 	        strcat(id->name, $1);
 	        strcpy(id->displayName, $1);
+
 		    if (streq(currType, "int", 3))
 		        id->type = INT;
 		    else if (streq(currType, "float", 5))
 		        id->type = FLOAT;
 		    else if (streq(currType, "char", 4))
 		        id->type = CHAR;
+
 	        id->depth = $2->depth;
 	        id->subscripts = $2->subscripts;
 		    insertSymbol(id->name, id, symbolTable);
@@ -815,6 +817,14 @@ int main(int argc, char *argv[]) {
 	EAX_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
 	EAX_REGISTER->type = X86_REGISTER;
 	EAX_REGISTER->value.reg = 'a';
+
+	EBX_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	EBX_REGISTER->type = X86_REGISTER;
+	EBX_REGISTER->value.reg = 'b';
+
+	ECX_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	ECX_REGISTER->type = X86_REGISTER;
+	ECX_REGISTER->value.reg = 'c';
 
 	ZEROF_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
 	ZEROF_REGISTER->type = X86_REGISTER;
@@ -1650,6 +1660,17 @@ void firstPassTACs(tac_list_t *tacList) {
 				if (item->data->stackOffset == 0) {
 				    item->data->stackOffset = -(currStackOffset + 4);
 					currStackOffset += 4;
+					for (int k = 0; k < item->data->depth; k++)
+						switch (item->data->type) {
+						    case INT:
+								currStackOffset += 4 * (atoi(item->data->subscripts[k]->lValue));
+								break;
+						    case CHAR:
+								currStackOffset += 1 * (atoi(item->data->subscripts[k]->lValue));
+								break;
+						    default:
+								error("Arrays supported only with INT and CHAR");
+						}
 				}
 				goto continue_first_pass;
 		    } else {
@@ -2049,6 +2070,7 @@ void stringifyAssemblyLabel(assembly_label_t *label) {
 		x86_data_movement_t *x86DataMovement = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
 		x86DataMovement->op = X86_MOV;
 		x86DataMovement->src = ESP_REGISTER;
+		x86DataMovement->isDestAddress = false;
 		x86DataMovement->dest = EBP_REGISTER;
 		addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
 
@@ -2065,60 +2087,48 @@ void stringifyAssemblyLabel(assembly_label_t *label) {
 }
 
 void stringifyAssemblyAssignment(assembly_assignment_t *assignment) {
-    assignment->rValue->stringify(assignment->rValue);
 	x86_location_t *x86Location = getX86Location(assignment->lValue);
+	expression_t *exp;
+	bool hasSubscripts = false;
+
+	for (int i = 0; i < assignment->lValue->depth; i++) {
+		exp = assignment->lValue->subscripts[i];
+		tac_term_t *tacTerm = newTACTerm(VARIABLE, 0, NULL, exp->lValue);
+		assembly_term_t *assTerm = newAssemblyTerm(tacTerm);
+
+		x86_data_movement_t *x86Mov = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+		x86Mov->op = X86_MOV;
+		x86Mov->isDestAddress = false;
+		x86Mov->src = getX86Location(assTerm);
+		x86Mov->dest = EAX_REGISTER;
+		addX86Instruction(x86Mov, X86_DATA_MOVEMENT);
+
+		x86_data_movement_t *x86Lea = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+		x86Lea->op = X86_LEA;
+		x86Lea->isDestAddress = false;
+		x86Lea->src = x86Location;
+		x86Lea->opReg = EAX_REGISTER;
+		x86Lea->dest = EBX_REGISTER;
+		hasSubscripts = true;
+		addX86Instruction(x86Lea, X86_DATA_MOVEMENT);
+	}
+
+    assignment->rValue->stringify(assignment->rValue);
 
 	x86_data_movement_t *x86DataMovement = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
 	x86DataMovement->op = X86_MOV;
 	x86DataMovement->src = EAX_REGISTER;
-	x86DataMovement->dest = x86Location;
-	addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
-}
 
-x86_location_t *getX86Location(assembly_term_t *term) {
-	if (term == NULL)
-		return NULL;
-
-	char tempStr[MAX_IDENTIFIER_LENGTH];
-	x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
-	symbol_table_item_t *item;
-
-	switch (term->type) {
-		case ASSEMBLY_VARIABLE:
-			sprintf(tempStr, "%s_%s", term->scope, term->value);
-			item = searchSymbol(tempStr, symbolTable);
-
-			if (item == NULL)
-				error("Assembly assignment lValue not found");
-
-		    if (streq(term->scope, "global", 6)) {
-				if (item->data->type == DATA_STRING)
-				    x86Location->type = X86_DATA_FMT;
-				else
-				    x86Location->type = X86_GLOBAL;
-
-				strcpy(x86Location->value.var, term->value);
-			} else {
-				x86Location->type = X86_MEMORY;
-				x86Location->value.stackOffset = item->data->stackOffset;
-			}
-		    break;
-		case EAX:
-		    x86Location = EAX_REGISTER;
-		    break;
-		case CHAR_IMMEDIATE:
-		    x86Location->type = X86_CHAR_IMMEDIATE;
-			x86Location->value.charImmediate = term->value[1];
-		    break;
-		case INT_IMMEDIATE:
-		    x86Location->type = X86_INT_IMMEDIATE;
-			x86Location->value.intImmediate = atoi(term->value);
-		    break;
-		default:
-		    error("Invalid type term type");
+	if (hasSubscripts) {
+		x86DataMovement->isDestAddress = true;
+		x86DataMovement->dest = EBX_REGISTER;
+	}
+	else {
+		x86DataMovement->isDestAddress = false;
+		x86DataMovement->dest = x86Location;
 	}
 
-	return x86Location;
+	addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
 }
 
 void stringifyAssemblyCall(assembly_call_t *call) {
@@ -2237,7 +2247,10 @@ void stringifyAssemblyReturn(assembly_return_t *ret) {
 void stringifyAssemblyExp(assembly_exp_t *exp) {
 	x86_location_t *x86LocationLTerm = getX86Location(exp->lTerm);
 	x86_location_t *x86LocationRTerm = getX86Location(exp->rTerm);
+
 	x86_data_movement_t *x86DataMovement = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+	x86DataMovement->isDestAddress = false;
+
 	x86_compar_t *x86Compar = (x86_compar_t *)malloc(sizeof(x86_compar_t));
 	x86_jump_t *x86Jump = (x86_jump_t *)malloc(sizeof(x86_jump_t));
 	x86_arithmetic_t *x86Arithmetic = (x86_arithmetic_t *)malloc(sizeof(x86_arithmetic_t));
@@ -2408,12 +2421,24 @@ void stringifyX86List(x86_list_t *x86List) {
 						printf(" ");
 						stringifyX86Location(x86->instruction.dataMovement->src);
 						printf(", ");
+						if (x86->instruction.dataMovement->isDestAddress)
+						    printf("(");
 						stringifyX86Location(x86->instruction.dataMovement->dest);
+						if (x86->instruction.dataMovement->isDestAddress)
+						    printf(")");
+
 						break;
 				    case X86_LEA:
 						printf("leal");
 						printf(" ");
-						stringifyX86Location(x86->instruction.dataMovement->src);
+						if (x86->instruction.dataMovement->src->type == X86_MEMORY) {
+						    printf("%d(%%ebp", x86->instruction.dataMovement->src->value.stackOffset);
+							printf(", ");
+							stringifyX86Location(x86->instruction.dataMovement->opReg);
+							printf(")");
+						} else {
+						    stringifyX86Location(x86->instruction.dataMovement->src);
+						}
 						printf(", ");
 						stringifyX86Location(x86->instruction.dataMovement->dest);
 						break;
@@ -2518,7 +2543,7 @@ void stringifyX86List(x86_list_t *x86List) {
 						printf("jmp");
 						break;
 				}
-				printf(" %s", x86->instruction.jump->label);
+				printf(" .%s", x86->instruction.jump->label);
 				break;
 		    case X86_COMPAR:
 				printf("cmpl ");
@@ -2562,6 +2587,53 @@ void stringifyX86List(x86_list_t *x86List) {
 	}
 }
 
+x86_location_t *getX86Location(assembly_term_t *term) {
+	if (term == NULL)
+		return NULL;
+
+	char tempStr[MAX_IDENTIFIER_LENGTH];
+	x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+	symbol_table_item_t *item;
+
+	switch (term->type) {
+		case ASSEMBLY_VARIABLE:
+			sprintf(tempStr, "%s_%s", term->scope, term->value);
+			item = searchSymbol(tempStr, symbolTable);
+
+			if (item == NULL)
+				error("Assembly assignment lValue not found");
+
+		    if (streq(term->scope, "global", 6)) {
+				if (item->data->type == DATA_STRING)
+				    x86Location->type = X86_DATA_FMT;
+				else
+				    x86Location->type = X86_GLOBAL;
+
+				strcpy(x86Location->value.var, term->value);
+			} else {
+				x86Location->type = X86_MEMORY;
+				x86Location->value.stackOffset = item->data->stackOffset;
+			}
+
+		    break;
+		case EAX:
+		    x86Location = EAX_REGISTER;
+		    break;
+		case CHAR_IMMEDIATE:
+		    x86Location->type = X86_CHAR_IMMEDIATE;
+			x86Location->value.charImmediate = term->value[1];
+		    break;
+		case INT_IMMEDIATE:
+		    x86Location->type = X86_INT_IMMEDIATE;
+			x86Location->value.intImmediate = atoi(term->value);
+		    break;
+		default:
+		    error("Invalid type term type");
+	}
+
+	return x86Location;
+}
+
 void stringifyX86Location(x86_location_t *location) {
     switch (location->type) {
 		case X86_REGISTER:
@@ -2577,6 +2649,9 @@ void stringifyX86Location(x86_location_t *location) {
 					break;
 				case 'b':
 				    printf("%%ebx");
+					break;
+				case 'c':
+				    printf("%%ecx");
 					break;
 				default:
 				    error("Register type not supported");

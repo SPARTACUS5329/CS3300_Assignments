@@ -1,35 +1,6 @@
-global b
-foo:
-x = param1
-retval = 0
-return
 main:
-t1 = 3
-a = t1
-t2 = 17
-b = t2
-t3 = 2
-param1 = t3
-call foo
-t4 = retval
-t5 = b
-param1 = t5
-call foo
-t6 = retval
-t7 = a < 3
-if (t7) goto L1
-goto L2
-L1:
-t8 = 3
-a = t8
-goto L3
-L2:
-t9 = 2
-a = t9
-L3:
-t10 = "Something\n"
-param1 = t10
-call printf
-t11 = retval
+t1 = 'A'
+t2 = 5
+str[t2] = t1
 retval = 0
 return
