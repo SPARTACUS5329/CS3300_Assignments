@@ -1,54 +1,46 @@
-main:
-t1 = 3
-a = t1
-t2 = 7
-b = t2
-t3 = a <= 3
-if (t3) goto L3
-goto L2
-L3:
-t4 = b == 7
-if (t4) goto L1
-goto L2
-L1:
-t5 = 'P'
-t6 = 0
-str[t6] = t5
-t7 = 'R'
-t8 = 1
-str[t8] = t7
-t9 = 'O'
-t10 = 2
-str[t10] = t9
-t11 = '\0'
-t12 = 3
-str[t12] = t11
-goto L4
-L2:
-t13 = 'N'
-t14 = 0
-str[t14] = t13
-t15 = 'O'
-t16 = 1
-str[t16] = t15
-t17 = 'O'
-t18 = 2
-str[t18] = t17
-t19 = 'B'
-t20 = 3
-str[t20] = t19
-t21 = 'S'
-t22 = 4
-str[t22] = t21
-t23 = '\0'
-t24 = 5
-str[t24] = t23
-L4:
-t25 = "%s\n"
-t26 = str
-param1 = t25
-param2 = t26
+dead:
+t1 = "This shouldn't print, if it does, you are cooked!!\n"
+param1 = t1
 call printf
-t27 = retval
+t2 = retval
+retval = -1
+return
+main:
+t3 = -1 == -1
+if (t3) goto L4
+goto L5
+L5:
+call dead
+t4 = retval
+t5 = t4 == 1
+if (t5) goto L4
+goto L1
+L4:
+t6 = -1 * -1
+t7 = -1 == t6
+if (t7) goto L6
+goto L1
+L6:
+t8 = 1 / 0
+t9 = t8 == 1
+if (t9) goto L3
+goto L1
+L3:
+call dead
+t10 = retval
+t11 = t10 == 1
+if (t11) goto L2
+goto L1
+L2:
+t12 = "Hello\n"
+param1 = t12
+call printf
+t13 = retval
+L1:
+t14 = "Hello\n"
+param1 = t14
+call printf
+t15 = retval
+L2:
 retval = 0
 return

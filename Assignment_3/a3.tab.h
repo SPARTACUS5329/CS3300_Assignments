@@ -70,7 +70,8 @@
      MAIN = 286,
      INCLUDE = 287,
      LIB_NAME = 288,
-     UMINUS = 289
+     UPLUS = 289,
+     UMINUS = 290
    };
 #endif
 /* Tokens.  */
@@ -105,7 +106,8 @@
 #define MAIN 286
 #define INCLUDE 287
 #define LIB_NAME 288
-#define UMINUS 289
+#define UPLUS 289
+#define UMINUS 290
 
 
 
@@ -141,7 +143,7 @@ typedef union YYSTYPE
 	condition_t *con;
 }
 /* Line 1529 of yacc.c.  */
-#line 145 "a3.tab.h"
+#line 147 "a3.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

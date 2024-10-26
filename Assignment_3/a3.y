@@ -40,7 +40,7 @@ x86_location_t *EBP_REGISTER, *ESP_REGISTER, *EAX_REGISTER, *EBX_REGISTER, *ECX_
 %left SHORT_OR_TOK 
 %left SHORT_AND_TOK 
 %right NOT_TOK
-%right UMINUS EXPONENT_TOK
+%right UMINUS UPLUS EXPONENT_TOK
 %left OPEN_PAREN CLOSE_PAREN
 %left ELSE_TOK
 
@@ -463,11 +463,17 @@ expression:
 		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
+    | PLUS_TOK expression %prec UPLUS {
+		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
+		exp->type = INT_CONSTANT;
+		sprintf(exp->lValue, "%s", $2->lValue);
+		exp->stringify = &stringifyExpression;
+		$$ = exp;
+    }
     | MINUS_TOK expression %prec UMINUS {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = INT_CONSTANT;
-		exp->child.binOp->type = EXPONENT;
-		sprintf(exp->lValue, "%s", $2->lValue);
+		sprintf(exp->lValue, "-%s", $2->lValue);
 		exp->stringify = &stringifyExpression;
 		$$ = exp;
     }
