@@ -2930,6 +2930,7 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 	condition_t *baseCon = ifElse->condition;
 	bool rootIfElse = ifElse->trueLabel == 0 && ifElse->falseLabel == 0;
 	char tempString[MAX_IDENTIFIER_LENGTH];
+
 	if (ifElse->trueLabel == 0)
 		ifElse->trueLabel = lCount++;
 	if (ifElse->falseLabel == 0)
@@ -2943,12 +2944,14 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 	switch (baseCon->op) {
 		case NOT:
 			baseIfElse->condition = baseCon->base;
-			baseIfElse->trueLabel = ifElse->falseLabel;
-			baseIfElse->falseLabel = ifElse->trueLabel;
-			baseIfElse->ifLineList = ifElse->ifLineList;
+			baseIfElse->trueLabel = 0;
+			baseIfElse->falseLabel = 0;
+			baseIfElse->ifLineList = ifElse->elseLineList;
+			baseIfElse->elseLineList = ifElse->ifLineList;
 			baseIfElse->stringify = &stringifyIfElseStatement;
+			baseIfElse->isMatched = ifElse->isMatched;
 			baseIfElse->stringify(baseIfElse);
-			break;
+			return;
 		case SHORT_AND:
 			tempLabel = lCount++;
 			baseIfElse->condition = baseCon->base;
@@ -3007,11 +3010,13 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 		sprintf(tempLabelString, "L%d", exitLabel);
 		newTACGoto(GOTO, tempLabelString, NULL);
 	}
+
 	if (ifElse->isMatched) {
 		sprintf(tempString, "L%d", ifElse->falseLabel);
 		newTACLabel(JUMP_LABEL, tempString);
 		ifElse->elseLineList->stringify(ifElse->elseLineList);
 	}
+
 	if (rootIfElse) {
 		sprintf(tempString, "L%d", exitLabel);
 		newTACLabel(JUMP_LABEL, tempString);

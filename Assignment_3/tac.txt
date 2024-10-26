@@ -1,46 +1,36 @@
-dead:
-t1 = "This shouldn't print, if it does, you are cooked!!\n"
-param1 = t1
-call printf
-t2 = retval
-retval = -1
-return
 main:
-t3 = -1 == -1
-if (t3) goto L4
-goto L5
-L5:
-call dead
-t4 = retval
-t5 = t4 == 1
-if (t5) goto L4
-goto L1
+t1 = 0
+i = t1
+L1:
+t2 = i < 3
+if (t2) goto L2
+goto L3
+L2:
+t3 = 0
+j = t3
 L4:
-t6 = -1 * -1
-t7 = -1 == t6
-if (t7) goto L6
-goto L1
+t4 = j < 3
+if (t4) goto L5
+goto L6
+L5:
+t5 = "%d "
+t6 = i * j
+t7 = t6
+param1 = t5
+param2 = t7
+call printf
+t8 = retval
+t9 = j + 1
+j = t9
+goto L4
 L6:
-t8 = 1 / 0
-t9 = t8 == 1
-if (t9) goto L3
+t10 = "\n"
+param1 = t10
+call printf
+t11 = retval
+t12 = i + 1
+i = t12
 goto L1
 L3:
-call dead
-t10 = retval
-t11 = t10 == 1
-if (t11) goto L2
-goto L1
-L2:
-t12 = "Hello\n"
-param1 = t12
-call printf
-t13 = retval
-L1:
-t14 = "Hello\n"
-param1 = t14
-call printf
-t15 = retval
-L2:
 retval = 0
 return

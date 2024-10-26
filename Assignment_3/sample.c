@@ -1,8 +1,8 @@
-// MiniC program for complex expression
-#include <stdio.h>
-int main() {
+// MiniC program for complex boolean expressions
+#include<stdio.h>
 
-  int a;
-  a = -1;
-  return 0;
+int main() {
+    int a;
+    a = 5;
+    return 0;
 }
