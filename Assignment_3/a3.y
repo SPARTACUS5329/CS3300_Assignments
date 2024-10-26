@@ -1403,14 +1403,6 @@ tac_term_t *newTACTerm(tac_term_e type, int depth, expression_t **subscripts,
 	strcpy(tacTerm->value, value);
 	tacTerm->stringify = &stringifyTACTerm;
 
-	// char tempStr[MAX_IDENTIFIER_LENGTH];
-	// sprintf(tempStr, "%s_%s", currTACFunction, value);
-	// symbol_table_item_t *item = searchSymbol(tempStr, symbolTable);
-	// if (item == NULL && item->data->depth > 0) {
-		// printf("Reaching: %s\n", tempStr);
-	// }
-	// else {}
-
 	return tacTerm;
 }
 
@@ -1720,6 +1712,7 @@ void firstPassTACs(tac_list_t *tacList) {
 			strcpy(id->name, tempStr);
 			strcpy(id->displayName, ass->lValue->value);
 			id->stackOffset = -(currStackOffset + 4);
+			id->isPointer = isPointer;
 			currStackOffset += 4;
 			insertSymbol(tempStr, id, symbolTable);
 		}
@@ -2356,8 +2349,9 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 			}
 		    break;
 		case ASSEMBLY_CONSTANT:
-			if (x86LocationLTerm->isPointer)
+			if (x86LocationLTerm->isPointer) {
 				x86DataMovement->op = X86_LEA;
+			}
 			else
 				x86DataMovement->op = X86_MOV;
 

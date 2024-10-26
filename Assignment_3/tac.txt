@@ -1,15 +1,54 @@
 main:
-t1 = 'B'
-t2 = 0
-str[t2] = t1
-t3 = '\0'
-t4 = 1
-str[t4] = t3
-t5 = "%s"
-t6 = str
-param1 = t5
-param2 = t6
+t1 = 3
+a = t1
+t2 = 7
+b = t2
+t3 = a <= 3
+if (t3) goto L3
+goto L2
+L3:
+t4 = b == 7
+if (t4) goto L1
+goto L2
+L1:
+t5 = 'P'
+t6 = 0
+str[t6] = t5
+t7 = 'R'
+t8 = 1
+str[t8] = t7
+t9 = 'O'
+t10 = 2
+str[t10] = t9
+t11 = '\0'
+t12 = 3
+str[t12] = t11
+goto L4
+L2:
+t13 = 'N'
+t14 = 0
+str[t14] = t13
+t15 = 'O'
+t16 = 1
+str[t16] = t15
+t17 = 'O'
+t18 = 2
+str[t18] = t17
+t19 = 'B'
+t20 = 3
+str[t20] = t19
+t21 = 'S'
+t22 = 4
+str[t22] = t21
+t23 = '\0'
+t24 = 5
+str[t24] = t23
+L4:
+t25 = "%s\n"
+t26 = str
+param1 = t25
+param2 = t26
 call printf
-t7 = retval
+t27 = retval
 retval = 0
 return
