@@ -6,8 +6,10 @@ int main() {
    * is working */
   // printf("Something\n"); // And this is also working
   // comments should be fine
+  int a;
+  a = 3;
   char str[20];
-  str[5] = 'A';
+  str[a + 5] = 'A';
 
   return 0;
 }

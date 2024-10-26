@@ -1,6 +1,8 @@
 main:
-t1 = 'A'
-t2 = 5
-str[t2] = t1
+t1 = 3
+a = t1
+t2 = 'A'
+t3 = a + 5
+str[t3] = t2
 retval = 0
 return

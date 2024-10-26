@@ -4187,7 +4187,6 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 				    default:
 						error("Invalid binary arithmetic operation");
 				}
-				addX86Instruction(x86Arithmetic, X86_ARITHMETIC);
 			}
 		    break;
 		case ASSEMBLY_CONSTANT:
