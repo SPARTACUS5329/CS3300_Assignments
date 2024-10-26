@@ -4,4 +4,4 @@ bison -d a3.y
 gcc lex.yy.c a3.tab.c
 ./a.out < sample.c
 # cat tac.txt
-cat a.s
+# cat a.s

@@ -494,7 +494,7 @@ expression:
 			    if (item == NULL)
 			    	error("Undefined identifier");
 			}
-			if (item->data->depth != $1->depth)
+			if (item->data->type == INT && item->data->depth != $1->depth)
 				error("Invalid location");
 		    exp->type = VAR_CONSTANT;
 		} else {

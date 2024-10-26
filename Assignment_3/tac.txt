@@ -1,11 +1,33 @@
 main:
 t1 = 1
 a = t1
-t2 = 'B'
-t3 = 1
-str[t3] = t2
-t4 = '\0'
-t5 = a + 1
-str[t5] = t4
+t2 = a < 4
+if (t2) goto L1
+goto L2
+L1:
+t3 = 'B'
+t4 = 0
+str[t4] = t3
+t5 = 'B'
+t6 = 1
+str[t6] = t5
+goto L3
+L2:
+t7 = 'C'
+t8 = 0
+str[t8] = t7
+t9 = 'C'
+t10 = 1
+str[t10] = t9
+L3:
+t11 = '\0'
+t12 = a + 1
+str[t12] = t11
+t13 = "%s"
+t14 = str
+param1 = t13
+param2 = t14
+call printf
+t15 = retval
 retval = 0
 return

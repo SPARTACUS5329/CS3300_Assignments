@@ -2074,7 +2074,7 @@ yyreduce:
 			    if (item == NULL)
 			    	error("Undefined identifier");
 			}
-			if (item->data->depth != (yyvsp[(1) - (1)].id)->depth)
+			if (item->data->type == INT && item->data->depth != (yyvsp[(1) - (1)].id)->depth)
 				error("Invalid location");
 		    exp->type = VAR_CONSTANT;
 		} else {
