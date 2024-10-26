@@ -225,6 +225,7 @@ typedef enum {
 
 typedef struct Identifier {
   data_type_e type;
+  bool isPointer;
   char name[MAX_IDENTIFIER_LENGTH];
   char displayName[MAX_IDENTIFIER_LENGTH];
   int depth;
@@ -443,7 +444,6 @@ typedef struct TACExp {
 
 typedef struct TACTerm {
   tac_term_e type;
-  bool isPassAddress;
   char value[MAX_IDENTIFIER_LENGTH];
   int depth;
   expression_t **subscripts;
@@ -542,7 +542,6 @@ typedef struct AssemblyExp {
 
 typedef struct AssemblyTerm {
   assembly_term_e type;
-  bool isPassAddress;
   char scope[MAX_IDENTIFIER_LENGTH];
   char value[MAX_IDENTIFIER_LENGTH];
   int depth;
@@ -658,7 +657,7 @@ typedef struct X86Label {
 
 typedef struct X86Location {
   x86_location_e type;
-  bool isPassAddress;
+  bool isPointer;
   union {
     int intImmediate;
     char charImmediate;

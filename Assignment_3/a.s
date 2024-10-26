@@ -13,7 +13,7 @@ movl $0, %eax
 movl %eax, -8(%ebp)
 movl -8(%ebp), %eax
 leal -12(%ebp, %eax), %ebx
-movl -4(%ebp), %eax
+leal -4(%ebp), %eax
 movl %eax, (%ebx)
 movb $0, %eax
 movl %eax, -26(%ebp)
@@ -23,7 +23,7 @@ movl -30(%ebp), %eax
 leal -12(%ebp, %eax), %ebx
 movl -26(%ebp), %eax
 movl %eax, (%ebx)
-movl -12(%ebp), %eax
+leal -12(%ebp), %eax
 movl %eax, -38(%ebp)
 pushl -38(%ebp)
 pushl $t5

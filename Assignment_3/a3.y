@@ -332,6 +332,7 @@ assignable:
 
 	        id->depth = $2->depth;
 	        id->subscripts = $2->subscripts;
+			id->isPointer = true;
 		    insertSymbol(id->name, id, symbolTable);
 		    $$ = id;
 		}
@@ -807,37 +808,30 @@ int main(int argc, char *argv[]) {
     assembly_list_t *assList = parseTACs(tacList);
 
 	EBP_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
-	// EBP_REGISTER->isPassAddress = false;
 	EBP_REGISTER->type = X86_REGISTER;
 	EBP_REGISTER->value.reg = 'B';
 
 	ESP_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
-	// ESP_REGISTER->isPassAddress = false;
 	ESP_REGISTER->type = X86_REGISTER;
 	ESP_REGISTER->value.reg = 'S';
 
 	EAX_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
-	// EAX_REGISTER->isPassAddress = false;
 	EAX_REGISTER->type = X86_REGISTER;
 	EAX_REGISTER->value.reg = 'a';
 
 	EBX_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
-	// EBX_REGISTER->isPassAddress = false;
 	EBX_REGISTER->type = X86_REGISTER;
 	EBX_REGISTER->value.reg = 'b';
 
 	ECX_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
-	// ECX_REGISTER->isPassAddress = false;
 	ECX_REGISTER->type = X86_REGISTER;
 	ECX_REGISTER->value.reg = 'c';
 
 	ZEROF_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
-	// ZEROF_REGISTER->isPassAddress = false;
 	ZEROF_REGISTER->type = X86_REGISTER;
 	ZEROF_REGISTER->value.reg = 'Z';
 
 	ONE = (x86_location_t *)malloc(sizeof(x86_location_t));
-	// ONE->isPassAddress = false;
 	ONE->type = X86_INT_IMMEDIATE;
 	ONE->value.intImmediate = 1;
 
@@ -1395,7 +1389,6 @@ void newTACGlobalDec(char value[MAX_IDENTIFIER_LENGTH]) {
 void newTACAssignment(tac_term_t *lValue, tac_exp_t *rValue) {
     tac_ass_t *tacAss = (tac_ass_t *)malloc(sizeof(tac_ass_t));
 	tacAss->lValue = lValue;
-	// lValue->isPassAddress = rValue->lTerm->isPassAddress;
 	tacAss->rValue = rValue;
 	tacAss->stringify = &stringifyTACAssignment;
 	newTAC(TAC_ASSIGNMENT, tacAss);
@@ -1415,10 +1408,8 @@ tac_term_t *newTACTerm(tac_term_e type, int depth, expression_t **subscripts,
 	// symbol_table_item_t *item = searchSymbol(tempStr, symbolTable);
 	// if (item == NULL && item->data->depth > 0) {
 		// printf("Reaching: %s\n", tempStr);
-		// // tacTerm->isPassAddress = true;
 	// }
 	// else {}
-		// // tacTerm->isPassAddress = false;
 
 	return tacTerm;
 }
@@ -1700,6 +1691,22 @@ void firstPassTACs(tac_list_t *tacList) {
 				    goto continue_first_pass;
 			}
 
+			bool isPointer = false;
+
+		    sprintf(tempStr, "%s_%s", currTACFunction, ass->rValue->lTerm->value);
+			if (ass->rValue->lTerm->type == TEMPORARY || ass->rValue->lTerm->type == VARIABLE) {
+				symbol_table_item_t *rItem = searchSymbol(tempStr, symbolTable);
+
+				if (rItem == NULL) {
+				    sprintf(tempStr, "global_%s", ass->rValue->lTerm->value);
+					rItem = searchSymbol(tempStr, symbolTable);
+					if (rItem == NULL)
+						error("[firstPassTAC] Undefined variable used to read");
+				}
+
+				isPointer = rItem->data->isPointer;
+			}
+
 			identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 			tac_term_e rType = ass->rValue->lTerm->type;
 			if (rType == STRING_LITERAL) {
@@ -1709,6 +1716,7 @@ void firstPassTACs(tac_list_t *tacList) {
 				sprintf(tempStr, "%s_%s", currTACFunction, ass->lValue->value);
 				id->type = rType == CHAR_LITERAL ? CHAR : INT;
 			}
+
 			strcpy(id->name, tempStr);
 			strcpy(id->displayName, ass->lValue->value);
 			id->stackOffset = -(currStackOffset + 4);
@@ -1952,7 +1960,6 @@ assembly_term_t *newAssemblyTerm(tac_term_t *tac) {
 	}
 
 	term->depth = tac->depth;
-	// term->isPassAddress = tac->isPassAddress;
 	term->subscripts = tac->subscripts;
 	strcpy(term->value, tac->value);
 
@@ -2117,7 +2124,6 @@ void stringifyAssemblyLabel(assembly_label_t *label) {
 		int stackOffset = item->data->stackOffset;
 		x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
 		x86Location->type = X86_INT_IMMEDIATE;
-		// x86Location->isPassAddress = false;
 		x86Location->value.intImmediate = stackOffset;
 		newX86Arithmetic(X86_SUB, x86Location, ESP_REGISTER);
 	}
@@ -2178,7 +2184,6 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 		if (item != NULL) {
 		    x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
 		    x86Location->type = X86_MEMORY;
-			// x86Location->isPassAddress = item->data->depth > 0;
 			x86Location->value.stackOffset = item->data->stackOffset;
 
 			if (item->data->depth == 0) {
@@ -2208,7 +2213,6 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 		x86Stack->op = X86_PUSH;
 
 		x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
-		// x86Location->isPassAddress = false;
 		if (item->data->type == DATA_STRING)
 		    x86Location->type = X86_DATA_FMT;
 		else
@@ -2227,7 +2231,6 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 
 	x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
 	x86Location->type = X86_INT_IMMEDIATE;
-	// x86Location->isPassAddress = false;
 	x86Location->value.intImmediate = 4 * call->argCount;
 	newX86Arithmetic(X86_ADD, x86Location, ESP_REGISTER);
 }
@@ -2353,8 +2356,13 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 			}
 		    break;
 		case ASSEMBLY_CONSTANT:
-		    x86DataMovement->op = X86_MOV;
+			if (x86LocationLTerm->isPointer)
+				x86DataMovement->op = X86_LEA;
+			else
+				x86DataMovement->op = X86_MOV;
+
 			x86DataMovement->src = x86LocationLTerm;
+			x86DataMovement->opReg = NULL;
 			x86DataMovement->dest = EAX_REGISTER;
 			addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
 		    break;
@@ -2627,13 +2635,13 @@ x86_location_t *getX86Location(assembly_term_t *term) {
 
 	char tempStr[MAX_IDENTIFIER_LENGTH];
 	x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
-	// x86Location->isPassAddress = term->isPassAddress;
 	symbol_table_item_t *item;
 
 	switch (term->type) {
 		case ASSEMBLY_VARIABLE:
 			sprintf(tempStr, "%s_%s", term->scope, term->value);
 			item = searchSymbol(tempStr, symbolTable);
+			x86Location->isPointer = item->data->isPointer;
 
 			if (item == NULL)
 				error("Assembly assignment lValue not found");
