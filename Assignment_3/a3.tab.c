@@ -2677,30 +2677,37 @@ int main(int argc, char *argv[]) {
     assembly_list_t *assList = parseTACs(tacList);
 
 	EBP_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	// EBP_REGISTER->isPassAddress = false;
 	EBP_REGISTER->type = X86_REGISTER;
 	EBP_REGISTER->value.reg = 'B';
 
 	ESP_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	// ESP_REGISTER->isPassAddress = false;
 	ESP_REGISTER->type = X86_REGISTER;
 	ESP_REGISTER->value.reg = 'S';
 
 	EAX_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	// EAX_REGISTER->isPassAddress = false;
 	EAX_REGISTER->type = X86_REGISTER;
 	EAX_REGISTER->value.reg = 'a';
 
 	EBX_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	// EBX_REGISTER->isPassAddress = false;
 	EBX_REGISTER->type = X86_REGISTER;
 	EBX_REGISTER->value.reg = 'b';
 
 	ECX_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	// ECX_REGISTER->isPassAddress = false;
 	ECX_REGISTER->type = X86_REGISTER;
 	ECX_REGISTER->value.reg = 'c';
 
 	ZEROF_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	// ZEROF_REGISTER->isPassAddress = false;
 	ZEROF_REGISTER->type = X86_REGISTER;
 	ZEROF_REGISTER->value.reg = 'Z';
 
 	ONE = (x86_location_t *)malloc(sizeof(x86_location_t));
+	// ONE->isPassAddress = false;
 	ONE->type = X86_INT_IMMEDIATE;
 	ONE->value.intImmediate = 1;
 
@@ -3258,6 +3265,7 @@ void newTACGlobalDec(char value[MAX_IDENTIFIER_LENGTH]) {
 void newTACAssignment(tac_term_t *lValue, tac_exp_t *rValue) {
     tac_ass_t *tacAss = (tac_ass_t *)malloc(sizeof(tac_ass_t));
 	tacAss->lValue = lValue;
+	// lValue->isPassAddress = rValue->lTerm->isPassAddress;
 	tacAss->rValue = rValue;
 	tacAss->stringify = &stringifyTACAssignment;
 	newTAC(TAC_ASSIGNMENT, tacAss);
@@ -3271,6 +3279,17 @@ tac_term_t *newTACTerm(tac_term_e type, int depth, expression_t **subscripts,
 	tacTerm->subscripts = subscripts;
 	strcpy(tacTerm->value, value);
 	tacTerm->stringify = &stringifyTACTerm;
+
+	// char tempStr[MAX_IDENTIFIER_LENGTH];
+	// sprintf(tempStr, "%s_%s", currTACFunction, value);
+	// symbol_table_item_t *item = searchSymbol(tempStr, symbolTable);
+	// if (item == NULL && item->data->depth > 0) {
+		// printf("Reaching: %s\n", tempStr);
+		// // tacTerm->isPassAddress = true;
+	// }
+	// else {}
+		// // tacTerm->isPassAddress = false;
+
 	return tacTerm;
 }
 
@@ -3467,6 +3486,7 @@ void insertSymbol(char *key, identifier_t *data, symbol_table_item_t* hashTable[
 	item = searchSymbol(key, hashTable);
 	if (item != NULL)
 		return;
+
 	int hashIndex = hash(key);
 	item = (symbol_table_item_t*) malloc(sizeof(symbol_table_item_t));
 	item->data = data;
@@ -3774,13 +3794,16 @@ assembly_exp_t *newAssemblyExp(tac_exp_e type, bin_op_e op, assembly_term_t *lTe
 
 assembly_term_t *newAssemblyTerm(tac_term_t *tac) {
     assembly_term_t *term = (assembly_term_t *)calloc(1, sizeof(assembly_term_t));
+	bool updateScope = false;
 
 	switch (tac->type) {
 		case TEMPORARY:	
 		    term->type = ASSEMBLY_VARIABLE;
+			updateScope = true;
 			break;
 		case VARIABLE:	
 		    term->type = ASSEMBLY_VARIABLE;
+			updateScope = true;
 			break;
 		case RETVAL:	
 		    term->type = EAX;
@@ -3799,16 +3822,29 @@ assembly_term_t *newAssemblyTerm(tac_term_t *tac) {
 	}
 
 	term->depth = tac->depth;
+	// term->isPassAddress = tac->isPassAddress;
 	term->subscripts = tac->subscripts;
 	strcpy(term->value, tac->value);
+
+	if (!updateScope)
+		goto return_term;
 
 	char tempStr[MAX_IDENTIFIER_LENGTH];
 	sprintf(tempStr, "global_%s", tac->value);
 	symbol_table_item_t *item = searchSymbol(tempStr, symbolTable);
-	if (item == NULL)
+	if (item == NULL) {
+		sprintf(tempStr, "%s_%s", currScope, tac->value);
+		item = searchSymbol(tempStr, symbolTable);
+		if (item == NULL) {
+			printf("%s\n", tempStr);
+		    error("[newAssemblyTerm] Undefined variable");
+		}
 		strcpy(term->scope, currScope);
-	else
+	} else {
 		strcpy(term->scope, "global");
+	}
+
+return_term:
 	return term;
 }
 
@@ -3951,6 +3987,7 @@ void stringifyAssemblyLabel(assembly_label_t *label) {
 		int stackOffset = item->data->stackOffset;
 		x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
 		x86Location->type = X86_INT_IMMEDIATE;
+		// x86Location->isPassAddress = false;
 		x86Location->value.intImmediate = stackOffset;
 		newX86Arithmetic(X86_SUB, x86Location, ESP_REGISTER);
 	}
@@ -4011,9 +4048,24 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 		if (item != NULL) {
 		    x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
 		    x86Location->type = X86_MEMORY;
+			// x86Location->isPassAddress = item->data->depth > 0;
 			x86Location->value.stackOffset = item->data->stackOffset;
 
-		    newX86Stack(X86_PUSH, x86Location);
+			if (item->data->depth == 0) {
+				newX86Stack(X86_PUSH, x86Location);
+				continue;
+		    }
+
+			x86_data_movement_t *x86Lea = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+			x86Lea->op = X86_LEA;
+			x86Lea->isDestAddress = false;
+			x86Lea->src = x86Location;
+			x86Lea->opReg = NULL;
+			x86Lea->dest = EAX_REGISTER;
+			addX86Instruction(x86Lea, X86_DATA_MOVEMENT);
+
+			newX86Stack(X86_PUSH, EAX_REGISTER);
+
 			continue;
 		}
 
@@ -4026,6 +4078,7 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 		x86Stack->op = X86_PUSH;
 
 		x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+		// x86Location->isPassAddress = false;
 		if (item->data->type == DATA_STRING)
 		    x86Location->type = X86_DATA_FMT;
 		else
@@ -4044,6 +4097,7 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 
 	x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
 	x86Location->type = X86_INT_IMMEDIATE;
+	// x86Location->isPassAddress = false;
 	x86Location->value.intImmediate = 4 * call->argCount;
 	newX86Arithmetic(X86_ADD, x86Location, ESP_REGISTER);
 }
@@ -4066,34 +4120,13 @@ void stringifyAssemblyJump(assembly_goto_t *jump) {
 
 		    int stackOffset = item->data->stackOffset;
 			x86Location->type = X86_MEMORY;
-			x86Location->value.intImmediate = stackOffset;
+			x86Location->value.stackOffset = stackOffset;
 
 		    x86Compar->op = X86_CMP;
 			x86Compar->src = x86Location;
 			x86Compar->dest = ONE;
 			addX86Instruction(x86Compar, X86_COMPAR);
 			addX86Instruction(x86Jump, X86_JUMP);
-
-		    // switch (exp->op) {
-				// case COMPAR_EQ:
-				    // x86Jump->op = X86_JE;
-					// break;
-				// case COMPAR_NE:
-				    // x86Jump->op = X86_JNE;
-					// break;
-				// case COMPAR_LT:
-				    // x86Jump->op = X86_JLT;
-					// break;
-				// case COMPAR_GT:
-				    // x86Jump->op = X86_JGT;
-					// break;
-				// case COMPAR_LE:
-				    // x86Jump->op = X86_JLE;
-					// break;
-				// case COMPAR_GE:
-				    // x86Jump->op = X86_JGE;
-					// break;
-				// }
 		    break;
 		case GOTO:
 			x86Jump->op = X86_JMP;
@@ -4302,8 +4335,10 @@ void stringifyX86List(x86_list_t *x86List) {
 						printf(" ");
 						if (x86->instruction.dataMovement->src->type == X86_MEMORY) {
 						    printf("%d(%%ebp", x86->instruction.dataMovement->src->value.stackOffset);
-							printf(", ");
-							stringifyX86Location(x86->instruction.dataMovement->opReg);
+							if (x86->instruction.dataMovement->opReg != NULL) {
+								printf(", ");
+								stringifyX86Location(x86->instruction.dataMovement->opReg);
+							}
 							printf(")");
 						} else {
 						    stringifyX86Location(x86->instruction.dataMovement->src);
@@ -4462,6 +4497,7 @@ x86_location_t *getX86Location(assembly_term_t *term) {
 
 	char tempStr[MAX_IDENTIFIER_LENGTH];
 	x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+	// x86Location->isPassAddress = term->isPassAddress;
 	symbol_table_item_t *item;
 
 	switch (term->type) {

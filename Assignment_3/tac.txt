@@ -1,33 +1,15 @@
 main:
-t1 = 1
-a = t1
-t2 = a < 4
-if (t2) goto L1
-goto L2
-L1:
-t3 = 'B'
-t4 = 0
+t1 = 'B'
+t2 = 0
+str[t2] = t1
+t3 = '\0'
+t4 = 1
 str[t4] = t3
-t5 = 'B'
-t6 = 1
-str[t6] = t5
-goto L3
-L2:
-t7 = 'C'
-t8 = 0
-str[t8] = t7
-t9 = 'C'
-t10 = 1
-str[t10] = t9
-L3:
-t11 = '\0'
-t12 = a + 1
-str[t12] = t11
-t13 = "%s"
-t14 = str
-param1 = t13
-param2 = t14
+t5 = "%s"
+t6 = str
+param1 = t5
+param2 = t6
 call printf
-t15 = retval
+t7 = retval
 retval = 0
 return
