@@ -166,16 +166,15 @@ mainIdentifier:
 ;
 
 lines:
-	line {
-		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
-		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
-		lineList->lines[lineList->lineCount++] = $1;
-		lineList->stringify = &stringifyLineList;
-		$$ = lineList;
-	}
-	| lines line {
+	lines line {
 		$1->lines[$1->lineCount++] = $2;
 		$$ = $1;
+	}
+	| {
+		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
+		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
+		lineList->stringify = &stringifyLineList;
+		$$ = lineList;
 	}
 ;
 

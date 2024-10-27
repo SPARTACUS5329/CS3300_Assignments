@@ -1,105 +1,71 @@
-print:
-x = param1
-y = param2
-t1 = "%d\n"
-t2 = x
-param1 = t1
-param2 = t2
+b:
+arg = param1
+t1 = arg * arg
+arg = t1
+t2 = "Value at b is %d\n"
+t3 = arg
+param1 = t2
+param2 = t3
 call printf
-t3 = retval
-t4 = x + y
-retval = t4
+t4 = retval
+retval = 0
 return
-main:
-t5 = 3
-t6 = 9
+a:
+arg = param1
+nest = param2
+t5 = "Current Nesting: %d\n"
+t6 = nest
 param1 = t5
 param2 = t6
-call print
+call printf
 t7 = retval
-t8 = t7
-t9 = 4
-t10 = -9
-param1 = t9
-param2 = t10
-call print
-t11 = retval
-t12 = t11
-param1 = t8
-param2 = t12
-call print
-t13 = retval
-t14 = t13
-t15 = 0
-t16 = 67
-param1 = t15
-param2 = t16
-call print
-t17 = retval
-t18 = t17
-t19 = 7
-t20 = 8
+t8 = 1024 * 1024
+t9 = arg >= t8
+if (t9) goto L1
+goto L2
+L1:
+goto L3
+L2:
+t10 = "Arg before is %d\n"
+t11 = arg
+param1 = t10
+param2 = t11
+call printf
+t12 = retval
+t13 = arg
+param1 = t13
+call b
+t14 = retval
+t15 = arg * 1024
+arg = t15
+t16 = "Arg after is %d\n"
+t17 = arg
+param1 = t16
+param2 = t17
+call printf
+t18 = retval
+t19 = arg
+t20 = nest + 1
+t21 = t20
 param1 = t19
-param2 = t20
-call print
-t21 = retval
-t22 = t21
-param1 = t18
-param2 = t22
-call print
-t23 = retval
-t24 = t23
-t25 = 3
-t26 = 9
-param1 = t25
-param2 = t26
-call print
-t27 = retval
-t28 = t27
-t29 = 4
-t30 = -9
-param1 = t29
-param2 = t30
-call print
-t31 = retval
-t32 = t31
-param1 = t28
-param2 = t32
-call print
-t33 = retval
-t34 = t33
-param1 = t24
-param2 = t34
-call print
-t35 = retval
-t36 = t35
-param1 = t14
-param2 = t36
-call print
-t37 = retval
-t38 = t37
-t39 = -1
-t40 = -3
-param1 = t39
-param2 = t40
-call print
-t41 = retval
-t42 = t41
-t43 = 2
-t44 = 5
-param1 = t43
-param2 = t44
-call print
-t45 = retval
-t46 = t45
-param1 = t42
-param2 = t46
-call print
-t47 = retval
-t48 = t47
-param1 = t38
-param2 = t48
-call print
-t49 = retval
+param2 = t21
+call a
+t22 = retval
+t23 = "Back to Nesting: %d\n"
+t24 = nest
+param1 = t23
+param2 = t24
+call printf
+t25 = retval
+L3:
+retval = 0
+return
+main:
+t26 = 100
+t27 = 1
+param1 = t26
+param2 = t27
+call a
+t28 = retval
 retval = 0
 return
