@@ -1,15 +1,21 @@
-main:
+global ascii
+foo:
+str = param1
 t1 = 'A'
 t2 = 0
 str[t2] = t1
-t3 = '\0'
-t4 = 1
+retval = 0
+return
+main:
+t3 = 'A'
+t4 = 0
 str[t4] = t3
-t5 = "%s\n"
-t6 = str
-param1 = t5
-param2 = t6
-call printf
-t7 = retval
+t5 = 'A'
+t6 = 1
+ascii[t6] = t5
+t7 = str
+param1 = t7
+call foo
+t8 = retval
 retval = 0
 return

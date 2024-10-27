@@ -1136,9 +1136,9 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 		ifElse->ifLineList->stringify(ifElse->ifLineList);
 	}
 
-	int exitLabel;
+	int exitLabel = -1;
 
-	if (ifElse->ifLineList != NULL & ifElse->elseLineList != NULL)
+	if (ifElse->ifLineList != NULL && ifElse->elseLineList != NULL)
 		exitLabel = lCount++;
 	else if (ifElse->elseLineList != NULL)
 		exitLabel = ifElse->trueLabel;
@@ -1156,7 +1156,7 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 		ifElse->elseLineList->stringify(ifElse->elseLineList);
 	}
 
-	if (rootIfElse) {
+	if (rootIfElse && exitLabel != -1) {
 		sprintf(tempString, "L%d", exitLabel);
 		newTACLabel(JUMP_LABEL, tempString);
 	}
@@ -2536,16 +2536,25 @@ void stringifyX86List(x86_list_t *x86List) {
 
 						break;
 				    case X86_LEA:
-						printf("leal");
-						printf(" ");
 						if (x86->instruction.dataMovement->src->type == X86_MEMORY) {
-						    printf("%d(%%ebp", x86->instruction.dataMovement->src->value.stackOffset);
-							if (x86->instruction.dataMovement->opReg != NULL) {
-								printf(", ");
+							if (x86->instruction.dataMovement->src->value.stackOffset > 0) {
+								printf("movl %d(%%ebp), %%edx\n", x86->instruction.dataMovement->src->value.stackOffset);
+								printf("leal (%%edx, ");
 								stringifyX86Location(x86->instruction.dataMovement->opReg);
+								printf(", 1");
+							} else {
+								printf("leal");
+								printf(" ");
+								printf("%d(%%ebp", x86->instruction.dataMovement->src->value.stackOffset);
+								if (x86->instruction.dataMovement->opReg != NULL) {
+								    printf(", ");
+									stringifyX86Location(x86->instruction.dataMovement->opReg);
+								}
 							}
 							printf(")");
 						} else {
+							printf("leal");
+							printf(" ");
 						    stringifyX86Location(x86->instruction.dataMovement->src);
 						}
 						if (x86->instruction.dataMovement->src->type == X86_GLOBAL) {
