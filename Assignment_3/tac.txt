@@ -1,18 +1,78 @@
-global ascii
-print:
-ascii_arg = param1
-t1 = ascii_arg
-t2 = "%s"
-param1 = t1
-param2 = t2
+printPascal:
+n = param1
+t1 = 1
+line = t1
+L1:
+t2 = line <= n
+if (t2) goto L2
+goto L3
+L2:
+t3 = 1
+space = t3
+L4:
+t4 = n - line
+t5 = space <= t4
+if (t5) goto L5
+goto L6
+L5:
+t6 = "  "
+param1 = t6
 call printf
-t3 = retval
+t7 = retval
+t8 = space + 1
+space = t8
+goto L4
+L6:
+t9 = 1
+coef = t9
+t10 = 1
+i = t10
+L7:
+t11 = i <= line
+if (t11) goto L8
+goto L9
+L8:
+t12 = coef < 10
+if (t12) goto L10
+goto L11
+L10:
+t13 = "   %d"
+t14 = coef
+param1 = t13
+param2 = t14
+call printf
+t15 = retval
+goto L12
+L11:
+t16 = "  %d"
+t17 = coef
+param1 = t16
+param2 = t17
+call printf
+t18 = retval
+L12:
+t19 = line - i
+t20 = coef * t19
+t21 = t20 / i
+coef = t21
+t22 = i + 1
+i = t22
+goto L7
+L9:
+t23 = "\n"
+param1 = t23
+call printf
+t24 = retval
+t25 = line + 1
+line = t25
+goto L1
+L3:
 retval = 0
 return
 main:
-t4 = ascii
-param1 = t4
-call print
-t5 = retval
+t26 = 6
+param1 = t26
+call printPascal
+t27 = retval
 retval = 0
 return

@@ -2740,10 +2740,6 @@ int main(int argc, char *argv[]) {
 	ONE->type = X86_INT_IMMEDIATE;
 	ONE->value.intImmediate = 1;
 
-    // file = freopen("a.s", "w", stdout);
-    // if (file == NULL)
-        // error("Error opening file");
-
 	stringifyAssList(assList);
 
     return 0;
