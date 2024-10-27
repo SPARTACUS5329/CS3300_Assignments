@@ -548,12 +548,12 @@ static const yytype_uint16 yyrline[] =
 {
        0,   103,   103,   118,   122,   130,   139,   143,   152,   163,
      169,   173,   183,   190,   197,   204,   211,   218,   225,   235,
-     245,   251,   258,   264,   272,   289,   312,   342,   349,   356,
-     359,   368,   379,   384,   388,   395,   401,   411,   423,   435,
-     447,   459,   471,   478,   485,   488,   496,   523,   534,   541,
-     547,   555,   562,   566,   575,   584,   593,   604,   611,   618,
-     624,   627,   660,   663,   669,   676,   686,   696,   713,   720,
-     726,   732,   739,   747,   758,   764,   775
+     245,   251,   258,   264,   272,   289,   312,   343,   350,   357,
+     360,   369,   380,   385,   389,   396,   402,   412,   424,   436,
+     448,   460,   472,   479,   486,   489,   497,   524,   535,   542,
+     548,   556,   563,   567,   576,   585,   594,   605,   612,   619,
+     625,   628,   661,   664,   670,   677,   687,   697,   714,   721,
+     727,   733,   740,   748,   759,   765,   776
 };
 #endif
 
@@ -1848,33 +1848,34 @@ yyreduce:
 		char tempStr[MAX_IDENTIFIER_LENGTH];
 		sprintf(tempStr, "global_%s", (yyvsp[(1) - (2)].str));
 		symbol_table_item_t *item = searchSymbol(tempStr, symbolTable);
+	    identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
+
+
+		if (streq(currType, "int", 3))
+		    id->type = INT;
+		else if (streq(currType, "float", 5))
+		    id->type = FLOAT;
+		else if (streq(currType, "char", 4))
+		    id->type = CHAR;
+
+	    id->depth = (yyvsp[(2) - (2)].subscriptList)->depth;
+	    id->subscripts = (yyvsp[(2) - (2)].subscriptList)->subscripts;
+		id->isPointer = true;
+
 		if (item != NULL) {
-		    (yyval.id) = item->data;
+		    sprintf(id->name, "global_%s", (yyvsp[(1) - (2)].str));
 		} else {
-	        identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
-		    strcpy(id->name, currScope);
-	        strcat(id->name, "_");
-	        strcat(id->name, (yyvsp[(1) - (2)].str));
-	        strcpy(id->displayName, (yyvsp[(1) - (2)].str));
-
-		    if (streq(currType, "int", 3))
-		        id->type = INT;
-		    else if (streq(currType, "float", 5))
-		        id->type = FLOAT;
-		    else if (streq(currType, "char", 4))
-		        id->type = CHAR;
-
-	        id->depth = (yyvsp[(2) - (2)].subscriptList)->depth;
-	        id->subscripts = (yyvsp[(2) - (2)].subscriptList)->subscripts;
-			id->isPointer = true;
+		    sprintf(id->name, "%s_%s", currScope, (yyvsp[(1) - (2)].str));
 		    insertSymbol(id->name, id, symbolTable);
-		    (yyval.id) = id;
 		}
+
+	    strcpy(id->displayName, (yyvsp[(1) - (2)].str));
+		(yyval.id) = id;
 	;}
     break;
 
   case 27:
-#line 342 "a3.y"
+#line 343 "a3.y"
     {
 		subscript_list_t *subscriptList = (subscript_list_t *)malloc(sizeof(subscript_list_t));
 		subscriptList->depth = 1;
@@ -1885,7 +1886,7 @@ yyreduce:
     break;
 
   case 28:
-#line 349 "a3.y"
+#line 350 "a3.y"
     {
 		(yyvsp[(1) - (2)].subscriptList)->subscripts[(yyvsp[(1) - (2)].subscriptList)->depth++] = (yyvsp[(2) - (2)].exp);
 		(yyval.subscriptList) = (yyvsp[(1) - (2)].subscriptList);
@@ -1893,14 +1894,14 @@ yyreduce:
     break;
 
   case 29:
-#line 356 "a3.y"
+#line 357 "a3.y"
     {
 		(yyval.exp) = (yyvsp[(2) - (3)].exp);
 	;}
     break;
 
   case 30:
-#line 359 "a3.y"
+#line 360 "a3.y"
     {
 		expression_t *exp = (expression_t *)calloc(1, sizeof(expression_t));
 		strcpy(exp->lValue, "0");
@@ -1910,7 +1911,7 @@ yyreduce:
     break;
 
   case 31:
-#line 368 "a3.y"
+#line 369 "a3.y"
     {
 		arg_list_t *argList = (yyvsp[(3) - (4)].argList);
 		function_call_t *fun = (function_call_t *)malloc(sizeof(function_call_t));
@@ -1922,7 +1923,7 @@ yyreduce:
     break;
 
   case 32:
-#line 379 "a3.y"
+#line 380 "a3.y"
     {
 		(yyval.argList) = (arg_list_t *)malloc(sizeof(arg_list_t));
 		(yyval.argList)->args = (arg_t **)malloc(MAX_ARGS * sizeof(arg_t *));
@@ -1931,7 +1932,7 @@ yyreduce:
     break;
 
   case 33:
-#line 384 "a3.y"
+#line 385 "a3.y"
     {
 		(yyvsp[(1) - (3)].argList)->args[(yyvsp[(1) - (3)].argList)->argCount++] = (yyvsp[(3) - (3)].arg);
 		(yyval.argList) = (yyvsp[(1) - (3)].argList);
@@ -1939,7 +1940,7 @@ yyreduce:
     break;
 
   case 34:
-#line 388 "a3.y"
+#line 389 "a3.y"
     {
 		(yyval.argList) = (arg_list_t *)malloc(sizeof(arg_list_t));
 		(yyval.argList)->args = (arg_t **)malloc(MAX_ARGS * sizeof(arg_t *));
@@ -1947,7 +1948,7 @@ yyreduce:
     break;
 
   case 35:
-#line 395 "a3.y"
+#line 396 "a3.y"
     {
 		arg_t *arg = (arg_t *)malloc(sizeof(arg_t));
 		arg->type = EXPRESSION;
@@ -1957,7 +1958,7 @@ yyreduce:
     break;
 
   case 36:
-#line 401 "a3.y"
+#line 402 "a3.y"
     {
 		arg_t *arg = (arg_t *)malloc(sizeof(arg_t));
 		arg->type = STRING;
@@ -1968,7 +1969,7 @@ yyreduce:
     break;
 
   case 37:
-#line 411 "a3.y"
+#line 412 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -1984,7 +1985,7 @@ yyreduce:
     break;
 
   case 38:
-#line 423 "a3.y"
+#line 424 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -2000,7 +2001,7 @@ yyreduce:
     break;
 
   case 39:
-#line 435 "a3.y"
+#line 436 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -2016,7 +2017,7 @@ yyreduce:
     break;
 
   case 40:
-#line 447 "a3.y"
+#line 448 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -2032,7 +2033,7 @@ yyreduce:
     break;
 
   case 41:
-#line 459 "a3.y"
+#line 460 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -2048,7 +2049,7 @@ yyreduce:
     break;
 
   case 42:
-#line 471 "a3.y"
+#line 472 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = INT_CONSTANT;
@@ -2059,7 +2060,7 @@ yyreduce:
     break;
 
   case 43:
-#line 478 "a3.y"
+#line 479 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = INT_CONSTANT;
@@ -2070,14 +2071,14 @@ yyreduce:
     break;
 
   case 44:
-#line 485 "a3.y"
+#line 486 "a3.y"
     {
 		(yyval.exp) = (yyvsp[(2) - (3)].exp);
     ;}
     break;
 
   case 45:
-#line 488 "a3.y"
+#line 489 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		strcpy(exp->lValue, "retval");
@@ -2089,7 +2090,7 @@ yyreduce:
     break;
 
   case 46:
-#line 496 "a3.y"
+#line 497 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 
@@ -2117,7 +2118,7 @@ yyreduce:
     break;
 
   case 47:
-#line 523 "a3.y"
+#line 524 "a3.y"
     {
 		function_def_t *fun = (function_def_t *)malloc(sizeof(function_def_t));
 		strcpy(fun->name, (yyvsp[(2) - (6)].str));
@@ -2129,7 +2130,7 @@ yyreduce:
     break;
 
   case 48:
-#line 534 "a3.y"
+#line 535 "a3.y"
     {
 		strcpy(currScope, (yyvsp[(1) - (1)].str));
 		(yyval.str) = (yyvsp[(1) - (1)].str);
@@ -2137,7 +2138,7 @@ yyreduce:
     break;
 
   case 49:
-#line 541 "a3.y"
+#line 542 "a3.y"
     {
 		return_statement_t *ret = (return_statement_t *)malloc(sizeof(return_statement_t));
 		ret->exp = (yyvsp[(2) - (3)].exp);
@@ -2147,7 +2148,7 @@ yyreduce:
     break;
 
   case 50:
-#line 547 "a3.y"
+#line 548 "a3.y"
     {
 		return_statement_t *ret = (return_statement_t *)malloc(sizeof(return_statement_t));
 		ret->stringify = &stringifyReturnStatement;
@@ -2156,7 +2157,7 @@ yyreduce:
     break;
 
   case 51:
-#line 555 "a3.y"
+#line 556 "a3.y"
     {
 		param_list_t *paramList = (param_list_t *)malloc(sizeof(param_list_t));
 		paramList->params = (param_t **)malloc(MAX_ARGS * sizeof(param_t *));
@@ -2167,7 +2168,7 @@ yyreduce:
     break;
 
   case 52:
-#line 562 "a3.y"
+#line 563 "a3.y"
     {
 		(yyvsp[(1) - (3)].paramList)->params[(yyvsp[(1) - (3)].paramList)->paramCount++] = (yyvsp[(3) - (3)].param);
 		(yyval.paramList) = (yyvsp[(1) - (3)].paramList);
@@ -2175,7 +2176,7 @@ yyreduce:
     break;
 
   case 53:
-#line 566 "a3.y"
+#line 567 "a3.y"
     {
 		param_list_t *paramList = (param_list_t *)malloc(sizeof(param_list_t));
 		paramList->params = (param_t **)malloc(MAX_ARGS * sizeof(param_t *));
@@ -2185,7 +2186,7 @@ yyreduce:
     break;
 
   case 54:
-#line 575 "a3.y"
+#line 576 "a3.y"
     {
 		param_t *param = (param_t *)malloc(sizeof(param_t));
 		param->type = (yyvsp[(1) - (2)].dataType);
@@ -2195,7 +2196,7 @@ yyreduce:
     break;
 
   case 55:
-#line 584 "a3.y"
+#line 585 "a3.y"
     {
 		if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 		ifElse->isMatched = true;
@@ -2208,7 +2209,7 @@ yyreduce:
     break;
 
   case 56:
-#line 593 "a3.y"
+#line 594 "a3.y"
     {
 		if_else_statement_t *ifElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
 		ifElse->isMatched = false;
@@ -2220,7 +2221,7 @@ yyreduce:
     break;
 
   case 57:
-#line 604 "a3.y"
+#line 605 "a3.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = SHORT_AND;
@@ -2231,7 +2232,7 @@ yyreduce:
     break;
 
   case 58:
-#line 611 "a3.y"
+#line 612 "a3.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = SHORT_OR;
@@ -2242,7 +2243,7 @@ yyreduce:
     break;
 
   case 59:
-#line 618 "a3.y"
+#line 619 "a3.y"
     {
 		condition_t *con = (condition_t *)malloc(sizeof(condition_t));
 		con->op = NOT;
@@ -2252,14 +2253,14 @@ yyreduce:
     break;
 
   case 60:
-#line 624 "a3.y"
+#line 625 "a3.y"
     {
 		(yyval.con) = (yyvsp[(2) - (3)].con);
 	;}
     break;
 
   case 61:
-#line 627 "a3.y"
+#line 628 "a3.y"
     {
 		expression_t *exp = (expression_t *)malloc(sizeof(expression_t));
 		exp->type = BIN_OP;
@@ -2293,21 +2294,21 @@ yyreduce:
     break;
 
   case 62:
-#line 660 "a3.y"
+#line 661 "a3.y"
     {
 		(yyval.exp) = (yyvsp[(1) - (1)].exp);
 	;}
     break;
 
   case 63:
-#line 663 "a3.y"
+#line 664 "a3.y"
     {
 		(yyval.exp) = (yyvsp[(1) - (1)].con)->exp;
 	;}
     break;
 
   case 64:
-#line 669 "a3.y"
+#line 670 "a3.y"
     {
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = WHILE;
@@ -2318,7 +2319,7 @@ yyreduce:
     break;
 
   case 65:
-#line 676 "a3.y"
+#line 677 "a3.y"
     {
 		loop_statement_t *loop = (loop_statement_t *)malloc(sizeof(loop_statement_t));
 		loop->type = FOR;
@@ -2329,7 +2330,7 @@ yyreduce:
     break;
 
   case 66:
-#line 686 "a3.y"
+#line 687 "a3.y"
     {
 		while_loop_t *loop = (while_loop_t *)malloc(sizeof(while_loop_t));
 		loop->condition = (yyvsp[(3) - (5)].con);
@@ -2340,7 +2341,7 @@ yyreduce:
     break;
 
   case 67:
-#line 696 "a3.y"
+#line 697 "a3.y"
     {
 		for_loop_t *loop = (for_loop_t *)malloc(sizeof(for_loop_t));
 		loop->initial = (yyvsp[(3) - (10)].assignmentStatement);
@@ -2358,7 +2359,7 @@ yyreduce:
     break;
 
   case 68:
-#line 713 "a3.y"
+#line 714 "a3.y"
     {
 		line_list_t *lineList = (line_list_t *)malloc(sizeof(line_list_t));
 		lineList->lines = (line_t **)malloc(MAX_LINES * sizeof(line_t *));
@@ -2369,14 +2370,14 @@ yyreduce:
     break;
 
   case 69:
-#line 720 "a3.y"
+#line 721 "a3.y"
     {
 		(yyval.lineList) = (yyvsp[(2) - (3)].lineList);
 	;}
     break;
 
   case 70:
-#line 726 "a3.y"
+#line 727 "a3.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, (yyvsp[(1) - (1)].str));
@@ -2386,7 +2387,7 @@ yyreduce:
     break;
 
   case 71:
-#line 732 "a3.y"
+#line 733 "a3.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, (yyvsp[(1) - (2)].str));
@@ -2397,7 +2398,7 @@ yyreduce:
     break;
 
   case 72:
-#line 739 "a3.y"
+#line 740 "a3.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, mytext);
@@ -2409,7 +2410,7 @@ yyreduce:
     break;
 
   case 73:
-#line 747 "a3.y"
+#line 748 "a3.y"
     {
 		identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 		strcpy(id->name, mytext);
@@ -2421,14 +2422,14 @@ yyreduce:
     break;
 
   case 74:
-#line 758 "a3.y"
+#line 759 "a3.y"
     {
 		(yyval.str) = strdup(mytext);
 	;}
     break;
 
   case 75:
-#line 764 "a3.y"
+#line 765 "a3.y"
     {
 		strcpy(currType, mytext);
 		if (streq(mytext, "int", 3))
@@ -2441,7 +2442,7 @@ yyreduce:
     break;
 
   case 76:
-#line 775 "a3.y"
+#line 776 "a3.y"
     {
 		(yyval.str) = strdup(mytext);
 	;}
@@ -2449,7 +2450,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 2453 "a3.tab.c"
+#line 2454 "a3.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2663,7 +2664,7 @@ yyreturn:
 }
 
 
-#line 780 "a3.y"
+#line 781 "a3.y"
 
 
 void yyerror(char *message) {
@@ -2855,6 +2856,7 @@ void stringifyExpression(expression_t *exp) {
 	tac_term_t *lValue;
 	tac_term_t *lTerm;
 	tac_exp_t *rValue;
+
     switch (exp->type) {
 		case INT_CONSTANT:
 			sprintf(tempString, "t%d", tCount++);

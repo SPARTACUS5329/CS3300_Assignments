@@ -313,28 +313,29 @@ assignable:
 		char tempStr[MAX_IDENTIFIER_LENGTH];
 		sprintf(tempStr, "global_%s", $1);
 		symbol_table_item_t *item = searchSymbol(tempStr, symbolTable);
+	    identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
+
+
+		if (streq(currType, "int", 3))
+		    id->type = INT;
+		else if (streq(currType, "float", 5))
+		    id->type = FLOAT;
+		else if (streq(currType, "char", 4))
+		    id->type = CHAR;
+
+	    id->depth = $2->depth;
+	    id->subscripts = $2->subscripts;
+		id->isPointer = true;
+
 		if (item != NULL) {
-		    $$ = item->data;
+		    sprintf(id->name, "global_%s", $1);
 		} else {
-	        identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
-		    strcpy(id->name, currScope);
-	        strcat(id->name, "_");
-	        strcat(id->name, $1);
-	        strcpy(id->displayName, $1);
-
-		    if (streq(currType, "int", 3))
-		        id->type = INT;
-		    else if (streq(currType, "float", 5))
-		        id->type = FLOAT;
-		    else if (streq(currType, "char", 4))
-		        id->type = CHAR;
-
-	        id->depth = $2->depth;
-	        id->subscripts = $2->subscripts;
-			id->isPointer = true;
+		    sprintf(id->name, "%s_%s", currScope, $1);
 		    insertSymbol(id->name, id, symbolTable);
-		    $$ = id;
 		}
+
+	    strcpy(id->displayName, $1);
+		$$ = id;
 	}
 ;
 
@@ -968,6 +969,7 @@ void stringifyExpression(expression_t *exp) {
 	tac_term_t *lValue;
 	tac_term_t *lTerm;
 	tac_exp_t *rValue;
+
     switch (exp->type) {
 		case INT_CONSTANT:
 			sprintf(tempString, "t%d", tCount++);
