@@ -2060,13 +2060,17 @@ void stringifyTextList(assembly_text_list_t *textList) {
 
 void stringifyBSS(assembly_bss_t *ass) {
 	identifier_t *var = ass->var;
-	int space;
+	int space, depth = 1;
+
+	for (int i = 0; i < var->depth; i++)
+		depth *= atoi(var->subscripts[i]->lValue);
+
 	switch(var->type) {
 		case INT:
-			space = 4 * (1 + var->depth);
+			space = 4 * depth;
 			break;
 		case CHAR:
-			space = 1 * (1 + var->depth);
+			space = 1 * depth;
 			break;
 		default:
 		    error("Unsupported data type");
@@ -2543,6 +2547,14 @@ void stringifyX86List(x86_list_t *x86List) {
 							printf(")");
 						} else {
 						    stringifyX86Location(x86->instruction.dataMovement->src);
+						}
+						if (x86->instruction.dataMovement->src->type == X86_GLOBAL) {
+							printf("(");
+							if (x86->instruction.dataMovement->opReg != NULL) {
+								printf(", ");
+								stringifyX86Location(x86->instruction.dataMovement->opReg);
+							}
+							printf(", 1)");
 						}
 						printf(", ");
 						stringifyX86Location(x86->instruction.dataMovement->dest);
