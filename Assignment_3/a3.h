@@ -652,6 +652,7 @@ typedef struct X86Section {
 } x86_section_t;
 
 typedef struct X86Label {
+  label_e type;
   char label[MAX_IDENTIFIER_LENGTH];
 } x86_label_t;
 

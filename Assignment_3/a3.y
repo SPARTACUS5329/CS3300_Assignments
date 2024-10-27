@@ -2126,6 +2126,7 @@ void stringifyAssemblyLabel(assembly_label_t *label) {
 	}
 
     x86_label_t *x86Label = (x86_label_t *)malloc(sizeof(x86_label_t));
+	x86Label->type = label->type;
     strcpy(x86Label->label, label->value);
     addX86Instruction(x86Label, X86_LABEL);
 
@@ -2668,7 +2669,9 @@ void stringifyX86List(x86_list_t *x86List) {
 				}
 				break;
 		    case X86_LABEL:
-				printf(".%s:", x86->instruction.label->label);
+				if (x86->instruction.label->type == JUMP_LABEL)
+				    printf(".");
+				printf("%s:", x86->instruction.label->label);
 				break;
 		}
 		printf("\n");

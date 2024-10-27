@@ -4,5 +4,12 @@ b = t1
 main:
 t2 = 3
 a = t2
+t3 = a == 3
+if (t3) goto L1
+goto L2
+L1:
+t4 = 2
+a = t4
+L2:
 retval = 0
 return
