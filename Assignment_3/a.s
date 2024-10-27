@@ -67,23 +67,24 @@ movl %eax, -52(%ebp)
 movl -52(%ebp), %eax
 movl %eax, -56(%ebp)
 movl $3, %eax
-imull $3
+imull $3, %eax
 movl %eax, -60(%ebp)
 movl $3, %eax
-imull $3
+imull $3, %eax
 movl %eax, -64(%ebp)
 movl -60(%ebp), %eax
-imull -64(%ebp)
+imull -64(%ebp), %eax
 movl %eax, -68(%ebp)
 movl -68(%ebp), %eax
 movl %eax, -72(%ebp)
 movl $-1, %eax
-idivl $-1
+movl $-1, %ebx
+idivl %ebx
 movl %eax, -76(%ebp)
 movl -76(%ebp), %eax
 movl %eax, -80(%ebp)
 movl $3, %eax
-imull $5
+imull $5, %eax
 movl %eax, -84(%ebp)
 movl -84(%ebp), %eax
 movl %eax, -88(%ebp)
@@ -97,7 +98,7 @@ movl %eax, -100(%ebp)
 movl -100(%ebp), %eax
 movl %eax, -104(%ebp)
 movl -16(%ebp), %eax
-imull -24(%ebp)
+imull -24(%ebp), %eax
 movl %eax, -108(%ebp)
 movl -8(%ebp), %eax
 addl -108(%ebp), %eax
@@ -112,16 +113,19 @@ movl -56(%ebp), %eax
 addl -72(%ebp), %eax
 movl %eax, -124(%ebp)
 movl -120(%ebp), %eax
-idivl -124(%ebp)
+movl -124(%ebp), %ebx
+idivl %ebx
 movl %eax, -128(%ebp)
 movl -116(%ebp), %eax
-idivl -128(%ebp)
+movl -128(%ebp), %ebx
+idivl %ebx
 movl %eax, -132(%ebp)
 movl -80(%ebp), %eax
-imull -88(%ebp)
+imull -88(%ebp), %eax
 movl %eax, -136(%ebp)
 movl -96(%ebp), %eax
-idivl -104(%ebp)
+movl -104(%ebp), %ebx
+idivl %ebx
 movl %eax, -140(%ebp)
 movl -136(%ebp), %eax
 subl -140(%ebp), %eax
@@ -140,7 +144,8 @@ addl $8, %esp
 
 movl %eax, -164(%ebp)
 movl $1, %eax
-idivl $2
+movl $2, %ebx
+idivl %ebx
 movl %eax, -168(%ebp)
 movl -168(%ebp), %eax
 movl %eax, -152(%ebp)
@@ -161,7 +166,8 @@ addl $0, %esp
 
 movl %eax, -188(%ebp)
 movl -184(%ebp), %eax
-idivl -188(%ebp)
+movl -188(%ebp), %ebx
+idivl %ebx
 movl %eax, -192(%ebp)
 call one
 addl $0, %esp
@@ -179,7 +185,7 @@ addl $0, %esp
 
 movl %eax, -208(%ebp)
 movl -204(%ebp), %eax
-imull -208(%ebp)
+imull -208(%ebp), %eax
 movl %eax, -212(%ebp)
 movl -192(%ebp), %eax
 addl -212(%ebp), %eax

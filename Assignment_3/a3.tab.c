@@ -4200,6 +4200,10 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 	x86_data_movement_t *x86DataMovement = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
 	x86DataMovement->isDestAddress = false;
 
+	x86_data_movement_t *x86DataMovementIntermediate = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+	x86DataMovementIntermediate->isDestAddress = false;
+
+
 	x86_data_movement_t *x86DataMovementIntermediate1 = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
 	x86DataMovementIntermediate1->isDestAddress = false;
 
@@ -4266,6 +4270,7 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 				x86DataMovement->dest = EAX_REGISTER;
 				addX86Instruction(x86DataMovement, X86_DATA_MOVEMENT);
 
+
 				switch (exp->op) {
 				    case PLUS:
 						x86Arithmetic = newX86Arithmetic(X86_ADD, x86LocationRTerm, EAX_REGISTER);
@@ -4274,10 +4279,14 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 						x86Arithmetic = newX86Arithmetic(X86_SUB, x86LocationRTerm, EAX_REGISTER);
 						break;
 				    case MULTIPLY:
-						x86Arithmetic = newX86Arithmetic(X86_MUL, x86LocationRTerm, NULL);
+						x86Arithmetic = newX86Arithmetic(X86_MUL, x86LocationRTerm, EAX_REGISTER);
 						break;
 				    case DIVIDE:
-						x86Arithmetic = newX86Arithmetic(X86_DIV, x86LocationRTerm, NULL);
+						x86DataMovementIntermediate->op = X86_MOV;
+						x86DataMovementIntermediate->src = x86LocationRTerm;
+						x86DataMovementIntermediate->dest = EBX_REGISTER;
+						addX86Instruction(x86DataMovementIntermediate, X86_DATA_MOVEMENT);
+						x86Arithmetic = newX86Arithmetic(X86_DIV, EBX_REGISTER, NULL);
 						break;
 				    default:
 						error("Invalid binary arithmetic operation");
