@@ -2401,6 +2401,11 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 						x86Arithmetic = newX86Arithmetic(X86_MUL, x86LocationRTerm, EAX_REGISTER);
 						break;
 				    case DIVIDE:
+						x86Logic->op = X86_XOR;
+						x86Logic->src = EDX_REGISTER;
+						x86Logic->dest = EDX_REGISTER;
+						addX86Instruction(x86Logic, X86_LOGIC);
+
 						x86DataMovementIntermediate->op = X86_MOV;
 						x86DataMovementIntermediate->src = x86LocationRTerm;
 						x86DataMovementIntermediate->dest = EBX_REGISTER;
