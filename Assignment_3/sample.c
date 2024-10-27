@@ -1,65 +1,63 @@
-// Minic Program to test globals and arguments evaluation
+// MiniC program for finding all permutations of a string
+
 #include<stdio.h>
-int a;
-int b;
+char string_glob [6];
 
-
-int set_a()
+int swap(char string[], int i, int j)
 {
-    a = 1;
-    printf("12\n");
-    return 1;
+    char dummy[2];
+    dummy[1] = '\0';
+    dummy[0] = string[i]; 
+    string[i] = string[j];
+    string[j] = dummy[0];
+
+    return 0;
 }
 
-int set_b()
+int permutRec(char string[], int ind)
 {
-    b = 1;
-    printf("52\n");
-    return 1;
+    int i;
+    i = ind;
+    
+    // Base Case
+    if(ind == 4)
+    {
+        printf("%s\n", string);
+    }
+    else
+    {
+        while(i < 5)
+        {
+            // Swapping
+            swap(string, ind, i);
+
+            // First ind+1 characters fixed
+            permutRec(string, ind + 1);
+
+            // Backtrack
+            swap(string, ind, i);
+
+            //Increment
+            i = i + 1;
+        }
+    }
+    return 0;
 }
 
-int unset_a()
+int permut(char string[])
 {
-    a = 0;
-    printf("77\n");
-    return a;
-}
+    permutRec(string, 0);
 
-int unset_b()
-{
-    b = 0;
-    printf("8234\n");
-    return a;
+    return 0;
 }
-
-int main()
+  
+int main() 
 {
-    a = 0; b = 0;
-    if (set_a() == 1 && set_b() == 1) { 
-      printf("1241\n");
-    } else {
-      printf("-1241\n");
-    } 
-    if (set_b() == 1 && set_a() == 1) { 
-      printf("2445\n");
-    } else {
-      printf("-2445\n");
-    }
-    if ((unset_a() == 1) && (unset_b() == 1)) {
-      printf("4562");
-    } else {
-      printf("-4562");
-    }
-    if ((unset_b()==1) && (set_a()==1)) {
-      printf("352");
-    } else {
-      printf("-352");
-    }
-    if ((set_b()==1) && (unset_a()==1)) {
-      printf("986");
-    } else {
-      printf("-986");
-    }
-    printf("\n");
+    string_glob[0] = 'A';  string_glob[1] = 'B';
+    string_glob[2] = 'C';  string_glob[3] = 'D';
+    string_glob[4] = 'E';  string_glob[5] = '\0';
+    
+    permut(string_glob);
+
     return 0;
 }

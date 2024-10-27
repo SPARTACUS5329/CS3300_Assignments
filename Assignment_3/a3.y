@@ -2519,12 +2519,22 @@ void stringifyX86List(x86_list_t *x86List) {
 
 				switch (x86->instruction.dataMovement->op) {
 				    case X86_MOV:
-						switch (x86->instruction.dataMovement->src->type) {
-						    case X86_CHAR_IMMEDIATE:
+						if (x86->instruction.dataMovement->src->type == X86_CHAR_IMMEDIATE) {
+						    if (x86->instruction.dataMovement->dest == EAX_REGISTER) {
+								printf("xorl ");
+								stringifyX86Location(x86->instruction.dataMovement->dest);
+								printf(", ");
+								stringifyX86Location(x86->instruction.dataMovement->dest);
+								printf("\n");
 								printf("movb");
+								printf(" ");
+								stringifyX86Location(x86->instruction.dataMovement->src);
+								printf(", %%al");
 								break;
-						    default:
-								printf("movl");
+						    }
+							printf("movb");
+						} else {
+						    printf("movl");
 						}
 						printf(" ");
 						stringifyX86Location(x86->instruction.dataMovement->src);

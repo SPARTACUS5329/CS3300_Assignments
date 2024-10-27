@@ -1,164 +1,106 @@
-global a
-global b
-set_a:
-t1 = 1
-a = t1
-t2 = "12\n"
-param1 = t2
-call printf
-t3 = retval
-retval = 1
+global string_glob
+swap:
+string = param1
+i = param2
+j = param3
+t1 = '\0'
+t2 = 1
+dummy[t2] = t1
+t3 = string
+t4 = 0
+dummy[t4] = t3
+t5 = string
+t6 = i
+string[t6] = t5
+t7 = dummy
+t8 = j
+string[t8] = t7
+retval = 0
 return
-set_b:
-t4 = 1
-b = t4
-t5 = "52\n"
-param1 = t5
-call printf
-t6 = retval
-retval = 1
-return
-unset_a:
-t7 = 0
-a = t7
-t8 = "77\n"
-param1 = t8
-call printf
-t9 = retval
-retval = a
-return
-unset_b:
-t10 = 0
-b = t10
-t11 = "8234\n"
-param1 = t11
-call printf
-t12 = retval
-retval = a
-return
-main:
-t13 = 0
-a = t13
-t14 = 0
-b = t14
-call set_a
-t15 = retval
-t16 = t15 == 1
-if (t16) goto L3
-goto L2
-L3:
-call set_b
-t17 = retval
-t18 = t17 == 1
-if (t18) goto L1
+permutRec:
+string = param1
+ind = param2
+t9 = ind
+i = t9
+t10 = ind == 4
+if (t10) goto L1
 goto L2
 L1:
-t19 = "1241\n"
-param1 = t19
+t11 = "%s\n"
+t12 = string
+param1 = t11
+param2 = t12
 call printf
-t20 = retval
-goto L4
+t13 = retval
+goto L3
 L2:
-t21 = "-1241\n"
-param1 = t21
-call printf
-t22 = retval
 L4:
-call set_b
-t23 = retval
-t24 = t23 == 1
-if (t24) goto L7
-goto L6
-L7:
-call set_a
-t25 = retval
-t26 = t25 == 1
-if (t26) goto L5
+t14 = i < 5
+if (t14) goto L5
 goto L6
 L5:
-t27 = "2445\n"
-param1 = t27
-call printf
-t28 = retval
-goto L8
+t15 = string
+t16 = ind
+t17 = i
+param1 = t15
+param2 = t16
+param3 = t17
+call swap
+t18 = retval
+t19 = string
+t20 = ind + 1
+t21 = t20
+param1 = t19
+param2 = t21
+call permutRec
+t22 = retval
+t23 = string
+t24 = ind
+t25 = i
+param1 = t23
+param2 = t24
+param3 = t25
+call swap
+t26 = retval
+t27 = i + 1
+i = t27
+goto L4
 L6:
-t29 = "-2445\n"
-param1 = t29
-call printf
+L3:
+retval = 0
+return
+permut:
+string = param1
+t28 = string
+t29 = 0
+param1 = t28
+param2 = t29
+call permutRec
 t30 = retval
-L8:
-call unset_a
-t31 = retval
-t32 = t31 == 1
-if (t32) goto L11
-goto L10
-L11:
-call unset_b
-t33 = retval
-t34 = t33 == 1
-if (t34) goto L9
-goto L10
-L9:
-t35 = "4562"
-param1 = t35
-call printf
-t36 = retval
-goto L12
-L10:
-t37 = "-4562"
-param1 = t37
-call printf
-t38 = retval
-L12:
-call unset_b
-t39 = retval
-t40 = t39 == 1
-if (t40) goto L15
-goto L14
-L15:
-call set_a
-t41 = retval
-t42 = t41 == 1
-if (t42) goto L13
-goto L14
-L13:
-t43 = "352"
+retval = 0
+return
+main:
+t31 = 'A'
+t32 = 6
+string_glob[t42] = t31
+t33 = 'B'
+t34 = t32
+string_glob[t42] = t33
+t35 = 'C'
+t36 = t34
+string_glob[t42] = t35
+t37 = 'D'
+t38 = t36
+string_glob[t42] = t37
+t39 = 'E'
+t40 = t38
+string_glob[t42] = t39
+t41 = '\0'
+t42 = t40
+string_glob[t42] = t41
+t43 = string_glob
 param1 = t43
-call printf
+call permut
 t44 = retval
-goto L16
-L14:
-t45 = "-352"
-param1 = t45
-call printf
-t46 = retval
-L16:
-call set_b
-t47 = retval
-t48 = t47 == 1
-if (t48) goto L19
-goto L18
-L19:
-call unset_a
-t49 = retval
-t50 = t49 == 1
-if (t50) goto L17
-goto L18
-L17:
-t51 = "986"
-param1 = t51
-call printf
-t52 = retval
-goto L20
-L18:
-t53 = "-986"
-param1 = t53
-call printf
-t54 = retval
-L20:
-t55 = "\n"
-param1 = t55
-call printf
-t56 = retval
 retval = 0
 return
