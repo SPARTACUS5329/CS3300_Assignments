@@ -11,7 +11,7 @@ int yylex(void);
 char mytext[100];
 char currType[10];
 char currScope[MAX_IDENTIFIER_LENGTH] = "global";
-char currTACFunction[MAX_IDENTIFIER_LENGTH];
+char currTACFunction[MAX_IDENTIFIER_LENGTH] = "global";
 expression_t args[MAX_FUNCTION_CALLS][MAX_ARGS];
 int lineNumber = 1;
 static int tCount = 1;
@@ -1766,6 +1766,9 @@ assembly_list_t *parseTACs(tac_list_t *tacList) {
 		    case TAC_ASSIGNMENT:
 				if (tac->instruction.assignment->lValue->type == PARAM || tac->instruction.assignment->rValue->lTerm->type == PARAM)
 				    break;
+				if (streq(currScope, "global", 6) && tac->instruction.assignment->lValue->type == TEMPORARY)
+					newTACGlobalDec(tac->instruction.assignment->lValue->value);
+
 				assList->instructions[assList->assCount++] = newAssemblyAssignment(tac->instruction.assignment);
 				break;
 		    case TAC_LABEL:

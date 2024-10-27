@@ -1,36 +1,8 @@
+global b
+t1 = 2
+b = t1
 main:
-t1 = 0
-i = t1
-L1:
-t2 = i < 3
-if (t2) goto L2
-goto L3
-L2:
-t3 = 0
-j = t3
-L4:
-t4 = j < 3
-if (t4) goto L5
-goto L6
-L5:
-t5 = "%d "
-t6 = i * j
-t7 = t6
-param1 = t5
-param2 = t7
-call printf
-t8 = retval
-t9 = j + 1
-j = t9
-goto L4
-L6:
-t10 = "\n"
-param1 = t10
-call printf
-t11 = retval
-t12 = i + 1
-i = t12
-goto L1
-L3:
+t2 = 3
+a = t2
 retval = 0
 return
