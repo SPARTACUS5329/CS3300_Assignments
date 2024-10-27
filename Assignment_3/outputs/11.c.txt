@@ -1,0 +1,9 @@
+This should print first
+This should print second
+This should print third
+This should print fourth
+This should print fifth
+This should print last
+ /\____/\    ______
+(=^ . ^=)   (meow!_)
+ (") (")_/   )/

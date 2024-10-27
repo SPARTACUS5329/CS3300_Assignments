@@ -1,0 +1,59 @@
+34
+g = 60
+Yes
+This is a zero
+NO
+This is a zero
+This is a zero
+YES
+This is a zero
+This is a zero
+No
+Yes
+This is a zero
+NO
+This is a zero
+This is a zero
+YES
+This is a zero
+This is a zero
+No
+Yes
+This is a zero
+NO
+This is a zero
+This is a zero
+YES
+This is a zero
+This is a zero
+No
+Yes
+This is a zero
+NO
+This is a zero
+This is a zero
+YES
+This is a zero
+This is a zero
+No
+Yes
+This is a zero
+NO
+This is a zero
+This is a zero
+YES
+This is a zero
+This is a zero
+No
+This is a zero
+This is a one
+This is a one
+This is a zero
+This is a one
+Value = 0
+This is a one
+This is a zero
+This is a one
+This is a zero
+This is a zero
+Value = 0

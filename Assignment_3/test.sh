@@ -1,13 +1,17 @@
 #!/bin/bash
-
 # ANSI color codes
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Create outputs directory if it doesn't exist
+mkdir -p ./outputs
+
 # Create a function to run tests for a single file
 run_test() {
     local input_file=$1
+    local filename=$(basename "$input_file")
+    local expected_output="./outputs/${filename}.txt"
     
     # Make sure we start clean
     make clean
@@ -17,7 +21,7 @@ run_test() {
     make > /dev/null 2>&1
     
     if [ ! -f "a.out" ]; then
-        echo -e "${RED}Failed $input_file - make failed${NC}"
+        echo -e "${RED}Failed $filename - make failed${NC}"
         return
     fi
     
@@ -27,28 +31,27 @@ run_test() {
     # Step 3: Compile the assembly output
     gcc -m32 a.s -o myout 2>/dev/null
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Failed $input_file - assembly compilation failed${NC}"
+        echo -e "${RED}Failed $filename - assembly compilation failed${NC}"
         return
     fi
     
     # Step 4: Run the compiled assembly program
     ./myout > myout.txt 2>/dev/null
     
-    # Step 5: Compile the original C file
-    gcc "$input_file" -o gccout 2>/dev/null
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Failed $input_file - gcc compilation failed${NC}"
+    # Step 5: Check if expected output exists
+    if [ ! -f "$expected_output" ]; then
+        echo -e "${RED}Failed $filename - no expected output file found${NC}"
         return
     fi
     
-    # Step 6: Run the compiled C program
-    ./gccout > gccout.txt 2>/dev/null
-    
-    # Step 7: Compare outputs
-    if diff -q myout.txt gccout.txt >/dev/null; then
-        echo -e "${GREEN}Passed $input_file${NC}"
+    # Step 6: Compare outputs with expected output in outputs directory
+    if diff -q myout.txt "$expected_output" >/dev/null; then
+        echo -e "${GREEN}Passed $filename${NC}"
     else
-        echo -e "${RED}Failed $input_file${NC}"
+        echo -e "${RED}Failed $filename - output mismatch${NC}"
+        # Optionally show the differences
+        echo "Differences found:"
+        diff myout.txt "$expected_output"
     fi
     
     # Clean up
@@ -58,17 +61,36 @@ run_test() {
 # Main script
 echo "Starting tests..."
 
-# Check if directory exists
+# Check if directories exist
 if [ ! -d "./PublicTCs/Input" ]; then
-    echo "Error: Directory ./PublicTCs/Input not found!"
+    echo -e "${RED}Error: Directory ./PublicTCs/Input not found!${NC}"
     exit 1
 fi
+
+if [ ! -d "./outputs" ]; then
+    echo -e "${RED}Error: Directory ./outputs not found!${NC}"
+    exit 1
+fi
+
+# Track statistics
+total=0
+passed=0
+failed=0
 
 # Process each file in the directory
 for input_file in ./PublicTCs/Input/*; do
     if [ -f "$input_file" ]; then
-        run_test "$input_file"
+        ((total++))
+        if run_test "$input_file" | grep -q "Passed"; then
+            ((passed++))
+        else
+            ((failed++))
+        fi
     fi
 done
 
-echo "Testing complete."
+# Print summary
+echo -e "\nTesting complete."
+echo -e "Total tests: $total"
+echo -e "${GREEN}Passed: $passed${NC}"
+echo -e "${RED}Failed: $failed${NC}"

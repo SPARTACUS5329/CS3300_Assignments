@@ -1,0 +1,11 @@
+Current Nesting: 1
+Arg before is 100
+Value at b is 10000
+Arg after is 102400
+Current Nesting: 2
+Arg before is 102400
+Value at b is 1895825408
+Arg after is 104857600
+Current Nesting: 3
+Back to Nesting: 2
+Back to Nesting: 1

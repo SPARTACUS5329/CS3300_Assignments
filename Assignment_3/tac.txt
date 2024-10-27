@@ -1,78 +1,105 @@
-printPascal:
-n = param1
-t1 = 1
-line = t1
-L1:
-t2 = line <= n
-if (t2) goto L2
-goto L3
-L2:
-t3 = 1
-space = t3
-L4:
-t4 = n - line
-t5 = space <= t4
-if (t5) goto L5
-goto L6
-L5:
-t6 = "  "
-param1 = t6
+print:
+x = param1
+y = param2
+t1 = "%d\n"
+t2 = x
+param1 = t1
+param2 = t2
 call printf
-t7 = retval
-t8 = space + 1
-space = t8
-goto L4
-L6:
-t9 = 1
-coef = t9
-t10 = 1
-i = t10
-L7:
-t11 = i <= line
-if (t11) goto L8
-goto L9
-L8:
-t12 = coef < 10
-if (t12) goto L10
-goto L11
-L10:
-t13 = "   %d"
-t14 = coef
-param1 = t13
-param2 = t14
-call printf
-t15 = retval
-goto L12
-L11:
-t16 = "  %d"
-t17 = coef
-param1 = t16
-param2 = t17
-call printf
-t18 = retval
-L12:
-t19 = line - i
-t20 = coef * t19
-t21 = t20 / i
-coef = t21
-t22 = i + 1
-i = t22
-goto L7
-L9:
-t23 = "\n"
-param1 = t23
-call printf
-t24 = retval
-t25 = line + 1
-line = t25
-goto L1
-L3:
-retval = 0
+t3 = retval
+t4 = x + y
+retval = t4
 return
 main:
-t26 = 6
-param1 = t26
-call printPascal
+t5 = 3
+t6 = 9
+param1 = t5
+param2 = t6
+call print
+t7 = retval
+t8 = t7
+t9 = 4
+t10 = -9
+param1 = t9
+param2 = t10
+call print
+t11 = retval
+t12 = t11
+param1 = t8
+param2 = t12
+call print
+t13 = retval
+t14 = t13
+t15 = 0
+t16 = 67
+param1 = t15
+param2 = t16
+call print
+t17 = retval
+t18 = t17
+t19 = 7
+t20 = 8
+param1 = t19
+param2 = t20
+call print
+t21 = retval
+t22 = t21
+param1 = t18
+param2 = t22
+call print
+t23 = retval
+t24 = t23
+t25 = 3
+t26 = 9
+param1 = t25
+param2 = t26
+call print
 t27 = retval
+t28 = t27
+t29 = 4
+t30 = -9
+param1 = t29
+param2 = t30
+call print
+t31 = retval
+t32 = t31
+param1 = t28
+param2 = t32
+call print
+t33 = retval
+t34 = t33
+param1 = t24
+param2 = t34
+call print
+t35 = retval
+t36 = t35
+param1 = t14
+param2 = t36
+call print
+t37 = retval
+t38 = t37
+t39 = -1
+t40 = -3
+param1 = t39
+param2 = t40
+call print
+t41 = retval
+t42 = t41
+t43 = 2
+t44 = 5
+param1 = t43
+param2 = t44
+call print
+t45 = retval
+t46 = t45
+param1 = t42
+param2 = t46
+call print
+t47 = retval
+t48 = t47
+param1 = t38
+param2 = t48
+call print
+t49 = retval
 retval = 0
 return

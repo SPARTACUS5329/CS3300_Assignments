@@ -1,0 +1,7 @@
+Thala for a reason 7
+This should be zero = 0
+This is a zero
+This is a one
+This is a one
+This is a zero
+This is a one
