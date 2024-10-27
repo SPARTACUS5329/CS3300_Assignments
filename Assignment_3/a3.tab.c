@@ -4172,6 +4172,8 @@ void stringifyAssemblyJump(assembly_goto_t *jump) {
 			x86Compar->src = ONE;
 			x86Compar->dest = ECX_REGISTER;
 			addX86Instruction(x86Compar, X86_COMPAR);
+
+			x86Jump->op = X86_JE;
 			addX86Instruction(x86Jump, X86_JUMP);
 		    break;
 		case GOTO:
