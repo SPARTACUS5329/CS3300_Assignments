@@ -1,21 +1,18 @@
 global ascii
-foo:
-str = param1
-t1 = 'A'
-t2 = 0
-str[t2] = t1
+print:
+ascii_arg = param1
+t1 = ascii_arg
+t2 = "%s"
+param1 = t1
+param2 = t2
+call printf
+t3 = retval
 retval = 0
 return
 main:
-t3 = 'A'
-t4 = 0
-str[t4] = t3
-t5 = 'A'
-t6 = 1
-ascii[t6] = t5
-t7 = str
-param1 = t7
-call foo
-t8 = retval
+t4 = ascii
+param1 = t4
+call print
+t5 = retval
 retval = 0
 return

@@ -1,18 +1,18 @@
-// MiniC program to test the major constructs
+// MiniC program for ascii art (complex short-circuting and char array manipulation)
 
 #include<stdio.h>
-char ascii[10];
 
-int foo(char str[]) {
-   str[0] = 'A';
-   return 0;
+char ascii[58];
+
+int print(char ascii_arg[])
+{
+    printf(ascii_arg, "%s");
+    return 0;
 }
 
-int main()
+int main() 
 {
-   char str[10];
-   str[0] = 'A';
-   ascii[1] = 'A';
-   foo(str);
-   return 0;
+    print(ascii);
+
+    return 0;
 }

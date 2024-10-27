@@ -1136,7 +1136,7 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 		ifElse->ifLineList->stringify(ifElse->ifLineList);
 	}
 
-	int exitLabel = -1;
+	int exitLabel;
 
 	if (ifElse->ifLineList != NULL && ifElse->elseLineList != NULL)
 		exitLabel = lCount++;
@@ -1156,7 +1156,7 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 		ifElse->elseLineList->stringify(ifElse->elseLineList);
 	}
 
-	if (rootIfElse && exitLabel != -1) {
+	if (rootIfElse) {
 		sprintf(tempString, "L%d", exitLabel);
 		newTACLabel(JUMP_LABEL, tempString);
 	}
