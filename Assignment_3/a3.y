@@ -22,7 +22,7 @@ symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 program_t *program;
 tac_list_t *tacList;
 x86_list_t *x86List;
-x86_location_t *EBP_REGISTER, *ESP_REGISTER, *EAX_REGISTER, *EBX_REGISTER, *ECX_REGISTER, *ZEROF_REGISTER, *ONE;
+x86_location_t *EBP_REGISTER, *ESP_REGISTER, *EAX_REGISTER, *EBX_REGISTER, *ECX_REGISTER, *EDX_REGISTER, *ZEROF_REGISTER, *ONE;
 
 %}
 
@@ -811,6 +811,8 @@ int main(int argc, char *argv[]) {
     close(saved_stdout);
 
 	firstPassTACs(tacList);
+
+	strcpy(currScope, "global");
     assembly_list_t *assList = parseTACs(tacList);
 
 	EBP_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
@@ -832,6 +834,10 @@ int main(int argc, char *argv[]) {
 	ECX_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
 	ECX_REGISTER->type = X86_REGISTER;
 	ECX_REGISTER->value.reg = 'c';
+
+	EDX_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
+	EDX_REGISTER->type = X86_REGISTER;
+	EDX_REGISTER->value.reg = 'd';
 
 	ZEROF_REGISTER = (x86_location_t *)malloc(sizeof(x86_location_t));
 	ZEROF_REGISTER->type = X86_REGISTER;
@@ -1055,6 +1061,7 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 
     if_else_statement_t *chainIfElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
     if_else_statement_t *baseIfElse = (if_else_statement_t *)malloc(sizeof(if_else_statement_t));
+
 	int tempLabel;
 	char tempLabelString[MAX_IDENTIFIER_LENGTH];
 
@@ -1122,13 +1129,21 @@ void stringifyIfElseStatement(if_else_statement_t *ifElse) {
 		ifElse->ifLineList->stringify(ifElse->ifLineList);
 	}
 
-	int exitLabel = ifElse->isMatched ? lCount++ : ifElse->falseLabel;
+	int exitLabel;
+
+	if (ifElse->ifLineList != NULL & ifElse->elseLineList != NULL)
+		exitLabel = lCount++;
+	else if (ifElse->elseLineList != NULL)
+		exitLabel = ifElse->trueLabel;
+	else if (ifElse->ifLineList != NULL)
+		exitLabel = ifElse->falseLabel;
+
 	if (rootIfElse && ifElse->isMatched) {
 		sprintf(tempLabelString, "L%d", exitLabel);
 		newTACGoto(GOTO, tempLabelString, NULL);
 	}
 
-	if (ifElse->isMatched) {
+	if (ifElse->elseLineList != NULL) {
 		sprintf(tempString, "L%d", ifElse->falseLabel);
 		newTACLabel(JUMP_LABEL, tempString);
 		ifElse->elseLineList->stringify(ifElse->elseLineList);
@@ -2267,8 +2282,8 @@ void stringifyAssemblyJump(assembly_goto_t *jump) {
 			addX86Instruction(x86DataMovementIntermediate, X86_DATA_MOVEMENT);
 
 		    x86Compar->op = X86_CMP;
-			x86Compar->src = ECX_REGISTER;
-			x86Compar->dest = ONE;
+			x86Compar->src = ONE;
+			x86Compar->dest = ECX_REGISTER;
 			addX86Instruction(x86Compar, X86_COMPAR);
 			addX86Instruction(x86Jump, X86_JUMP);
 		    break;
@@ -2298,8 +2313,11 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 	x86_data_movement_t *x86DataMovement = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
 	x86DataMovement->isDestAddress = false;
 
-	x86_data_movement_t *x86DataMovementIntermediate = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
-	x86DataMovementIntermediate->isDestAddress = false;
+	x86_data_movement_t *x86DataMovementIntermediate1 = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+	x86DataMovementIntermediate1->isDestAddress = false;
+
+	x86_data_movement_t *x86DataMovementIntermediate2 = (x86_data_movement_t *)malloc(sizeof(x86_data_movement_t));
+	x86DataMovementIntermediate2->isDestAddress = false;
 
 	x86_compar_t *x86Compar = (x86_compar_t *)malloc(sizeof(x86_compar_t));
 	x86_jump_t *x86Jump = (x86_jump_t *)malloc(sizeof(x86_jump_t));
@@ -2314,14 +2332,19 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 				x86Logic->dest = EAX_REGISTER;
 				addX86Instruction(x86Logic, X86_LOGIC);
 
-				x86DataMovementIntermediate->op = X86_MOV;
-				x86DataMovementIntermediate->src = x86LocationLTerm;
-				x86DataMovementIntermediate->dest = ECX_REGISTER;
-				addX86Instruction(x86DataMovementIntermediate, X86_DATA_MOVEMENT);
+				x86DataMovementIntermediate1->op = X86_MOV;
+				x86DataMovementIntermediate1->src = x86LocationLTerm;
+				x86DataMovementIntermediate1->dest = ECX_REGISTER;
+				addX86Instruction(x86DataMovementIntermediate1, X86_DATA_MOVEMENT);
+
+				x86DataMovementIntermediate2->op = X86_MOV;
+				x86DataMovementIntermediate2->src = x86LocationRTerm;
+				x86DataMovementIntermediate2->dest = EDX_REGISTER;
+				addX86Instruction(x86DataMovementIntermediate2, X86_DATA_MOVEMENT);
 
 				x86Compar->op = X86_CMP;
 				x86Compar->src = ECX_REGISTER;
-				x86Compar->dest = x86LocationRTerm;
+				x86Compar->dest = EDX_REGISTER;
 				addX86Instruction(x86Compar, X86_COMPAR);
 
 				switch (exp->op) {
@@ -2731,6 +2754,9 @@ void stringifyX86Location(x86_location_t *location) {
 					break;
 				case 'c':
 				    printf("%%ecx");
+					break;
+				case 'd':
+				    printf("%%edx");
 					break;
 				default:
 				    error("Register type not supported");

@@ -15,12 +15,13 @@ movl %eax, -8(%ebp)
 .L1:
 xorl %eax, %eax
 movl -8(%ebp), %ecx
-cmpl %ecx, $3
+movl $3, %edx
+cmpl %ecx, %edx
 setl %al
 
 movl %eax, -12(%ebp)
 movl -12(%ebp), %ecx
-cmpl %ecx, $1
+cmpl $1, %ecx
 je .L2
 jmp .L3
 .L2:
@@ -31,12 +32,13 @@ movl %eax, -20(%ebp)
 .L4:
 xorl %eax, %eax
 movl -20(%ebp), %ecx
-cmpl %ecx, $3
+movl $3, %edx
+cmpl %ecx, %edx
 setl %al
 
 movl %eax, -24(%ebp)
 movl -24(%ebp), %ecx
-cmpl %ecx, $1
+cmpl $1, %ecx
 je .L5
 jmp .L6
 .L5:
