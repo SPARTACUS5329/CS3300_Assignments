@@ -1,15 +1,15 @@
-global b
-t1 = 2
-b = t1
 main:
-t2 = 3
-a = t2
-t3 = a == 3
-if (t3) goto L1
-goto L2
-L1:
-t4 = 2
-a = t4
-L2:
+t1 = 10
+a = t1
+t2 = 20
+b = t2
+t3 = a + b
+c = t3
+t4 = "c = %d\n"
+t5 = c
+param1 = t4
+param2 = t5
+call printf
+t6 = retval
 retval = 0
 return

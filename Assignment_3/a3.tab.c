@@ -4285,9 +4285,8 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 			}
 		    break;
 		case ASSEMBLY_CONSTANT:
-			if (x86LocationLTerm->isPointer) {
+			if (x86LocationLTerm->isPointer)
 				x86DataMovement->op = X86_LEA;
-			}
 			else
 				x86DataMovement->op = X86_MOV;
 
@@ -4566,7 +4565,7 @@ x86_location_t *getX86Location(assembly_term_t *term) {
 		return NULL;
 
 	char tempStr[MAX_IDENTIFIER_LENGTH];
-	x86_location_t *x86Location = (x86_location_t *)malloc(sizeof(x86_location_t));
+	x86_location_t *x86Location = (x86_location_t *)calloc(1, sizeof(x86_location_t));
 	symbol_table_item_t *item;
 
 	switch (term->type) {

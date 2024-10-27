@@ -1,12 +1,13 @@
-// MiniC program for complex boolean expressions
+// MiniC program for simple addition
 #include<stdio.h>
-int b = 2;
-
-int main()
-{
-  int a = 3;
-  if (a == 3) {
-    a = 2;
+  
+  int main() {
+      int a;
+      int b;
+      int c;
+      a = 10;
+      b = 20;
+      c = a + b;
+      printf("c = %d\n", c);
+      return 0;
   }
-    return 0;
-}
