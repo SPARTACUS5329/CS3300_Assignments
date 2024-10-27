@@ -356,6 +356,12 @@ subscript:
 	OPEN_SQUARE expression CLOSE_SQUARE {
 		$$ = $2;
 	}
+	| OPEN_SQUARE CLOSE_SQUARE {
+		expression_t *exp = (expression_t *)calloc(1, sizeof(expression_t));
+		strcpy(exp->lValue, "0");
+		exp->type = INT_CONSTANT;
+		$$ = exp;
+	}
 ;
 
 functionCall:

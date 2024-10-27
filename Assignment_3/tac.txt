@@ -1,71 +1,291 @@
-b:
-arg = param1
-t1 = arg * arg
-arg = t1
-t2 = "Value at b is %d\n"
-t3 = arg
-param1 = t2
-param2 = t3
+global glob_1
+global glob_2
+global yes_no
+zero:
+t1 = "This is a zero\n"
+param1 = t1
+call printf
+t2 = retval
+retval = 0
+return
+one:
+t3 = "This is a one\n"
+param1 = t3
 call printf
 t4 = retval
 retval = 0
 return
-a:
-arg = param1
-nest = param2
-t5 = "Current Nesting: %d\n"
-t6 = nest
-param1 = t5
-param2 = t6
-call printf
-t7 = retval
-t8 = 1024 * 1024
-t9 = arg >= t8
-if (t9) goto L1
-goto L2
+add:
+x = param1
+y = param2
+z = param3
+a = param4
+b = param5
+t5 = x + y
+t6 = z + a
+t7 = t6 + b
+t8 = t5 + t7
+retval = t8
+return
+print_yes:
+t9 = '\0'
+t10 = 1
+dummy[t10] = t9
+t11 = 0
+i = t11
 L1:
+t12 = i < 6
+if (t12) goto L2
 goto L3
 L2:
-t10 = "Arg before is %d\n"
-t11 = arg
-param1 = t10
-param2 = t11
+t13 = yes_no
+t14 = 0
+dummy[t14] = t13
+t15 = "%s"
+t16 = dummy
+param1 = t15
+param2 = t16
 call printf
-t12 = retval
-t13 = arg
-param1 = t13
-call b
-t14 = retval
-t15 = arg * 1024
-arg = t15
-t16 = "Arg after is %d\n"
-t17 = arg
-param1 = t16
-param2 = t17
-call printf
-t18 = retval
-t19 = arg
-t20 = nest + 1
-t21 = t20
-param1 = t19
-param2 = t21
-call a
-t22 = retval
-t23 = "Back to Nesting: %d\n"
-t24 = nest
-param1 = t23
-param2 = t24
-call printf
-t25 = retval
+t17 = retval
+t18 = i + 2
+i = t18
+goto L1
 L3:
-retval = 0
+t19 = "\n"
+param1 = t19
+call printf
+t20 = retval
+call zero
+t21 = retval
+retval = t21
+return
+print_no:
+t22 = '\0'
+t23 = 1
+dummy[t23] = t22
+t24 = 1
+i = t24
+L4:
+t25 = i < 6
+if (t25) goto L5
+goto L6
+L5:
+t26 = yes_no
+t27 = 0
+dummy[t27] = t26
+t28 = "%s"
+t29 = dummy
+param1 = t28
+param2 = t29
+call printf
+t30 = retval
+t31 = i + 2
+i = t31
+goto L4
+L6:
+t32 = "\n"
+param1 = t32
+call printf
+t33 = retval
+call zero
+t34 = retval
+t35 = t34 + 1
+retval = t35
+return
+fibonacci:
+n = param1
+t36 = n <= 2
+if (t36) goto L7
+goto L8
+L7:
+t37 = n - 1
+ret = t37
+goto L9
+L8:
+t38 = n - 1
+t39 = t38
+param1 = t39
+call fibonacci
+t40 = retval
+t41 = n - 2
+t42 = t41
+param1 = t42
+call fibonacci
+t43 = retval
+t44 = t40 + t43
+ret = t44
+L9:
+retval = ret
+return
+mess_around:
+a = param1
+b = param2
+c = param3
+d = param4
+e = param5
+t45 = a + c
+t46 = t45 * d
+f = t46
+t47 = f - d
+t48 = t47 / a
+t49 = a + c
+t50 = t48 * t49
+g = t50
+t51 = "g = %d\n"
+t52 = g
+param1 = t51
+param2 = t52
+call printf
+t53 = retval
+t54 = f + g
+retval = t54
 return
 main:
-t26 = 100
-t27 = 1
-param1 = t26
-param2 = t27
-call a
-t28 = retval
+t55 = 1
+flag = t55
+t56 = 10
+i = t56
+t57 = 'Y'
+t58 = 6
+yes_no[t68] = t57
+t59 = 'N'
+t60 = t58
+yes_no[t68] = t59
+t61 = 'E'
+t62 = t60
+yes_no[t68] = t61
+t63 = 'O'
+t64 = t62
+yes_no[t68] = t63
+t65 = 'S'
+t66 = t64
+yes_no[t68] = t65
+t67 = '\0'
+t68 = t66
+yes_no[t68] = t67
+t69 = "%d\n"
+t70 = 10
+param1 = t70
+call fibonacci
+t71 = retval
+t72 = t71
+param1 = t69
+param2 = t72
+call printf
+t73 = retval
+t74 = 10
+t75 = yes_no
+t76 = 10
+t77 = 2
+t78 = yes_no
+param1 = t74
+param2 = t75
+param3 = t76
+param4 = t77
+param5 = t78
+call mess_around
+t79 = retval
+L10:
+t80 = i > 0
+if (t80) goto L13
+goto L12
+L13:
+t81 = flag == 1
+if (t81) goto L11
+goto L12
+L11:
+t82 = i / 2
+dum = t82
+t83 = dum * 2
+t84 = t83 == i
+if (t84) goto L14
+goto L16
+L16:
+call zero
+t85 = retval
+t86 = t85 == 0
+if (t86) goto L18
+goto L19
+L258767746:
+L17:
+call print_no
+t87 = retval
+call zero
+t88 = retval
+t89 = t87 == t88
+if (t89) goto L21
+goto L22
+L0:
+L20:
+call print_yes
+t90 = retval
+call zero
+t91 = retval
+t92 = t90 == t91
+if (t92) goto L23
+goto L24
+L258767746:
+L14:
+t93 = "Yes\n"
+param1 = t93
+call printf
+t94 = retval
+goto L25
+L15:
+t95 = 1 >= 2
+if (t95) goto L26
+goto L32
+L32:
+t96 = 2 <= 1
+if (t96) goto L26
+goto L31
+L31:
+t97 = 1 == 2
+if (t97) goto L26
+goto L30
+L30:
+t98 = 1 > 2
+if (t98) goto L26
+goto L29
+L29:
+t99 = 1 != 1
+if (t99) goto L26
+goto L28
+L28:
+t100 = 1 < 2
+if (t100) goto L26
+goto L27
+L26:
+t101 = "No\n"
+param1 = t101
+call printf
+t102 = retval
+L27:
+L25:
+t103 = i - 1
+i = t103
+goto L10
+L12:
+call zero
+t104 = retval
+call one
+t105 = retval
+t106 = t104 + t105
+call one
+t107 = retval
+call zero
+t108 = retval
+t109 = t107 + t108
+call one
+t110 = retval
+t111 = t109 + t110
+t112 = t106 + t111
+dum = t112
+t113 = "Value = %d\n"
+t114 = dum
+param1 = t113
+param2 = t114
+call printf
+t115 = retval
 retval = 0
 return
