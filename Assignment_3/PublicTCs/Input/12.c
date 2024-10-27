@@ -1,11 +1,12 @@
 // MiniC program for finding all permutations of a string
 
 #include<stdio.h>
-char string [6];
+char string_glob [6];
 
 int swap(char string[], int i, int j)
 {
-    char dummy[1];
+    char dummy[2];
+    dummy[1] = '\0';
     dummy[0] = string[i]; 
     string[i] = string[j];
     string[j] = dummy[0];
@@ -52,11 +53,11 @@ int permut(char string[])
   
 int main() 
 {
-    string[0] = 'A';  string[1] = 'B';
-    string[2] = 'C';  string[3] = 'D';
-    string[4] = 'E';  string[5] = '\0';
+    string_glob[0] = 'A';  string_glob[1] = 'B';
+    string_glob[2] = 'C';  string_glob[3] = 'D';
+    string_glob[4] = 'E';  string_glob[5] = '\0';
     
-    permut(string);
+    permut(string_glob);
 
     return 0;
 }

@@ -1,11 +1,11 @@
 // MiniC program for simple short-circuiting 
 #include<stdio.h>
 
-int global;
+int global_int;
 
 int sideEffect()
 {
-    global = global + 1;
+    global_int = global_int + 1;
     return 0;
 }
 
@@ -27,11 +27,11 @@ int main()
 {
     int n;
     n = 10;
-    global = 0;
+    global_int = 0;
     while( sideEffect() > 0 || n>=0)
     {
        printf("Factorial of %d is %d\n",n,factorial(n));
-       printf("Global = %d\n",global);
+       printf("Global_int = %d\n",global_int);
        n = n -1;
     }
     return 0; 

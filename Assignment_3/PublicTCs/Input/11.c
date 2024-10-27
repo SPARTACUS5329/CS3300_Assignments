@@ -10,11 +10,11 @@ int dead()
     return -1;
 }
 
-int breaks(char ascii[])
+int breaks(char ascii_arg[])
 {
     printf("This should print first\n");
-    ascii[19] = '\n'; ascii[40] = '\n';
-    ascii[56] = '\n';
+    ascii_arg[19] = '\n'; ascii_arg[40] = '\n';
+    ascii_arg[56] = '\n';
     return 0;
 }
 
@@ -48,27 +48,27 @@ int bubbletext()
     return 0;
 }
 
-int head(char ascii[])
+int head(char ascii_arg[])
 {
     printf("This should print last\n");
-    ascii[1] = '/';  ascii[2] = '\\'; ascii[3] = '_'; ascii[4] = '_';
-    ascii[7] = '/';  ascii[8] = '\\'; ascii[5] = '_'; ascii[6] = '_';
+    ascii_arg[1] = '/';  ascii_arg[2] = '\\'; ascii_arg[3] = '_'; ascii_arg[4] = '_';
+    ascii_arg[7] = '/';  ascii_arg[8] = '\\'; ascii_arg[5] = '_'; ascii_arg[6] = '_';
     return 0;
 }
 
-int paws(char ascii[])
+int paws(char ascii_arg[])
 {
     printf("This should print second\n");
-    ascii[42] = '('; ascii[46] = '(';
-    ascii[44] = ')'; ascii[48] = ')'; 
-    ascii[43] = '"'; ascii[47] = '"'; 
-    ascii[49] = '_'; ascii[50] = '/'; 
+    ascii_arg[42] = '('; ascii_arg[46] = '(';
+    ascii_arg[44] = ')'; ascii_arg[48] = ')'; 
+    ascii_arg[43] = '"'; ascii_arg[47] = '"'; 
+    ascii_arg[49] = '_'; ascii_arg[50] = '/'; 
     return 0;
 }
 
-int print(char ascii[])
+int print(char ascii_arg[])
 {
-    printf("%s",ascii);
+    printf("%s",ascii_arg);
     return 0;
 }
 

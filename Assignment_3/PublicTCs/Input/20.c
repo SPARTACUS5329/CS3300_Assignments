@@ -25,7 +25,8 @@ int add(int x, int y, int z, int a, int b)
 int print_yes()
 {
     int i;
-    char dummy[1];
+    char dummy[2];
+    dummy[1] = '\0';
     i=0;
     while(i<6)
     {
@@ -40,7 +41,8 @@ int print_yes()
 int print_no()
 {
     int i;
-    char dummy[1];
+    char dummy[2];
+    dummy[1] = '\0';
     i=1;
     while(i<6)
     {
@@ -101,9 +103,6 @@ int main()
 
     dum = (((zero()) + (one())) + (((one())+(zero()))+(one())));
     printf("Value = %d\n",dum);
-    dum = add((one()),(zero()),(one()),(zero()),(zero()));
-    printf("Value = %d\n",dum);
-
 
     return 0;
 }

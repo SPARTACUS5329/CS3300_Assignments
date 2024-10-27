@@ -4,12 +4,12 @@
 
 int print(int x, int y)
 {
-    printf("%d\n",x);
     return x+y;
 }
 int main() 
 {
-    print
+    int x;
+    x = print
     (   print
         (   print
             (   print(3,9),
@@ -31,5 +31,6 @@ int main()
             print(2,5)
         )
     );
+    printf("Value of x = %d\n",x);
     return 0;
 }

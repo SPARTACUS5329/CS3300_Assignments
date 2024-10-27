@@ -2,13 +2,13 @@
 #include<stdio.h>
 
 int max(int a, int b) {
-    int retval;
+    int ret_val;
     if (a > b) {
-        retval = a;
+        ret_val = a;
     } else {
-        retval = b;
+        ret_val = b;
     }
-    return retval;
+    return ret_val;
 }
 
 int main() {

@@ -43,7 +43,7 @@ run_test() {
     if [ ! -f "$expected_output" ]; then
         echo -e "${RED}Failed $filename - no expected output file found${NC}"
         return 1
-    }
+    fi
     
     # Step 6: Compare outputs with expected output in outputs directory
     if cmp -s myout.txt "$expected_output"; then
