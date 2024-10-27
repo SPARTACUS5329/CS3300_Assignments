@@ -11,7 +11,7 @@ subl $56, %esp
 xorl %eax, %eax
 movl $1, %ecx
 movl $0, %edx
-cmpl %ecx, %edx
+cmpl %edx, %ecx
 setg %al
 
 movl %eax, -4(%ebp)
@@ -23,7 +23,7 @@ jmp .L2
 xorl %eax, %eax
 movl $2, %ecx
 movl $0, %edx
-cmpl %ecx, %edx
+cmpl %edx, %ecx
 setl %al
 
 movl %eax, -8(%ebp)
@@ -42,7 +42,7 @@ jmp .L5
 xorl %eax, %eax
 movl $3, %ecx
 movl $0, %edx
-cmpl %ecx, %edx
+cmpl %edx, %ecx
 setg %al
 
 movl %eax, -20(%ebp)
@@ -54,7 +54,7 @@ jmp .L7
 xorl %eax, %eax
 movl $0, %ecx
 movl $0, %edx
-cmpl %ecx, %edx
+cmpl %edx, %ecx
 sete %al
 
 movl %eax, -24(%ebp)
@@ -74,7 +74,7 @@ movl %eax, -36(%ebp)
 xorl %eax, %eax
 movl -36(%ebp), %ecx
 movl $6561, %edx
-cmpl %ecx, %edx
+cmpl %edx, %ecx
 setle %al
 
 movl %eax, -40(%ebp)

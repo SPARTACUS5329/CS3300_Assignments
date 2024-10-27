@@ -4236,8 +4236,8 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 				addX86Instruction(x86DataMovementIntermediate2, X86_DATA_MOVEMENT);
 
 				x86Compar->op = X86_CMP;
-				x86Compar->src = ECX_REGISTER;
-				x86Compar->dest = EDX_REGISTER;
+				x86Compar->src = EDX_REGISTER;
+				x86Compar->dest = ECX_REGISTER;
 				addX86Instruction(x86Compar, X86_COMPAR);
 
 				switch (exp->op) {
