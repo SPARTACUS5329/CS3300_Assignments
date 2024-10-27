@@ -1603,7 +1603,7 @@ void stringifyTACReturn(tac_return_t *tac) {
 }
 
 unsigned long hash(char *str) {
-	unsigned long hash = 5381;
+	unsigned long hash = 51212421381;
 	int c;
 
 	while ((c = *str++))
@@ -1630,7 +1630,7 @@ symbol_table_item_t *searchSymbol(char *key, symbol_table_item_t* hashTable[]) {
 void insertSymbol(char *key, identifier_t *data, symbol_table_item_t* hashTable[]) {
 	symbol_table_item_t *item;
 	item = searchSymbol(key, hashTable);
-	if (item != NULL)
+	if (item != NULL && streq(key, item->data->name, strlen(key)))
 		return;
 
 	int hashIndex = hash(key);
@@ -2002,7 +2002,6 @@ assembly_term_t *newAssemblyTerm(tac_term_t *tac) {
 		sprintf(tempStr, "%s_%s", currScope, tac->value);
 		item = searchSymbol(tempStr, symbolTable);
 		if (item == NULL) {
-			printf("%s\n", tempStr);
 		    error("[newAssemblyTerm] Undefined variable");
 		}
 		strcpy(term->scope, currScope);
@@ -2217,7 +2216,7 @@ void stringifyAssemblyCall(assembly_call_t *call) {
 		    x86Location->type = X86_MEMORY;
 			x86Location->value.stackOffset = item->data->stackOffset;
 
-			if (item->data->depth == 0) {
+			if (!item->data->isPointer) {
 				newX86Stack(X86_PUSH, x86Location);
 				continue;
 		    }

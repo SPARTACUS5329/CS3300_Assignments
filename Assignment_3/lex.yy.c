@@ -513,17 +513,14 @@ char *yytext;
 #line 1 "a3.l"
 #line 2 "a3.l"
 #include <stdlib.h>
-#define MAX_IDENTIFIERS 2000
-#define MAX_IDENTIFIER_LENGTH 200
-
 #include "a3.h"
 #include "a3.tab.h"
 
 void yyerror(char *);
 extern char mytext[];
 extern int lineNumber;
-#line 525 "lex.yy.c"
-#line 526 "lex.yy.c"
+#line 522 "lex.yy.c"
+#line 523 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -740,9 +737,9 @@ YY_DECL
 		}
 
 	{
-#line 14 "a3.l"
+#line 11 "a3.l"
 
-#line 745 "lex.yy.c"
+#line 742 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -801,234 +798,234 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 15 "a3.l"
+#line 12 "a3.l"
 { return OPEN_PAREN; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 16 "a3.l"
+#line 13 "a3.l"
 { return CLOSE_PAREN; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 17 "a3.l"
+#line 14 "a3.l"
 { return OPEN_BRACE; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 18 "a3.l"
+#line 15 "a3.l"
 { return CLOSE_BRACE; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 19 "a3.l"
+#line 16 "a3.l"
 { return OPEN_SQUARE; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 20 "a3.l"
+#line 17 "a3.l"
 { return CLOSE_SQUARE; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 21 "a3.l"
+#line 18 "a3.l"
 { return COMMA; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 23 "a3.l"
+#line 20 "a3.l"
 { return EQ; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 24 "a3.l"
+#line 21 "a3.l"
 { return PLUS_TOK; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 25 "a3.l"
+#line 22 "a3.l"
 { return MINUS_TOK; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 26 "a3.l"
+#line 23 "a3.l"
 { return MULTIPLY_TOK; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 27 "a3.l"
+#line 24 "a3.l"
 { return DIVIDE_TOK; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 28 "a3.l"
+#line 25 "a3.l"
 { return EXPONENT_TOK; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 29 "a3.l"
+#line 26 "a3.l"
 { return SEMI_COLON; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 31 "a3.l"
+#line 28 "a3.l"
 { strcpy(mytext, yytext); return VALID_TYPE; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 32 "a3.l"
+#line 29 "a3.l"
 { strcpy(mytext, yytext); return VALID_TYPE; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 33 "a3.l"
+#line 30 "a3.l"
 { strcpy(mytext, yytext); return VALID_TYPE; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 35 "a3.l"
+#line 32 "a3.l"
 { strcpy(mytext, yytext); return MAIN; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 37 "a3.l"
+#line 34 "a3.l"
 { strcpy(mytext, yytext); return COMPAR; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 38 "a3.l"
+#line 35 "a3.l"
 { strcpy(mytext, yytext); return COMPAR; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 39 "a3.l"
+#line 36 "a3.l"
 { strcpy(mytext, yytext); return COMPAR; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 40 "a3.l"
+#line 37 "a3.l"
 { strcpy(mytext, yytext); return COMPAR; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 41 "a3.l"
+#line 38 "a3.l"
 { strcpy(mytext, yytext); return COMPAR; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 42 "a3.l"
+#line 39 "a3.l"
 { strcpy(mytext, yytext); return COMPAR; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 44 "a3.l"
+#line 41 "a3.l"
 { strcpy(mytext, yytext); return SHORT_AND_TOK; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 45 "a3.l"
+#line 42 "a3.l"
 { strcpy(mytext, yytext); return SHORT_OR_TOK; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 46 "a3.l"
+#line 43 "a3.l"
 { strcpy(mytext, yytext); return NOT_TOK; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 48 "a3.l"
+#line 45 "a3.l"
 { return IF_TOK; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 49 "a3.l"
+#line 46 "a3.l"
 { return ELSE_TOK; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 51 "a3.l"
+#line 48 "a3.l"
 { return WHILE_TOK; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 52 "a3.l"
+#line 49 "a3.l"
 { return FOR_TOK; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 54 "a3.l"
+#line 51 "a3.l"
 { return RETURN_TOK; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 56 "a3.l"
+#line 53 "a3.l"
 { return INCLUDE; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 57 "a3.l"
+#line 54 "a3.l"
 { return LIB_NAME; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 59 "a3.l"
+#line 56 "a3.l"
 { strcpy(mytext, yytext); return NUMBER; }
 	YY_BREAK
 case 36:
 /* rule 36 can match eol */
 YY_RULE_SETUP
-#line 60 "a3.l"
+#line 57 "a3.l"
 { strcpy(mytext, yytext); return STRING_TOK; }
 	YY_BREAK
 case 37:
 /* rule 37 can match eol */
 YY_RULE_SETUP
-#line 61 "a3.l"
+#line 58 "a3.l"
 { strcpy(mytext, yytext); return CHAR_TOK; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 62 "a3.l"
+#line 59 "a3.l"
 { strcpy(mytext, yytext); return IDENTIFIER; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 64 "a3.l"
+#line 61 "a3.l"
 {}
 	YY_BREAK
 case 40:
 /* rule 40 can match eol */
 YY_RULE_SETUP
-#line 65 "a3.l"
+#line 62 "a3.l"
 {}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 67 "a3.l"
+#line 64 "a3.l"
 { }
 	YY_BREAK
 case 42:
 /* rule 42 can match eol */
 YY_RULE_SETUP
-#line 68 "a3.l"
+#line 65 "a3.l"
 { lineNumber++; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 69 "a3.l"
+#line 66 "a3.l"
 { return CHAR_TOK; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 71 "a3.l"
+#line 68 "a3.l"
 {yyerror("unknown character");}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 72 "a3.l"
+#line 69 "a3.l"
 ECHO;
 	YY_BREAK
-#line 1031 "lex.yy.c"
+#line 1028 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2033,7 +2030,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 72 "a3.l"
+#line 69 "a3.l"
 
 
 int yywrap(void) {

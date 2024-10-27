@@ -1,7 +1,7 @@
 #pragma once
 #include <stdbool.h>
 #define MAX_STRING_LITERAL_LENGTH 10000
-#define MAX_IDENTIFIERS 2000
+#define MAX_IDENTIFIERS 20000
 #define MAX_ARGS 2000
 #define MAX_ARG_SIZE 2000
 #define MAX_FUNCTION_CALLS 2000

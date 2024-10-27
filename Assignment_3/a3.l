@@ -1,8 +1,5 @@
 %{
 #include <stdlib.h>
-#define MAX_IDENTIFIERS 2000
-#define MAX_IDENTIFIER_LENGTH 200
-
 #include "a3.h"
 #include "a3.tab.h"
 
