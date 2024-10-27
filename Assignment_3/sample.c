@@ -1,4 +1,5 @@
 // MiniC program to test the major constructs
+
 #include<stdio.h>
 int glob_1;
 int glob_2;

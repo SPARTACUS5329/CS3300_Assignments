@@ -206,7 +206,7 @@ t85 = retval
 t86 = t85 == 0
 if (t86) goto L18
 goto L19
-L258767746:
+L69680018:
 L17:
 call print_no
 t87 = retval
@@ -224,7 +224,7 @@ t91 = retval
 t92 = t90 == t91
 if (t92) goto L23
 goto L24
-L258767746:
+L69680018:
 L14:
 t93 = "Yes\n"
 param1 = t93

@@ -3887,7 +3887,7 @@ assembly_term_t *newAssemblyTerm(tac_term_t *tac) {
 		sprintf(tempStr, "%s_%s", currScope, tac->value);
 		item = searchSymbol(tempStr, symbolTable);
 		if (item == NULL) {
-			printf("Reaching: %s\n", tempStr);
+			printf("%s\n", tempStr);
 		    error("[newAssemblyTerm] Undefined variable");
 		}
 		strcpy(term->scope, currScope);
@@ -4011,6 +4011,7 @@ void stringifyText(assembly_text_t *text) {
 
 void stringifyAssemblyLabel(assembly_label_t *label) {
 	if (label->type == FUNCTION_LABEL) {
+		strcpy(currScope, label->value);
 		x86_section_t *x86Section = (x86_section_t *)malloc(sizeof(x86_section_t));
 		x86Section->type = X86_GLOBL;
 		strcpy(x86Section->label, label->value);
