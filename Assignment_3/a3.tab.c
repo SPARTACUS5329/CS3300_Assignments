@@ -3603,22 +3603,6 @@ void firstPassTACs(tac_list_t *tacList) {
 				    goto continue_first_pass;
 			}
 
-			bool isPointer = false;
-
-		    sprintf(tempStr, "%s_%s", currTACFunction, ass->rValue->lTerm->value);
-			if (ass->rValue->lTerm->type == TEMPORARY || ass->rValue->lTerm->type == VARIABLE) {
-				symbol_table_item_t *rItem = searchSymbol(tempStr, symbolTable);
-
-				if (rItem == NULL) {
-				    sprintf(tempStr, "global_%s", ass->rValue->lTerm->value);
-					rItem = searchSymbol(tempStr, symbolTable);
-					if (rItem == NULL)
-						error("[firstPassTAC] Undefined variable used to read");
-				}
-
-				isPointer = rItem->data->isPointer;
-			}
-
 			identifier_t *id = (identifier_t *)malloc(sizeof(identifier_t));
 			tac_term_e rType = ass->rValue->lTerm->type;
 			if (rType == STRING_LITERAL) {
@@ -3632,7 +3616,7 @@ void firstPassTACs(tac_list_t *tacList) {
 			strcpy(id->name, tempStr);
 			strcpy(id->displayName, ass->lValue->value);
 			id->stackOffset = -(currStackOffset + 4);
-			id->isPointer = isPointer;
+			id->isPointer = false;
 			currStackOffset += 4;
 			insertSymbol(tempStr, id, symbolTable);
 		}
