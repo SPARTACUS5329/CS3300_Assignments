@@ -1,108 +1,65 @@
-// MiniC program to test the major constructs
-
+// Minic Program to test globals and arguments evaluation
 #include<stdio.h>
-int glob_1;
-int glob_2;
-char yes_no[6];
+int a;
+int b;
 
-int zero()
+
+int set_a()
 {
-   printf("This is a zero\n");
-   return 0;
+    a = 1;
+    printf("12\n");
+    return 1;
 }
 
-int one()
+int set_b()
 {
-   printf("This is a one\n");
-   return 0;
+    b = 1;
+    printf("52\n");
+    return 1;
 }
 
-int add(int x, int y, int z, int a, int b)
+int unset_a()
 {
-    return ((x+y)+((z+a)+b));
+    a = 0;
+    printf("77\n");
+    return a;
 }
 
-int print_yes()
+int unset_b()
 {
-    int i;
-    char dummy[2];
-    dummy[1] = '\0';
-    i=0;
-    while(i<6)
-    {
-        dummy[0] = yes_no[i];
-        printf("%s",dummy);
-        i = i +2;
-    }
-    printf("\n");
-    return zero();
-}
-
-int print_no()
-{
-    int i;
-    char dummy[2];
-    dummy[1] = '\0';
-    i=1;
-    while(i<6)
-    {
-        dummy[0] = yes_no[i];
-        printf("%s",dummy);
-        i = i +2;
-    }
-    printf("\n");
-    return ((zero())+1);
-}
-
-int fibonacci(int n)
-{
-    int ret;
-    if(n <= 2){ ret = n-1;}
-    else{ ret = (fibonacci(n-1)) + (fibonacci(n-2));}
-    return ret;
-}
-
-int mess_around(int a, char b[], int c, int d, char e[])
-{
-    int f; int g; int h;
-    f = (a+c)*d;
-    g = ((f-d)/a)*(a+c);
-    printf("g = %d\n",g);
-    return (((f+g)));
+    b = 0;
+    printf("8234\n");
+    return a;
 }
 
 int main()
 {
-    int i;
-    int dum;
-    int flag;
-    flag = 1;
-    i=10;
-    yes_no[0] = 'Y'; yes_no[1] = 'N'; yes_no[2] = 'E';
-    yes_no[3] = 'O'; yes_no[4] = 'S'; yes_no[5] = '\0';
-    printf("%d\n",fibonacci(10));
-    mess_around(10,yes_no,10,2,yes_no);
-
-
-    while((i>0) && flag==1)
-    {
-        dum = i/2;
-        if( (dum*2 == i) || (!(zero()==0) || (!(print_no() == zero()) && !(print_yes() == zero()))))
-        {
-            printf("Yes\n");
-        }
-        else
-        {
-            if(1>=2 || 2<=1 || 1==2 || 1>2 || 1!=1 || 1<2)
-            {
-                printf("No\n");
-            }
-        }
-        i = i -1;
+    a = 0; b = 0;
+    if (set_a() == 1 && set_b() == 1) { 
+      printf("1241\n");
+    } else {
+      printf("-1241\n");
+    } 
+    if (set_b() == 1 && set_a() == 1) { 
+      printf("2445\n");
+    } else {
+      printf("-2445\n");
     }
-
-    dum = (((zero()) + (one())) + (((one())+(zero()))+(one())));
-    printf("Value = %d\n",dum);
-
+    if ((unset_a() == 1) && (unset_b() == 1)) {
+      printf("4562");
+    } else {
+      printf("-4562");
+    }
+    if ((unset_b()==1) && (set_a()==1)) {
+      printf("352");
+    } else {
+      printf("-352");
+    }
+    if ((set_b()==1) && (unset_a()==1)) {
+      printf("986");
+    } else {
+      printf("-986");
+    }
+    printf("\n");
     return 0;
 }

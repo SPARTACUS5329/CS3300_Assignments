@@ -2584,6 +2584,7 @@ void stringifyX86List(x86_list_t *x86List) {
 						printf("imull");
 						break;
 					case X86_DIV:
+						printf("cdq\n");
 						printf("idivl");
 						break;
 				}
