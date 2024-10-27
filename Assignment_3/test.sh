@@ -2,6 +2,7 @@
 # ANSI color codes
 GREEN='\033[0;32m'
 RED='\033[0;31m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Create outputs directory if it doesn't exist
@@ -22,7 +23,7 @@ run_test() {
     
     if [ ! -f "a.out" ]; then
         echo -e "${RED}Failed $filename - make failed${NC}"
-        return
+        return 1
     fi
     
     # Step 2: Run the assembly program with input
@@ -32,7 +33,7 @@ run_test() {
     gcc -m32 a.s -o myout 2>/dev/null
     if [ $? -ne 0 ]; then
         echo -e "${RED}Failed $filename - assembly compilation failed${NC}"
-        return
+        return 1
     fi
     
     # Step 4: Run the compiled assembly program
@@ -41,17 +42,14 @@ run_test() {
     # Step 5: Check if expected output exists
     if [ ! -f "$expected_output" ]; then
         echo -e "${RED}Failed $filename - no expected output file found${NC}"
-        return
-    fi
+        return 1
+    }
     
     # Step 6: Compare outputs with expected output in outputs directory
-    if diff -q myout.txt "$expected_output" >/dev/null; then
+    if cmp -s myout.txt "$expected_output"; then
         echo -e "${GREEN}Passed $filename${NC}"
     else
         echo -e "${RED}Failed $filename - output mismatch${NC}"
-        # Optionally show the differences
-        echo "Differences found:"
-        diff myout.txt "$expected_output"
     fi
     
     # Clean up
@@ -81,7 +79,7 @@ failed=0
 for input_file in ./PublicTCs/Input/*; do
     if [ -f "$input_file" ]; then
         ((total++))
-        if run_test "$input_file" | grep -q "Passed"; then
+        if run_test "$input_file"; then
             ((passed++))
         else
             ((failed++))
