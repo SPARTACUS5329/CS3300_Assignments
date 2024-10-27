@@ -1,15 +1,84 @@
-main:
-t1 = 10
-a = t1
-t2 = 20
-b = t2
-t3 = a + b
-c = t3
-t4 = "c = %d\n"
-t5 = c
-param1 = t4
-param2 = t5
+zero:
+t1 = "This is a zero\n"
+param1 = t1
 call printf
-t6 = retval
+t2 = retval
+retval = 0
+return
+one:
+t3 = "This is a one\n"
+param1 = t3
+call printf
+t4 = retval
+retval = 1
+return
+main:
+t5 = 10
+a = t5
+t6 = -3
+b = t6
+t7 = -4
+c = t7
+t8 = 1
+d = t8
+t9 = -10
+e = t9
+t10 = -17
+f = t10
+t11 = -80
+g = t11
+t12 = 3 * 3
+t13 = 3 * 3
+t14 = t12 * t13
+h = t14
+t15 = -1 / -1
+i = t15
+t16 = 3 * 5
+j = t16
+t17 = 7 - -4
+k = t17
+t18 = 1
+l = t18
+t19 = b * c
+t20 = a + t19
+t21 = t20 - d
+t22 = e - f
+t23 = g + h
+t24 = t22 / t23
+t25 = t21 / t24
+t26 = i * j
+t27 = k / l
+t28 = t26 - t27
+t29 = t25 + t28
+result = t29
+t30 = "Thala for a reason %d\n"
+t31 = result
+param1 = t30
+param2 = t31
+call printf
+t32 = retval
+t33 = 1 / 2
+result = t33
+t34 = "This should be zero = %d\n"
+t35 = result
+param1 = t34
+param2 = t35
+call printf
+t36 = retval
+call zero
+t37 = retval
+call one
+t38 = retval
+t39 = t37 / t38
+call one
+t40 = retval
+call zero
+t41 = retval
+t42 = t40 + t41
+call one
+t43 = retval
+t44 = t42 * t43
+t45 = t39 + t44
+result = t45
 retval = 0
 return

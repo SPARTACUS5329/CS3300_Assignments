@@ -4274,10 +4274,10 @@ void stringifyAssemblyExp(assembly_exp_t *exp) {
 						x86Arithmetic = newX86Arithmetic(X86_SUB, x86LocationRTerm, EAX_REGISTER);
 						break;
 				    case MULTIPLY:
-						x86Arithmetic = newX86Arithmetic(X86_MUL, x86LocationRTerm, EAX_REGISTER);
+						x86Arithmetic = newX86Arithmetic(X86_MUL, x86LocationRTerm, NULL);
 						break;
 				    case DIVIDE:
-						x86Arithmetic = newX86Arithmetic(X86_DIV, x86LocationRTerm, EAX_REGISTER);
+						x86Arithmetic = newX86Arithmetic(X86_DIV, x86LocationRTerm, NULL);
 						break;
 				    default:
 						error("Invalid binary arithmetic operation");
