@@ -1,22 +1,22 @@
 Factorial of 10 is 3628800
-Global = 1
+Global_int = 1
 Factorial of 9 is 362880
-Global = 2
+Global_int = 2
 Factorial of 8 is 40320
-Global = 3
+Global_int = 3
 Factorial of 7 is 5040
-Global = 4
+Global_int = 4
 Factorial of 6 is 720
-Global = 5
+Global_int = 5
 Factorial of 5 is 120
-Global = 6
+Global_int = 6
 Factorial of 4 is 24
-Global = 7
+Global_int = 7
 Factorial of 3 is 6
-Global = 8
+Global_int = 8
 Factorial of 2 is 2
-Global = 9
+Global_int = 9
 Factorial of 1 is 1
-Global = 10
+Global_int = 10
 Factorial of 0 is 1
-Global = 11
+Global_int = 11
