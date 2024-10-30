@@ -2,4 +2,5 @@ clear
 flex l14.l
 bison -d l14.y
 gcc lex.yy.c l14.tab.c
-./a.out < pattern.txt
+./a.out < pattern.txt > myout.txt
+cmp myout.txt out.txt

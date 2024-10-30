@@ -13,7 +13,6 @@ extern char *yytext;
 
 symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 program_t *program;
-int maxTime;
 %}
 
 %token IDENTIFIER NUMBER
@@ -72,8 +71,8 @@ identifier:
 number:
 	NUMBER {
 		int num = atoi(mytext);
-		if (num > maxTime);
-			maxTime = num;
+		if (num > program->maxTime)
+			program->maxTime = num;
 		$$ = num;
 	}
 ;
@@ -95,19 +94,63 @@ int main() {
 	yyparse();
 	reg_list_t *regList = (reg_list_t *)calloc(1, sizeof(reg_list_t));
 	regList->regs = (reg_t **)calloc(program->K, sizeof(reg_t *));
+
 	for (int i = 0; i < program->K; i++) {
-		reg_t *reg = (reg_t *)malloc(sizeof(reg_t));
+		reg_t *reg = (reg_t *)calloc(1, sizeof(reg_t));
 		reg->id = i + 1;
-		reg->available = true;
-		regList->regs[i] = reg;
+		regList->regs[regList->regCount++] = reg;
 	}
 
 	program->regList = regList;
 	linearScan();
+	identifier_t *id;
+
+	for (int i = 0; i < program->maxTime; i++) {
+		for (int j = 0; j < program->idList->idCount; j++) {
+			id = program->idList->ids[j];
+			if (i < id->startTime || i >= id->endTime)
+				continue;
+
+			printf("%s %d ", id->value, i);
+			if (id->reg != NULL)
+				printf("%d", id->reg->id);
+			else
+				printf("memory");
+			printf("\n");
+		}
+	}
 }
 
 void linearScan() {
 	qsort(program->idList->ids, program->N, sizeof(identifier_t *), compareId);
+	int idCount = program->idList->idCount;
+	identifier_t **ids = program->idList->ids;
+	identifier_t *id;
+	reg_t **regs = program->regList->regs;
+	int regCount = program->regList->regCount;
+	reg_t *reg;
+
+	for (int i = 1; i <= program->maxTime; i++) {
+		for (int j = 0; j < regCount; j++) {
+			reg = regs[j];
+
+			if (reg->var != NULL) {
+				if (reg->var->endTime == i)
+					reg->var = NULL;
+				else
+					continue;
+			}
+
+			for (int k = 0; k < idCount; k++) {
+				id = ids[k];
+				if (id->startTime == i && id->reg == NULL) {
+					id->reg = reg;
+					reg->var = id;
+					break;
+				}
+			}
+		}
+	}
 }
 
 unsigned long hash(char *str) {

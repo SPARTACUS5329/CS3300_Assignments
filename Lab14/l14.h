@@ -16,6 +16,7 @@ typedef struct SymbolTableItem symbol_table_item_t;
 typedef struct Program {
   int K;
   int N;
+  int maxTime;
   id_list_t *idList;
   reg_list_t *regList;
 } program_t;
@@ -29,6 +30,7 @@ typedef struct Id {
   char value[MAX_IDENTIFIER_LENGTH];
   int startTime;
   int endTime;
+  reg_t *reg;
   identifier_t **neighbours;
 } identifier_t;
 
@@ -39,7 +41,7 @@ typedef struct RegList {
 
 typedef struct Reg {
   int id;
-  bool available;
+  identifier_t *var;
 } reg_t;
 
 typedef struct SymbolTableItem {

@@ -94,7 +94,6 @@ extern char *yytext;
 
 symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 program_t *program;
-int maxTime;
 
 
 /* Enabling traces.  */
@@ -117,7 +116,7 @@ int maxTime;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 21 "l14.y"
+#line 20 "l14.y"
 {
 	char *str;
 	int val;
@@ -125,7 +124,7 @@ typedef union YYSTYPE
 	id_list_t *idList;
 }
 /* Line 193 of yacc.c.  */
-#line 129 "l14.tab.c"
+#line 128 "l14.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -138,7 +137,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 142 "l14.tab.c"
+#line 141 "l14.tab.c"
 
 #ifdef short
 # undef short
@@ -420,7 +419,7 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    35,    35,    43,    47,    55,    63,    73
+       0,    34,    34,    42,    46,    54,    62,    72
 };
 #endif
 
@@ -1320,7 +1319,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 35 "l14.y"
+#line 34 "l14.y"
     {
 		program->K = (yyvsp[(1) - (3)].val);
 		program->N = (yyvsp[(2) - (3)].val);
@@ -1329,7 +1328,7 @@ yyreduce:
     break;
 
   case 3:
-#line 43 "l14.y"
+#line 42 "l14.y"
     {
 		(yyvsp[(1) - (2)].idList)->ids[(yyvsp[(1) - (2)].idList)->idCount++] = (yyvsp[(2) - (2)].id);
 		(yyval.idList) = (yyvsp[(1) - (2)].idList);
@@ -1337,7 +1336,7 @@ yyreduce:
     break;
 
   case 4:
-#line 47 "l14.y"
+#line 46 "l14.y"
     {
 		id_list_t *idList = (id_list_t *)calloc(1, sizeof(id_list_t));
 		idList->ids = (identifier_t **)calloc(MAX_IDENTIFIERS, sizeof(identifier_t *));
@@ -1346,7 +1345,7 @@ yyreduce:
     break;
 
   case 5:
-#line 55 "l14.y"
+#line 54 "l14.y"
     {
 		(yyvsp[(1) - (3)].id)->startTime = (yyvsp[(2) - (3)].val);
 		(yyvsp[(1) - (3)].id)->endTime = (yyvsp[(3) - (3)].val);
@@ -1355,7 +1354,7 @@ yyreduce:
     break;
 
   case 6:
-#line 63 "l14.y"
+#line 62 "l14.y"
     {
 		identifier_t *id = (identifier_t *)calloc(1, sizeof(identifier_t));
 		strcpy(id->value, mytext);
@@ -1366,18 +1365,18 @@ yyreduce:
     break;
 
   case 7:
-#line 73 "l14.y"
+#line 72 "l14.y"
     {
 		int num = atoi(mytext);
-		if (num > maxTime);
-			maxTime = num;
+		if (num > program->maxTime)
+			program->maxTime = num;
 		(yyval.val) = num;
 	;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1381 "l14.tab.c"
+#line 1380 "l14.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1591,7 +1590,7 @@ yyreturn:
 }
 
 
-#line 81 "l14.y"
+#line 80 "l14.y"
 
 
 void yyerror(char *message) {
@@ -1609,20 +1608,63 @@ int main() {
 	yyparse();
 	reg_list_t *regList = (reg_list_t *)calloc(1, sizeof(reg_list_t));
 	regList->regs = (reg_t **)calloc(program->K, sizeof(reg_t *));
+
 	for (int i = 0; i < program->K; i++) {
-		reg_t *reg = (reg_t *)malloc(sizeof(reg_t));
+		reg_t *reg = (reg_t *)calloc(1, sizeof(reg_t));
 		reg->id = i + 1;
-		reg->available = true;
-		regList->regs[i] = reg;
+		regList->regs[regList->regCount++] = reg;
 	}
 
 	program->regList = regList;
 	linearScan();
+	identifier_t *id;
+
+	for (int i = 0; i < program->maxTime; i++) {
+		for (int j = 0; j < program->idList->idCount; j++) {
+			id = program->idList->ids[j];
+			if (i < id->startTime || i >= id->endTime)
+				continue;
+
+			printf("%s %d ", id->value, i);
+			if (id->reg != NULL)
+				printf("%d", id->reg->id);
+			else
+				printf("memory");
+			printf("\n");
+		}
+	}
 }
 
 void linearScan() {
 	qsort(program->idList->ids, program->N, sizeof(identifier_t *), compareId);
-	printf("%s\n", program->idList->ids[0]->value);
+	int idCount = program->idList->idCount;
+	identifier_t **ids = program->idList->ids;
+	identifier_t *id;
+	reg_t **regs = program->regList->regs;
+	int regCount = program->regList->regCount;
+	reg_t *reg;
+
+	for (int i = 1; i <= program->maxTime; i++) {
+		for (int j = 0; j < regCount; j++) {
+			reg = regs[j];
+
+			if (reg->var != NULL) {
+				if (reg->var->endTime == i)
+					reg->var = NULL;
+				else
+					continue;
+			}
+
+			for (int k = 0; k < idCount; k++) {
+				id = ids[k];
+				if (id->startTime == i && id->reg == NULL) {
+					id->reg = reg;
+					reg->var = id;
+					break;
+				}
+			}
+		}
+	}
 }
 
 unsigned long hash(char *str) {
