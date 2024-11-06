@@ -51,8 +51,8 @@
      GOTO = 267,
      PRINT = 268,
      READ = 269,
-     NUMBER = 270,
-     IDENTIFIER = 271
+     NUMBER_TOK = 270,
+     IDENTIFIER_TOK = 271
    };
 #endif
 /* Tokens.  */
@@ -68,14 +68,31 @@
 #define GOTO 267
 #define PRINT 268
 #define READ 269
-#define NUMBER 270
-#define IDENTIFIER 271
+#define NUMBER_TOK 270
+#define IDENTIFIER_TOK 271
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+typedef union YYSTYPE
+#line 24 "a4.y"
+{
+    int val;
+	identifier_t *id;
+	line_list_t *lineList;
+	line_t *line;
+	ass_t *ass;
+	u_ass_t *uass;
+	exp_t *exp;
+	cond_jump_t *condJump;
+	uncond_jump_t *ucondJump;
+	label_def_t *labelDef;
+	io_t *io;
+}
+/* Line 1529 of yacc.c.  */
+#line 95 "a4.tab.h"
+	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

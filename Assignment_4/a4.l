@@ -33,8 +33,8 @@ extern int lineNumber;
 
 "="	{ return EQ; }
 ":"	{ return COLON; }
-[0-9]+  { strcpy(mytext, yytext); return NUMBER; }
-[a-zA-Z_][a-zA-Z0-9_]*	{ strcpy(mytext, yytext); return IDENTIFIER; }
+[0-9]+  { strcpy(mytext, yytext); return NUMBER_TOK; }
+[a-zA-Z_][a-zA-Z0-9_]*	{ strcpy(mytext, yytext); return IDENTIFIER_TOK; }
 
 [ \t]	{ }
 [\n]	{ lineNumber++; }

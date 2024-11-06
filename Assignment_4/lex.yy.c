@@ -828,12 +828,12 @@ YY_RULE_SETUP
 case 16:
 YY_RULE_SETUP
 #line 36 "a4.l"
-{ strcpy(mytext, yytext); return NUMBER; }
+{ strcpy(mytext, yytext); return NUMBER_TOK; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 37 "a4.l"
-{ strcpy(mytext, yytext); return IDENTIFIER; }
+{ strcpy(mytext, yytext); return IDENTIFIER_TOK; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP

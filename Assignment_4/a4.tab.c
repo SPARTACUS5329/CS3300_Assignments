@@ -78,8 +78,8 @@
      GOTO = 267,
      PRINT = 268,
      READ = 269,
-     NUMBER = 270,
-     IDENTIFIER = 271
+     NUMBER_TOK = 270,
+     IDENTIFIER_TOK = 271
    };
 #endif
 /* Tokens.  */
@@ -95,8 +95,8 @@
 #define GOTO 267
 #define PRINT 268
 #define READ 269
-#define NUMBER 270
-#define IDENTIFIER 271
+#define NUMBER_TOK 270
+#define IDENTIFIER_TOK 271
 
 
 
@@ -115,7 +115,8 @@ int yylex(void);
 char mytext[100];
 int lineNumber = 1;
 
-hash_table_item_t *symbolTable[MAX_IDENTIFIERS];
+program_t *program;
+symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 
 
 /* Enabling traces.  */
@@ -137,7 +138,24 @@ hash_table_item_t *symbolTable[MAX_IDENTIFIERS];
 #endif
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+typedef union YYSTYPE
+#line 24 "a4.y"
+{
+    int val;
+	identifier_t *id;
+	line_list_t *lineList;
+	line_t *line;
+	ass_t *ass;
+	u_ass_t *uass;
+	exp_t *exp;
+	cond_jump_t *condJump;
+	uncond_jump_t *ucondJump;
+	label_def_t *labelDef;
+	io_t *io;
+}
+/* Line 193 of yacc.c.  */
+#line 158 "a4.tab.c"
+	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -149,7 +167,7 @@ typedef int YYSTYPE;
 
 
 /* Line 216 of yacc.c.  */
-#line 153 "a4.tab.c"
+#line 171 "a4.tab.c"
 
 #ifdef short
 # undef short
@@ -362,9 +380,9 @@ union yyalloc
 #endif
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  20
+#define YYFINAL  3
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   39
+#define YYLAST   35
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  17
@@ -373,7 +391,7 @@ union yyalloc
 /* YYNRULES -- Number of rules.  */
 #define YYNRULES  31
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  46
+#define YYNSTATES  45
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -420,7 +438,7 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint8 yyprhs[] =
 {
-       0,     0,     3,     5,     6,     9,    11,    13,    15,    17,
+       0,     0,     3,     5,     8,     9,    11,    13,    15,    17,
       19,    21,    25,    29,    33,    37,    41,    43,    45,    50,
       52,    54,    61,    64,    67,    70,    73,    75,    77,    79,
       81,    83
@@ -429,7 +447,7 @@ static const yytype_uint8 yyprhs[] =
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      18,     0,    -1,    19,    -1,    -1,    20,    19,    -1,    21,
+      18,     0,    -1,    19,    -1,    19,    20,    -1,    -1,    21,
       -1,    23,    -1,    25,    -1,    26,    -1,    27,    -1,    28,
       -1,    30,    10,    22,    -1,    30,    31,    30,    -1,    30,
       31,    29,    -1,    29,    31,    30,    -1,    29,    31,    29,
@@ -443,10 +461,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    25,    25,    28,    29,    33,    34,    35,    36,    37,
-      38,    42,    46,    47,    48,    49,    50,    51,    55,    59,
-      60,    64,    68,    72,    76,    77,    81,    85,    89,    90,
-      91,    92
+       0,    52,    52,    58,    61,    69,    75,    81,    87,    93,
+      99,   108,   117,   125,   133,   141,   149,   155,   164,   173,
+     174,   178,   188,   196,   204,   209,   217,   223,   231,   232,
+     233,   234
 };
 #endif
 
@@ -456,8 +474,8 @@ static const yytype_uint8 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "PLUS", "MINUS", "MULTIPLY", "DIVIDE",
-  "NOT", "COMPAR", "COLON", "EQ", "IF", "GOTO", "PRINT", "READ", "NUMBER",
-  "IDENTIFIER", "$accept", "program", "lines", "line",
+  "NOT", "COMPAR", "COLON", "EQ", "IF", "GOTO", "PRINT", "READ",
+  "NUMBER_TOK", "IDENTIFIER_TOK", "$accept", "program", "lines", "line",
   "assignmentStatement", "expression", "unaryAssignmentStatement",
   "unaryOperator", "conditionalJump", "unconditionalJump",
   "labelDefinition", "ioStatement", "number", "identifier", "operator", 0
@@ -486,7 +504,7 @@ static const yytype_uint8 yyr1[] =
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     1,     0,     2,     1,     1,     1,     1,     1,
+       0,     2,     1,     2,     0,     1,     1,     1,     1,     1,
        1,     3,     3,     3,     3,     3,     1,     1,     4,     1,
        1,     6,     2,     2,     2,     2,     1,     1,     1,     1,
        1,     1
@@ -497,37 +515,37 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       3,     0,     0,     0,     0,    27,     0,     2,     3,     5,
-       6,     7,     8,     9,    10,     0,     0,    22,    24,    25,
-       1,     4,    23,     0,     0,    19,    20,    26,    11,     0,
-      17,    16,     0,    18,    28,    29,    30,    31,     0,     0,
-       0,    15,    14,    13,    12,    21
+       4,     0,     2,     1,     0,     0,     0,     0,    27,     3,
+       5,     6,     7,     8,     9,    10,     0,     0,    22,    24,
+      25,    23,     0,     0,    19,    20,    26,    11,     0,    17,
+      16,     0,    18,    28,    29,    30,    31,     0,     0,     0,
+      15,    14,    13,    12,    21
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     6,     7,     8,     9,    28,    10,    29,    11,    12,
-      13,    14,    30,    15,    38
+      -1,     1,     2,     9,    10,    27,    11,    28,    12,    13,
+      14,    15,    29,    16,    37
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -13
+#define YYPACT_NINF -11
 static const yytype_int8 yypact[] =
 {
-      -3,    -2,    -2,    -2,    -2,   -13,    12,   -13,    -3,   -13,
-     -13,   -13,   -13,   -13,   -13,    -4,    13,   -13,   -13,   -13,
-     -13,   -13,   -13,     0,    -2,   -13,   -13,   -13,   -13,    -2,
-      14,    14,    17,   -13,   -13,   -13,   -13,   -13,     9,     9,
-      -2,   -13,   -13,   -13,   -13,   -13
+     -11,    12,    -3,   -11,    -2,    -2,    -2,    -2,   -11,   -11,
+     -11,   -11,   -11,   -11,   -11,   -11,    16,     9,   -11,   -11,
+     -11,   -11,     0,    -2,   -11,   -11,   -11,   -11,    -2,    17,
+      17,    15,   -11,   -11,   -11,   -11,   -11,   -10,   -10,    -2,
+     -11,   -11,   -11,   -11,   -11
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -13,   -13,    22,   -13,   -13,   -13,   -13,   -13,   -13,   -13,
-     -13,   -13,   -12,    -1,     1
+     -11,   -11,   -11,   -11,   -11,   -11,   -11,   -11,   -11,   -11,
+     -11,   -11,    -9,    -4,     1
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -537,29 +555,29 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-      16,    17,    18,    19,    25,    22,    23,    26,     1,     2,
-       3,     4,    20,     5,     5,    27,     5,    34,    35,    36,
-      37,    24,    31,    32,    27,     5,    41,    43,    33,    40,
-      21,     0,    39,     0,     0,     0,     0,    42,    44,    45
+      17,    18,    19,    20,    24,    26,     8,    25,     4,     5,
+       6,     7,     3,     8,     8,    26,     8,    23,    30,    31,
+      33,    34,    35,    36,    32,    21,    22,    39,    40,    42,
+       0,    38,     0,    41,    43,    44
 };
 
 static const yytype_int8 yycheck[] =
 {
-       1,     2,     3,     4,     4,     9,    10,     7,    11,    12,
-      13,    14,     0,    16,    16,    15,    16,     3,     4,     5,
-       6,     8,    23,    24,    15,    16,    38,    39,    29,    12,
-       8,    -1,    31,    -1,    -1,    -1,    -1,    38,    39,    40
+       4,     5,     6,     7,     4,    15,    16,     7,    11,    12,
+      13,    14,     0,    16,    16,    15,    16,     8,    22,    23,
+       3,     4,     5,     6,    28,     9,    10,    12,    37,    38,
+      -1,    30,    -1,    37,    38,    39
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    11,    12,    13,    14,    16,    18,    19,    20,    21,
-      23,    25,    26,    27,    28,    30,    30,    30,    30,    30,
-       0,    19,     9,    10,     8,     4,     7,    15,    22,    24,
-      29,    30,    30,    30,     3,     4,     5,     6,    31,    31,
-      12,    29,    30,    29,    30,    30
+       0,    18,    19,     0,    11,    12,    13,    14,    16,    20,
+      21,    23,    25,    26,    27,    28,    30,    30,    30,    30,
+      30,     9,    10,     8,     4,     7,    15,    22,    24,    29,
+      30,    30,    30,     3,     4,     5,     6,    31,    31,    12,
+      29,    30,    29,    30,    30
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1373,9 +1391,243 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-      
+        case 2:
+#line 52 "a4.y"
+    {
+		program->lineList = (yyvsp[(1) - (1)].lineList);
+	;}
+    break;
+
+  case 3:
+#line 58 "a4.y"
+    {
+		(yyvsp[(1) - (2)].lineList)->lines[(yyvsp[(1) - (2)].lineList)->lineCount++] = (yyvsp[(2) - (2)].line);
+	;}
+    break;
+
+  case 4:
+#line 61 "a4.y"
+    {
+		line_list_t *lineList = (line_list_t *)calloc(1, sizeof(line_list_t));
+		lineList->lines = (line_t **)calloc(MAX_LINES, sizeof(line_t *));
+		(yyval.lineList) = lineList;
+	;}
+    break;
+
+  case 5:
+#line 69 "a4.y"
+    {
+		line_t *line = (line_t *)calloc(1, sizeof(line_t));
+		line->type = ASS;
+		line->line.ass = (yyvsp[(1) - (1)].ass);
+		(yyval.line) = line;
+	;}
+    break;
+
+  case 6:
+#line 75 "a4.y"
+    {
+		line_t *line = (line_t *)calloc(1, sizeof(line_t));
+		line->type = UASS;
+		line->line.uass = (yyvsp[(1) - (1)].uass);
+		(yyval.line) = line;
+	;}
+    break;
+
+  case 7:
+#line 81 "a4.y"
+    {
+		line_t *line = (line_t *)calloc(1, sizeof(line_t));
+		line->type = COND_JUMP;
+		line->line.condJump = (yyvsp[(1) - (1)].condJump);
+		(yyval.line) = line;
+	;}
+    break;
+
+  case 8:
+#line 87 "a4.y"
+    {
+		line_t *line = (line_t *)calloc(1, sizeof(line_t));
+		line->type = UNCOND_JUMP;
+		line->line.uncondJump = (yyvsp[(1) - (1)].ucondJump);
+		(yyval.line) = line;
+	;}
+    break;
+
+  case 9:
+#line 93 "a4.y"
+    {
+		line_t *line = (line_t *)calloc(1, sizeof(line_t));
+		line->type = LABEL_DEF;
+		line->line.labelDef = (yyvsp[(1) - (1)].labelDef);
+		(yyval.line) = line;
+	;}
+    break;
+
+  case 10:
+#line 99 "a4.y"
+    {
+		line_t *line = (line_t *)calloc(1, sizeof(line_t));
+		line->type = IO;
+		line->line.io = (yyvsp[(1) - (1)].io);
+		(yyval.line) = line;
+	;}
+    break;
+
+  case 11:
+#line 108 "a4.y"
+    {
+		ass_t *ass = (ass_t *)calloc(1, sizeof(ass_t));
+		ass->id = (yyvsp[(1) - (3)].id);
+		ass->exp = (yyvsp[(3) - (3)].exp);
+		(yyval.ass) = ass;
+	;}
+    break;
+
+  case 12:
+#line 117 "a4.y"
+    {
+		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
+		exp->lType = IDENTIFIER;
+		exp->rType = IDENTIFIER;
+		exp->lValue.id = (yyvsp[(1) - (3)].id);
+		exp->rValue.id = (yyvsp[(3) - (3)].id);
+		(yyval.exp) = exp;
+	;}
+    break;
+
+  case 13:
+#line 125 "a4.y"
+    {
+		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
+		exp->lType = IDENTIFIER;
+		exp->rType = NUMBER;
+		exp->lValue.id = (yyvsp[(1) - (3)].id);
+		exp->rValue.val = (yyvsp[(3) - (3)].val);
+		(yyval.exp) = exp;
+	;}
+    break;
+
+  case 14:
+#line 133 "a4.y"
+    {
+		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
+		exp->lType = NUMBER;
+		exp->rType = IDENTIFIER;
+		exp->lValue.val = (yyvsp[(1) - (3)].val);
+		exp->rValue.id = (yyvsp[(3) - (3)].id);
+		(yyval.exp) = exp;
+	;}
+    break;
+
+  case 15:
+#line 141 "a4.y"
+    {
+		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
+		exp->lType = NUMBER;
+		exp->rType = NUMBER;
+		exp->lValue.val = (yyvsp[(1) - (3)].val);
+		exp->rValue.val = (yyvsp[(3) - (3)].val);
+		(yyval.exp) = exp;
+	;}
+    break;
+
+  case 16:
+#line 149 "a4.y"
+    {
+		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
+		exp->lType = IDENTIFIER;
+		exp->lValue.id = (yyvsp[(1) - (1)].id);
+		(yyval.exp) = exp;
+	;}
+    break;
+
+  case 17:
+#line 155 "a4.y"
+    {
+		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
+		exp->lType = NUMBER;
+		exp->lValue.val = (yyvsp[(1) - (1)].val);
+		(yyval.exp) = exp;
+	;}
+    break;
+
+  case 18:
+#line 164 "a4.y"
+    {
+		u_ass_t *ass = (u_ass_t *)calloc(1, sizeof(u_ass_t));
+		ass->lid = (yyvsp[(1) - (4)].id);
+		ass->rid = (yyvsp[(4) - (4)].id);
+		(yyval.uass) = ass;
+	;}
+    break;
+
+  case 21:
+#line 178 "a4.y"
+    {
+		cond_jump_t *jump = (cond_jump_t *)calloc(1, sizeof(cond_jump_t));
+		jump->lid = (yyvsp[(2) - (6)].id);
+		jump->rid = (yyvsp[(4) - (6)].id);
+		jump->label = (yyvsp[(6) - (6)].id);
+		(yyval.condJump) = jump;
+	;}
+    break;
+
+  case 22:
+#line 188 "a4.y"
+    {
+		uncond_jump_t *jump = (uncond_jump_t *)calloc(1, sizeof(uncond_jump_t));
+		jump->label = (yyvsp[(2) - (2)].id);
+		(yyval.ucondJump) = jump;
+	;}
+    break;
+
+  case 23:
+#line 196 "a4.y"
+    {
+		label_def_t *labelDef = (label_def_t *)calloc(1, sizeof(label_def_t));
+		labelDef->value = (yyvsp[(1) - (2)].id);
+		(yyval.labelDef) = labelDef;
+	;}
+    break;
+
+  case 24:
+#line 204 "a4.y"
+    {
+		io_t *io = (io_t *)calloc(1, sizeof(io_t));
+		io->id = (yyvsp[(2) - (2)].id);
+		(yyval.io) = io;
+	;}
+    break;
+
+  case 25:
+#line 209 "a4.y"
+    {
+		io_t *io = (io_t *)calloc(1, sizeof(io_t));
+		io->id = (yyvsp[(2) - (2)].id);
+		(yyval.io) = io;
+	;}
+    break;
+
+  case 26:
+#line 217 "a4.y"
+    {
+		(yyval.val) = atoi(mytext);
+	;}
+    break;
+
+  case 27:
+#line 223 "a4.y"
+    {
+		identifier_t *id = (identifier_t *)calloc(1, sizeof(identifier_t));
+		strcpy(id->value, mytext);
+		(yyval.id) = id;
+	;}
+    break;
+
+
 /* Line 1267 of yacc.c.  */
-#line 1379 "a4.tab.c"
+#line 1631 "a4.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1589,7 +1841,7 @@ yyreturn:
 }
 
 
-#line 95 "a4.y"
+#line 237 "a4.y"
 
 
 void yyerror(char *message) {
@@ -1603,6 +1855,7 @@ void error(char *message) {
 }
 
 int main(void) {
+    program = (program_t *)calloc(1, sizeof(program_t));
     yyparse();
 
     return 0;
@@ -1618,7 +1871,7 @@ unsigned long hash(char *str) {
 	return hash % MAX_IDENTIFIERS;
 }
 
-hash_table_item_t *searchSymbol(char *key, hash_table_item_t* hashTable[]) {
+symbol_table_item_t *searchSymbol(char *key, symbol_table_item_t* hashTable[]) {
 
 	int hashIndex = hash(key);
 
@@ -1633,13 +1886,13 @@ hash_table_item_t *searchSymbol(char *key, hash_table_item_t* hashTable[]) {
 	return NULL;        
 }
 
-void insertSymbol(char *key, identifier_t *data, hash_table_item_t* hashTable[]) {
-	hash_table_item_t *item;
+void insertSymbol(char *key, identifier_t *data, symbol_table_item_t* hashTable[]) {
+	symbol_table_item_t *item;
 	item = searchSymbol(key, hashTable);
 	if (item != NULL)
 		return;
 	int hashIndex = hash(key);
-	item = (hash_table_item_t*) malloc(sizeof(hash_table_item_t));
+	item = (symbol_table_item_t*) malloc(sizeof(symbol_table_item_t));
 	item->data = data;
 	item->key = hashIndex;
 
