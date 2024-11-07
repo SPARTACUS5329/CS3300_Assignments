@@ -122,4 +122,7 @@ void optimiseTAC(line_list_t *lineList);
 void computeOutSet(line_t *line);
 void computeInSet(line_t *line);
 void combineSets(id_list_t *set1, id_list_t *set2);
-void parseTAC(line_list_t *lineList);
+void firstParseTAC(line_list_t *lineList);
+void secondParseTAC(line_list_t *lineList);
+id_list_t *diffSets(id_list_t *set1, id_list_t *set2);
+void printSet(id_list_t *idList);

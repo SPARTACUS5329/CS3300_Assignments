@@ -1889,9 +1889,10 @@ int main(void) {
     yyparse();
 	constructCFG(program->lineList);
 	// stringifyCFG(program->lineList->lines[0], program->lineList->lineCount);
-	parseTAC(program->lineList);
-	printf("%s", program->lineList->lines[0]->def->ids[0]->value);
-	optimiseTAC(program->lineList);
+	firstParseTAC(program->lineList);
+	secondParseTAC(program->lineList);
+	printSet(program->lineList->lines[0]->in);
+	// optimiseTAC(program->lineList);
 
     return 0;
 }
@@ -2025,7 +2026,7 @@ void stringifyCFG(line_t *root, int maxNodes) {
     free(visited);
 }
 
-void parseTAC(line_list_t *lineList) {
+void firstParseTAC(line_list_t *lineList) {
 	line_t *line;
     for (int i = 0; i < lineList->lineCount; i++) {
 		line = lineList->lines[i];
@@ -2037,14 +2038,19 @@ void parseTAC(line_list_t *lineList) {
 				line->use->ids[line->use->idCount++] = line->line.ass->exp->rValue.id;
 		} else if (line->type == IO && line->line.io->type == IO_READ) {
 		    line->def->ids[line->def->idCount++] = line->line.io->id;
+		} else if (line->type == IO && line->line.io->type == IO_PRINT) {
+		    line->use->ids[line->def->idCount++] = line->line.io->id;
 		} else if (line->type == UASS) {
 		    line->def->ids[line->def->idCount++] = line->line.uass->lid;
 			line->use->ids[line->use->idCount++] = line->line.uass->rid;
+		} else if (line->type == COND_JUMP) {
+		    line->use->ids[line->use->idCount++] = line->line.condJump->lid;
+		    line->use->ids[line->use->idCount++] = line->line.condJump->rid;
 		}
 	}
 }
 
-void optimiseTAC(line_list_t *lineList) {
+void secondParseTAC(line_list_t *lineList) {
 	line_t *line;
 	bool printFound = false;
 	for (int i = lineList->lineCount - 1; i >= 0; i--) {
@@ -2069,6 +2075,9 @@ void computeOutSet(line_t *line) {
 }
 
 void computeInSet(line_t *line) {
+    combineSets(line->in, line->use);
+	id_list_t *outDefDiff = diffSets(line->out, line->def);
+    combineSets(line->in, outDefDiff);
 }
 
 void combineSets(id_list_t *set1, id_list_t *set2) {
@@ -2085,5 +2094,30 @@ void combineSets(id_list_t *set1, id_list_t *set2) {
 		if (!elementFound)
 		    set1->ids[set1->idCount++] = id;
 	}
+}
+
+id_list_t *diffSets(id_list_t *set1, id_list_t *set2) {
+	id_list_t *idList = (id_list_t *)calloc(1, sizeof(id_list_t));
+	idList->ids = (identifier_t **)calloc(MAX_IDENTIFIERS, sizeof(identifier_t *));
+	identifier_t *id;
+    for (int i = 0; i < set1->idCount; i++) {
+		bool elementFound = false;
+		id = set1->ids[i];
+		for (int j = 0; j < set2->idCount; j++) {
+		    if (set2->ids[j] == id) {
+				elementFound = true;
+				break;
+			}
+		}
+		if (!elementFound)
+		    idList->ids[idList->idCount++] = id;
+	}
+	return idList;
+}
+
+void printSet(id_list_t *idList) {
+    for (int i = 0; i < idList->idCount; i++)
+		printf("%s ", idList->ids[i]->value);
+    printf("\n");
 }
 
