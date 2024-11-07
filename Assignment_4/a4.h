@@ -1,7 +1,6 @@
 #pragma once
-#include <set>
 #include <stdbool.h>
-#define MAX_IDENTIFIERS 2000
+#define MAX_IDENTIFIERS 20000
 #define MAX_IDENTIFIER_LENGTH 200
 #define MAX_EXPRESSION_LENGTH 200
 #define MAX_LINES 2000
@@ -18,8 +17,11 @@ typedef struct UnconditionalJump uncond_jump_t;
 typedef struct LabelDefinition label_def_t;
 typedef struct IOStatement io_t;
 typedef struct Identifier identifier_t;
+typedef struct IdList id_list_t;
 
 typedef enum { IDENTIFIER, NUMBER } term_e;
+
+typedef enum { IO_PRINT, IO_READ } io_e;
 
 typedef enum { ASS, UASS, COND_JUMP, UNCOND_JUMP, LABEL_DEF, IO } line_e;
 
@@ -34,6 +36,7 @@ typedef struct LineList {
 
 typedef struct Line {
   line_e type;
+  bool isDeleted;
   int lineNumber;
   union {
     ass_t *ass;
@@ -43,13 +46,18 @@ typedef struct Line {
     label_def_t *labelDef;
     io_t *io;
   } line;
-  std::set<int> in;
-  std::set<int> out;
-  std::set<int> use;
-  std::set<int> def;
+  id_list_t *in;
+  id_list_t *out;
+  id_list_t *use;
+  id_list_t *def;
   line_list_t *prev;
   line_list_t *next;
 } line_t;
+
+typedef struct IdList {
+  int idCount;
+  identifier_t **ids;
+} id_list_t;
 
 typedef struct AssignmentStatement {
   identifier_t *id;
@@ -90,6 +98,7 @@ typedef struct LabelDefinition {
 } label_def_t;
 
 typedef struct IOStatement {
+  io_e type;
   identifier_t *id;
 } io_t;
 
@@ -109,3 +118,8 @@ void insertSymbol(char *key, void *data, symbol_table_item_t *hashTable[]);
 void constructCFG(line_list_t *lineList);
 void stringifyCFG(line_t *root, int maxNodes);
 void dfs(line_t *node, int *visited);
+void optimiseTAC(line_list_t *lineList);
+void computeOutSet(line_t *line);
+void computeInSet(line_t *line);
+void combineSets(id_list_t *set1, id_list_t *set2);
+void parseTAC(line_list_t *lineList);

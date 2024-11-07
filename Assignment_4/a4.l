@@ -1,8 +1,5 @@
 %{
 #include <stdlib.h>
-#define MAX_IDENTIFIERS 2000
-#define MAX_IDENTIFIER_LENGTH 200
-
 #include "a4.h"
 #include "a4.tab.h"
 
@@ -10,8 +7,6 @@ void yyerror(char *);
 extern char mytext[];
 extern int lineNumber;
 %}
-
-%option c++
 
 %%
 

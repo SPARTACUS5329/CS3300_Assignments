@@ -415,17 +415,14 @@ static const flex_int16_t yy_chk[69] =
 #line 1 "a4.l"
 #line 2 "a4.l"
 #include <stdlib.h>
-#define MAX_IDENTIFIERS 2000
-#define MAX_IDENTIFIER_LENGTH 200
-
 #include "a4.h"
 #include "a4.tab.h"
 
 void yyerror(char *);
 extern char mytext[];
 extern int lineNumber;
-#line 427 "lex.yy.cc"
-#line 428 "lex.yy.cc"
+#line 424 "lex.yy.cc"
+#line 425 "lex.yy.cc"
 
 #define INITIAL 0
 
@@ -557,10 +554,10 @@ YY_DECL
 		}
 
 	{
-#line 16 "a4.l"
+#line 13 "a4.l"
 
 
-#line 563 "lex.yy.cc"
+#line 560 "lex.yy.cc"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -619,111 +616,111 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 18 "a4.l"
+#line 15 "a4.l"
 { return PLUS; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 19 "a4.l"
+#line 16 "a4.l"
 { return MINUS; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 20 "a4.l"
+#line 17 "a4.l"
 { return MULTIPLY; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 21 "a4.l"
+#line 18 "a4.l"
 { return DIVIDE; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 23 "a4.l"
+#line 20 "a4.l"
 { return COMPAR; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 24 "a4.l"
+#line 21 "a4.l"
 { return COMPAR; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 25 "a4.l"
+#line 22 "a4.l"
 { return COMPAR; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 26 "a4.l"
+#line 23 "a4.l"
 { return COMPAR; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 28 "a4.l"
+#line 25 "a4.l"
 { return NOT; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 30 "a4.l"
+#line 27 "a4.l"
 { return IF; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 31 "a4.l"
+#line 28 "a4.l"
 { return GOTO; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 33 "a4.l"
+#line 30 "a4.l"
 { return PRINT; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 34 "a4.l"
+#line 31 "a4.l"
 { return READ; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 36 "a4.l"
+#line 33 "a4.l"
 { return EQ; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 37 "a4.l"
+#line 34 "a4.l"
 { return COLON; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 38 "a4.l"
+#line 35 "a4.l"
 { strcpy(mytext, yytext); return NUMBER_TOK; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 39 "a4.l"
+#line 36 "a4.l"
 { strcpy(mytext, yytext); return IDENTIFIER_TOK; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 41 "a4.l"
+#line 38 "a4.l"
 { }
 	YY_BREAK
 case 19:
 /* rule 19 can match eol */
 YY_RULE_SETUP
-#line 42 "a4.l"
+#line 39 "a4.l"
 { lineNumber++; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 44 "a4.l"
+#line 41 "a4.l"
 {yyerror("unknown character");}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 45 "a4.l"
+#line 42 "a4.l"
 ECHO;
 	YY_BREAK
-#line 726 "lex.yy.cc"
+#line 723 "lex.yy.cc"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1686,7 +1683,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 45 "a4.l"
+#line 42 "a4.l"
 
 
 int yywrap(void) {

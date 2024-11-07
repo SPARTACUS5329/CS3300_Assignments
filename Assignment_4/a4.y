@@ -61,6 +61,14 @@ lines:
 		$2->prev->lines = (line_t **)calloc(MAX_LINES, sizeof(line_t *));
 		$2->next = (line_list_t *)calloc(1, sizeof(line_list_t));
 		$2->next->lines = (line_t **)calloc(MAX_LINES, sizeof(line_t *));
+		$2->in = (id_list_t *)calloc(1, sizeof(id_list_t));
+		$2->in->ids = (identifier_t **)calloc(MAX_IDENTIFIERS, sizeof(identifier_t *));
+		$2->out = (id_list_t *)calloc(1, sizeof(id_list_t));
+		$2->out->ids = (identifier_t **)calloc(MAX_IDENTIFIERS, sizeof(identifier_t *));
+		$2->use = (id_list_t *)calloc(1, sizeof(id_list_t));
+		$2->use->ids = (identifier_t **)calloc(MAX_IDENTIFIERS, sizeof(identifier_t *));
+		$2->def = (id_list_t *)calloc(1, sizeof(id_list_t));
+		$2->def->ids = (identifier_t **)calloc(MAX_IDENTIFIERS, sizeof(identifier_t *));
 
 		$1->lines[$1->lineCount++] = $2;
 	}
@@ -217,11 +225,13 @@ ioStatement:
     PRINT identifier {
 		io_t *io = (io_t *)calloc(1, sizeof(io_t));
 		io->id = $2;
+		io->type = IO_PRINT;
 		$$ = io;
 	}
 	| READ identifier {
 		io_t *io = (io_t *)calloc(1, sizeof(io_t));
 		io->id = $2;
+		io->type = IO_READ;
 		$$ = io;
 	}
 ;
@@ -234,8 +244,15 @@ number:
 
 identifier:
     IDENTIFIER_TOK {
-		identifier_t *id = (identifier_t *)calloc(1, sizeof(identifier_t));
-		strcpy(id->value, mytext);
+		symbol_table_item_t *item = searchSymbol(mytext, symbolTable);
+		identifier_t *id;
+		if (item == NULL) {
+			id = (identifier_t *)calloc(1, sizeof(identifier_t));
+			strcpy(id->value, mytext);
+			insertSymbol(id->value, id, symbolTable);
+		} else {
+		    id = (identifier_t *) item->data;
+		}
 		$$ = id;
 	}
 ;
@@ -263,7 +280,9 @@ int main(void) {
     program = (program_t *)calloc(1, sizeof(program_t));
     yyparse();
 	constructCFG(program->lineList);
-	stringifyCFG(program->lineList->lines[0], program->lineList->lineCount);
+	// stringifyCFG(program->lineList->lines[0], program->lineList->lineCount);
+	parseTAC(program->lineList);
+	optimiseTAC(program->lineList);
 
     return 0;
 }
@@ -313,21 +332,33 @@ void insertSymbol(char *key, void *data, symbol_table_item_t* hashTable[]) {
 
 void constructCFG(line_list_t *lineList) {
 	line_t *line;
+	line_t *nextLine;
 	symbol_table_item_t *item;
     for (int i = 0; i < lineList->lineCount; i++) {
 		line = lineList->lines[i];
+		if (i < lineList->lineCount - 1)
+		    nextLine = lineList->lines[i + 1];
+		else
+		    nextLine = NULL;
+
 		switch (line->type) {
 		case ASS:
-			if (i < lineList->lineCount - 1)
-				line->next->lines[line->next->lineCount++] = lineList->lines[i + 1];
+			if (nextLine != NULL) {
+				line->next->lines[line->next->lineCount++] = nextLine;
+				nextLine->prev->lines[nextLine->prev->lineCount++] = line;
+			}
 		    break;
 		case UASS:
-			if (i < lineList->lineCount - 1)
-				line->next->lines[line->next->lineCount++] = lineList->lines[i + 1];
+			if (nextLine != NULL) {
+				line->next->lines[line->next->lineCount++] = nextLine;
+				nextLine->prev->lines[nextLine->prev->lineCount++] = line;
+			}
 		    break;
 		case COND_JUMP:
-			if (i < lineList->lineCount - 1)
-				line->next->lines[line->next->lineCount++] = lineList->lines[i + 1];
+			if (nextLine != NULL) {
+				line->next->lines[line->next->lineCount++] = nextLine;
+				nextLine->prev->lines[nextLine->prev->lineCount++] = line;
+			}
 			item = searchSymbol(line->line.condJump->label->value, labelTable);
 			line->next->lines[line->next->lineCount++] = (line_t *) item->data;
 		    break;
@@ -336,12 +367,16 @@ void constructCFG(line_list_t *lineList) {
 			line->next->lines[line->next->lineCount++] = (line_t *) item->data;
 		    break;
 		case LABEL_DEF:
-			if (i < lineList->lineCount - 1)
-				line->next->lines[line->next->lineCount++] = lineList->lines[i + 1];
+			if (nextLine != NULL) {
+				line->next->lines[line->next->lineCount++] = nextLine;
+				nextLine->prev->lines[nextLine->prev->lineCount++] = line;
+			}
 		    break;
 		case IO:
-			if (i < lineList->lineCount - 1)
-				line->next->lines[line->next->lineCount++] = lineList->lines[i + 1];
+			if (nextLine != NULL) {
+				line->next->lines[line->next->lineCount++] = nextLine;
+				nextLine->prev->lines[nextLine->prev->lineCount++] = line;
+			}
 		    break;
 		}
 	}
@@ -379,4 +414,66 @@ void stringifyCFG(line_t *root, int maxNodes) {
     printf("}\n");
 
     free(visited);
+}
+
+void parseTAC(line_list_t *lineList) {
+	line_t *line;
+    for (int i = 0; i < lineList->lineCount; i++) {
+		line = lineList->lines[i];
+		if (line->type == ASS) {
+		    line->def->ids[line->def->idCount++] = line->line.ass->id;
+			if (line->line.ass->exp->lType == IDENTIFIER)
+				line->use->ids[line->use->idCount++] = line->line.ass->exp->lValue.id;
+			if (line->line.ass->exp->rType == IDENTIFIER)
+				line->use->ids[line->use->idCount++] = line->line.ass->exp->rValue.id;
+		} else if (line->type == IO && line->line.io->type == IO_READ) {
+		    line->def->ids[line->def->idCount++] = line->line.io->id;
+		} else if (line->type == UASS) {
+		    line->def->ids[line->def->idCount++] = line->line.uass->lid;
+			line->use->ids[line->use->idCount++] = line->line.uass->rid;
+		}
+	}
+}
+
+void optimiseTAC(line_list_t *lineList) {
+	line_t *line;
+	bool printFound = false;
+	for (int i = lineList->lineCount - 1; i >= 0; i--) {
+		line = lineList->lines[i];
+		if ((line->type != IO || line->line.io->type == IO_READ) && !printFound) {
+			line->isDeleted = true;
+			continue;
+		}
+
+		printFound = true;
+		computeOutSet(line);
+		computeInSet(line);
+	}
+}
+
+void computeOutSet(line_t *line) {
+	line_t *nextLine;
+    for (int i = 0; i < line->next->lineCount; i++) {
+		nextLine = line->next->lines[i];
+		combineSets(line->out, nextLine->in);
+	}
+}
+
+void computeInSet(line_t *line) {
+}
+
+void combineSets(id_list_t *set1, id_list_t *set2) {
+	identifier_t *id;
+    for (int i = 0; i < set2->idCount; i++) {
+		bool elementFound = false;
+		id = set2->ids[i];
+		for (int j = 0; j < set1->idCount; j++) {
+		    if (set1->ids[j] == id) {
+				elementFound = true;
+				break;
+			}
+		}
+		if (!elementFound)
+		    set1->ids[set1->idCount++] = id;
+	}
 }
