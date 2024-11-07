@@ -76,7 +76,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 25 "a4.y"
+#line 23 "a4.y"
 {
     int val;
 	identifier_t *id;
@@ -91,7 +91,7 @@ typedef union YYSTYPE
 	io_t *io;
 }
 /* Line 1529 of yacc.c.  */
-#line 95 "a4.tab.h"
+#line 95 "parser.hpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

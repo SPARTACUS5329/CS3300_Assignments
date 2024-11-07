@@ -112,11 +112,9 @@
 
 void yyerror(char *);
 char mytext[100];
-extern int yylex(void);
 int lineNumber = 1;
 
 program_t *program;
-symbol_table_item_t *labelTable[MAX_LINES];
 symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 
 
@@ -140,7 +138,7 @@ symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 25 "a4.y"
+#line 23 "a4.y"
 {
     int val;
 	identifier_t *id;
@@ -155,7 +153,7 @@ typedef union YYSTYPE
 	io_t *io;
 }
 /* Line 193 of yacc.c.  */
-#line 159 "a4.tab.c"
+#line 157 "parser.cpp"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -168,7 +166,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 172 "a4.tab.c"
+#line 170 "parser.cpp"
 
 #ifdef short
 # undef short
@@ -462,10 +460,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    53,    53,    59,    67,    75,    82,    89,    96,   103,
-     111,   121,   130,   138,   146,   154,   162,   168,   177,   186,
-     187,   191,   201,   209,   217,   222,   230,   236,   244,   245,
-     246,   247
+       0,    51,    51,    57,    65,    73,    79,    85,    91,    97,
+     103,   112,   121,   129,   137,   145,   153,   159,   168,   177,
+     178,   182,   192,   200,   208,   213,   221,   227,   235,   236,
+     237,   238
 };
 #endif
 
@@ -1393,14 +1391,14 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 53 "a4.y"
+#line 51 "a4.y"
     {
 		program->lineList = (yyvsp[(1) - (1)].lineList);
 	;}
     break;
 
   case 3:
-#line 59 "a4.y"
+#line 57 "a4.y"
     {
 		(yyvsp[(2) - (2)].line)->prev = (line_list_t *)calloc(1, sizeof(line_list_t));
 		(yyvsp[(2) - (2)].line)->prev->lines = (line_t **)calloc(MAX_LINES, sizeof(line_t *));
@@ -1412,7 +1410,7 @@ yyreduce:
     break;
 
   case 4:
-#line 67 "a4.y"
+#line 65 "a4.y"
     {
 		line_list_t *lineList = (line_list_t *)calloc(1, sizeof(line_list_t));
 		lineList->lines = (line_t **)calloc(MAX_LINES, sizeof(line_t *));
@@ -1421,74 +1419,67 @@ yyreduce:
     break;
 
   case 5:
-#line 75 "a4.y"
+#line 73 "a4.y"
     {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = ASS;
 		line->line.ass = (yyvsp[(1) - (1)].ass);
-		line->lineNumber = lineNumber;
 		(yyval.line) = line;
 	;}
     break;
 
   case 6:
-#line 82 "a4.y"
+#line 79 "a4.y"
     {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = UASS;
 		line->line.uass = (yyvsp[(1) - (1)].uass);
-		line->lineNumber = lineNumber;
 		(yyval.line) = line;
 	;}
     break;
 
   case 7:
-#line 89 "a4.y"
+#line 85 "a4.y"
     {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = COND_JUMP;
 		line->line.condJump = (yyvsp[(1) - (1)].condJump);
-		line->lineNumber = lineNumber;
 		(yyval.line) = line;
 	;}
     break;
 
   case 8:
-#line 96 "a4.y"
+#line 91 "a4.y"
     {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = UNCOND_JUMP;
 		line->line.uncondJump = (yyvsp[(1) - (1)].ucondJump);
-		line->lineNumber = lineNumber;
 		(yyval.line) = line;
 	;}
     break;
 
   case 9:
-#line 103 "a4.y"
+#line 97 "a4.y"
     {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = LABEL_DEF;
 		line->line.labelDef = (yyvsp[(1) - (1)].labelDef);
-		line->lineNumber = lineNumber;
-		insertSymbol(line->line.labelDef->value->value, line, labelTable);
 		(yyval.line) = line;
 	;}
     break;
 
   case 10:
-#line 111 "a4.y"
+#line 103 "a4.y"
     {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = IO;
 		line->line.io = (yyvsp[(1) - (1)].io);
-		line->lineNumber = lineNumber;
 		(yyval.line) = line;
 	;}
     break;
 
   case 11:
-#line 121 "a4.y"
+#line 112 "a4.y"
     {
 		ass_t *ass = (ass_t *)calloc(1, sizeof(ass_t));
 		ass->id = (yyvsp[(1) - (3)].id);
@@ -1498,7 +1489,7 @@ yyreduce:
     break;
 
   case 12:
-#line 130 "a4.y"
+#line 121 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = IDENTIFIER;
@@ -1510,7 +1501,7 @@ yyreduce:
     break;
 
   case 13:
-#line 138 "a4.y"
+#line 129 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = IDENTIFIER;
@@ -1522,7 +1513,7 @@ yyreduce:
     break;
 
   case 14:
-#line 146 "a4.y"
+#line 137 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = NUMBER;
@@ -1534,7 +1525,7 @@ yyreduce:
     break;
 
   case 15:
-#line 154 "a4.y"
+#line 145 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = NUMBER;
@@ -1546,7 +1537,7 @@ yyreduce:
     break;
 
   case 16:
-#line 162 "a4.y"
+#line 153 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = IDENTIFIER;
@@ -1556,7 +1547,7 @@ yyreduce:
     break;
 
   case 17:
-#line 168 "a4.y"
+#line 159 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = NUMBER;
@@ -1566,7 +1557,7 @@ yyreduce:
     break;
 
   case 18:
-#line 177 "a4.y"
+#line 168 "a4.y"
     {
 		u_ass_t *ass = (u_ass_t *)calloc(1, sizeof(u_ass_t));
 		ass->lid = (yyvsp[(1) - (4)].id);
@@ -1576,7 +1567,7 @@ yyreduce:
     break;
 
   case 21:
-#line 191 "a4.y"
+#line 182 "a4.y"
     {
 		cond_jump_t *jump = (cond_jump_t *)calloc(1, sizeof(cond_jump_t));
 		jump->lid = (yyvsp[(2) - (6)].id);
@@ -1587,7 +1578,7 @@ yyreduce:
     break;
 
   case 22:
-#line 201 "a4.y"
+#line 192 "a4.y"
     {
 		uncond_jump_t *jump = (uncond_jump_t *)calloc(1, sizeof(uncond_jump_t));
 		jump->label = (yyvsp[(2) - (2)].id);
@@ -1596,7 +1587,7 @@ yyreduce:
     break;
 
   case 23:
-#line 209 "a4.y"
+#line 200 "a4.y"
     {
 		label_def_t *labelDef = (label_def_t *)calloc(1, sizeof(label_def_t));
 		labelDef->value = (yyvsp[(1) - (2)].id);
@@ -1605,7 +1596,7 @@ yyreduce:
     break;
 
   case 24:
-#line 217 "a4.y"
+#line 208 "a4.y"
     {
 		io_t *io = (io_t *)calloc(1, sizeof(io_t));
 		io->id = (yyvsp[(2) - (2)].id);
@@ -1614,7 +1605,7 @@ yyreduce:
     break;
 
   case 25:
-#line 222 "a4.y"
+#line 213 "a4.y"
     {
 		io_t *io = (io_t *)calloc(1, sizeof(io_t));
 		io->id = (yyvsp[(2) - (2)].id);
@@ -1623,14 +1614,14 @@ yyreduce:
     break;
 
   case 26:
-#line 230 "a4.y"
+#line 221 "a4.y"
     {
 		(yyval.val) = atoi(mytext);
 	;}
     break;
 
   case 27:
-#line 236 "a4.y"
+#line 227 "a4.y"
     {
 		identifier_t *id = (identifier_t *)calloc(1, sizeof(identifier_t));
 		strcpy(id->value, mytext);
@@ -1640,7 +1631,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1644 "a4.tab.c"
+#line 1635 "parser.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1854,7 +1845,7 @@ yyreturn:
 }
 
 
-#line 250 "a4.y"
+#line 241 "a4.y"
 
 
 void yyerror(char *message) {
@@ -1871,7 +1862,6 @@ int main(void) {
     program = (program_t *)calloc(1, sizeof(program_t));
     yyparse();
 	constructCFG(program->lineList);
-	stringifyCFG(program->lineList->lines[0], program->lineList->lineCount);
 
     return 0;
 }
@@ -1921,7 +1911,6 @@ void insertSymbol(char *key, void *data, symbol_table_item_t* hashTable[]) {
 
 void constructCFG(line_list_t *lineList) {
 	line_t *line;
-	symbol_table_item_t *item;
     for (int i = 0; i < lineList->lineCount; i++) {
 		line = lineList->lines[i];
 		switch (line->type) {
@@ -1936,12 +1925,10 @@ void constructCFG(line_list_t *lineList) {
 		case COND_JUMP:
 			if (i < lineList->lineCount - 1)
 				line->next->lines[line->next->lineCount++] = lineList->lines[i + 1];
-			item = searchSymbol(line->line.condJump->label->value, labelTable);
-			line->next->lines[line->next->lineCount++] = (line_t *) item->data;
+			// line->next->lines[line->next->lineCount++] = labelMap[line->line.labelDef->value];
 		    break;
 		case UNCOND_JUMP:
-			item = searchSymbol(line->line.uncondJump->label->value, labelTable);
-			line->next->lines[line->next->lineCount++] = (line_t *) item->data;
+			// line->next->lines[line->next->lineCount++] = labelMap[line->line.labelDef->value];
 		    break;
 		case LABEL_DEF:
 			if (i < lineList->lineCount - 1)
@@ -1953,39 +1940,5 @@ void constructCFG(line_list_t *lineList) {
 		    break;
 		}
 	}
-}
-
-void dfs(line_t *node, int *visited) {
-    if (node == NULL || visited[node->lineNumber]) {
-        return;
-    }
-
-    visited[node->lineNumber] = 1;
-
-    printf("  Node%d [label=\"Line %d\"];\n", node->lineNumber, node->lineNumber);
-
-    if (node->next != NULL) {
-        for (int i = 0; i < node->next->lineCount; i++) {
-            line_t *nextLine = node->next->lines[i];
-            if (nextLine != NULL) {
-                printf("  Node%d -> Node%d;\n", node->lineNumber, nextLine->lineNumber);
-                
-                dfs(nextLine, visited);
-            }
-        }
-    }
-}
-
-void stringifyCFG(line_t *root, int maxNodes) {
-    printf("digraph CFG {\n");
-    printf("  node [shape=box];\n");
-
-    int *visited = (int *)calloc(maxNodes, sizeof(int));
-
-    dfs(root, visited);
-
-    printf("}\n");
-
-    free(visited);
 }
 

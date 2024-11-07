@@ -1,5 +1,5 @@
 clear
 flex a4.l
 bison -d a4.y
-gcc lex.yy.c a4.tab.c
-./a.out < sample.tac
+g++ lex.yy.c a4.tab.c
+./a.out < sample.tac > out.txt

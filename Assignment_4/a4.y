@@ -6,11 +6,12 @@
 #include "a4.h"
 
 void yyerror(char *);
-int yylex(void);
 char mytext[100];
+extern int yylex(void);
 int lineNumber = 1;
 
 program_t *program;
+symbol_table_item_t *labelTable[MAX_LINES];
 symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 %}
 
@@ -56,6 +57,11 @@ program:
 
 lines:
     lines line {
+		$2->prev = (line_list_t *)calloc(1, sizeof(line_list_t));
+		$2->prev->lines = (line_t **)calloc(MAX_LINES, sizeof(line_t *));
+		$2->next = (line_list_t *)calloc(1, sizeof(line_list_t));
+		$2->next->lines = (line_t **)calloc(MAX_LINES, sizeof(line_t *));
+
 		$1->lines[$1->lineCount++] = $2;
 	}
 	| {
@@ -70,36 +76,43 @@ line:
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = ASS;
 		line->line.ass = $1;
+		line->lineNumber = lineNumber;
 		$$ = line;
 	}
 	| unaryAssignmentStatement {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = UASS;
 		line->line.uass = $1;
+		line->lineNumber = lineNumber;
 		$$ = line;
 	}
 	| conditionalJump {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = COND_JUMP;
 		line->line.condJump = $1;
+		line->lineNumber = lineNumber;
 		$$ = line;
 	}
 	| unconditionalJump {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = UNCOND_JUMP;
 		line->line.uncondJump = $1;
+		line->lineNumber = lineNumber;
 		$$ = line;
 	}
 	| labelDefinition {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = LABEL_DEF;
 		line->line.labelDef = $1;
+		line->lineNumber = lineNumber;
+		insertSymbol(line->line.labelDef->value->value, line, labelTable);
 		$$ = line;
 	}
 	| ioStatement {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = IO;
 		line->line.io = $1;
+		line->lineNumber = lineNumber;
 		$$ = line;
 	}
 ;
@@ -249,6 +262,8 @@ void error(char *message) {
 int main(void) {
     program = (program_t *)calloc(1, sizeof(program_t));
     yyparse();
+	constructCFG(program->lineList);
+	stringifyCFG(program->lineList->lines[0], program->lineList->lineCount);
 
     return 0;
 }
@@ -278,7 +293,7 @@ symbol_table_item_t *searchSymbol(char *key, symbol_table_item_t* hashTable[]) {
 	return NULL;        
 }
 
-void insertSymbol(char *key, identifier_t *data, symbol_table_item_t* hashTable[]) {
+void insertSymbol(char *key, void *data, symbol_table_item_t* hashTable[]) {
 	symbol_table_item_t *item;
 	item = searchSymbol(key, hashTable);
 	if (item != NULL)
@@ -294,4 +309,74 @@ void insertSymbol(char *key, identifier_t *data, symbol_table_item_t* hashTable[
 	}
 
 	hashTable[hashIndex] = item;
+}
+
+void constructCFG(line_list_t *lineList) {
+	line_t *line;
+	symbol_table_item_t *item;
+    for (int i = 0; i < lineList->lineCount; i++) {
+		line = lineList->lines[i];
+		switch (line->type) {
+		case ASS:
+			if (i < lineList->lineCount - 1)
+				line->next->lines[line->next->lineCount++] = lineList->lines[i + 1];
+		    break;
+		case UASS:
+			if (i < lineList->lineCount - 1)
+				line->next->lines[line->next->lineCount++] = lineList->lines[i + 1];
+		    break;
+		case COND_JUMP:
+			if (i < lineList->lineCount - 1)
+				line->next->lines[line->next->lineCount++] = lineList->lines[i + 1];
+			item = searchSymbol(line->line.condJump->label->value, labelTable);
+			line->next->lines[line->next->lineCount++] = (line_t *) item->data;
+		    break;
+		case UNCOND_JUMP:
+			item = searchSymbol(line->line.uncondJump->label->value, labelTable);
+			line->next->lines[line->next->lineCount++] = (line_t *) item->data;
+		    break;
+		case LABEL_DEF:
+			if (i < lineList->lineCount - 1)
+				line->next->lines[line->next->lineCount++] = lineList->lines[i + 1];
+		    break;
+		case IO:
+			if (i < lineList->lineCount - 1)
+				line->next->lines[line->next->lineCount++] = lineList->lines[i + 1];
+		    break;
+		}
+	}
+}
+
+void dfs(line_t *node, int *visited) {
+    if (node == NULL || visited[node->lineNumber]) {
+        return;
+    }
+
+    visited[node->lineNumber] = 1;
+
+    printf("  Node%d [label=\"Line %d\"];\n", node->lineNumber, node->lineNumber);
+
+    if (node->next != NULL) {
+        for (int i = 0; i < node->next->lineCount; i++) {
+            line_t *nextLine = node->next->lines[i];
+            if (nextLine != NULL) {
+                printf("  Node%d -> Node%d;\n", node->lineNumber, nextLine->lineNumber);
+                
+                dfs(nextLine, visited);
+            }
+        }
+    }
+}
+
+void stringifyCFG(line_t *root, int maxNodes) {
+    printf("digraph CFG {\n");
+    printf("  node [shape=box];\n");
+
+    int *visited = (int *)calloc(maxNodes, sizeof(int));
+
+    dfs(root, visited);
+
+    printf("}\n");
+
+    free(visited);
 }

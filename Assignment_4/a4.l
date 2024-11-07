@@ -11,6 +11,8 @@ extern char mytext[];
 extern int lineNumber;
 %}
 
+%option c++
+
 %%
 
 "+"	{ return PLUS; }

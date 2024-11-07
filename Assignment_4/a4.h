@@ -1,4 +1,5 @@
 #pragma once
+#include <set>
 #include <stdbool.h>
 #define MAX_IDENTIFIERS 2000
 #define MAX_IDENTIFIER_LENGTH 200
@@ -33,6 +34,7 @@ typedef struct LineList {
 
 typedef struct Line {
   line_e type;
+  int lineNumber;
   union {
     ass_t *ass;
     u_ass_t *uass;
@@ -41,6 +43,12 @@ typedef struct Line {
     label_def_t *labelDef;
     io_t *io;
   } line;
+  std::set<int> in;
+  std::set<int> out;
+  std::set<int> use;
+  std::set<int> def;
+  line_list_t *prev;
+  line_list_t *next;
 } line_t;
 
 typedef struct AssignmentStatement {
@@ -90,12 +98,14 @@ typedef struct Identifier {
 } identifier_t;
 
 typedef struct SymbolTableItem {
-  identifier_t *data;
+  void *data;
   int key;
 } symbol_table_item_t;
 
 void error(char *message);
 unsigned long hash(char *str);
 symbol_table_item_t *searchSymbol(char *key, symbol_table_item_t *hashTable[]);
-void insertSymbol(char *key, identifier_t *data,
-                  symbol_table_item_t *hashTable[]);
+void insertSymbol(char *key, void *data, symbol_table_item_t *hashTable[]);
+void constructCFG(line_list_t *lineList);
+void stringifyCFG(line_t *root, int maxNodes);
+void dfs(line_t *node, int *visited);
