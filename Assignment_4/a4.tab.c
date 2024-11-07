@@ -1891,8 +1891,10 @@ int main(void) {
 	// stringifyCFG(program->lineList->lines[0], program->lineList->lineCount);
 	firstParseTAC(program->lineList);
 	secondParseTAC(program->lineList);
-	printSet(program->lineList->lines[0]->in);
-	// optimiseTAC(program->lineList);
+	optimiseTAC(program->lineList->lines[program->lineList->lineCount - 1]);
+	for (int i = 0; i < program->lineList->lineCount; i++)
+		if (program->lineList->lines[i]->isDeleted)
+		    printf("Deleted %d\n", program->lineList->lines[i]->lineNumber);
 
     return 0;
 }
@@ -1970,7 +1972,9 @@ void constructCFG(line_list_t *lineList) {
 				nextLine->prev->lines[nextLine->prev->lineCount++] = line;
 			}
 			item = searchSymbol(line->line.condJump->label->value, labelTable);
-			line->next->lines[line->next->lineCount++] = (line_t *) item->data;
+			nextLine = (line_t *)item->data;
+			line->next->lines[line->next->lineCount++] = nextLine;
+			nextLine->prev->lines[nextLine->prev->lineCount++] = line;
 		    break;
 		case UNCOND_JUMP:
 			item = searchSymbol(line->line.uncondJump->label->value, labelTable);
@@ -2030,23 +2034,7 @@ void firstParseTAC(line_list_t *lineList) {
 	line_t *line;
     for (int i = 0; i < lineList->lineCount; i++) {
 		line = lineList->lines[i];
-		if (line->type == ASS) {
-		    line->def->ids[line->def->idCount++] = line->line.ass->id;
-			if (line->line.ass->exp->lType == IDENTIFIER)
-				line->use->ids[line->use->idCount++] = line->line.ass->exp->lValue.id;
-			if (line->line.ass->exp->rType == IDENTIFIER)
-				line->use->ids[line->use->idCount++] = line->line.ass->exp->rValue.id;
-		} else if (line->type == IO && line->line.io->type == IO_READ) {
-		    line->def->ids[line->def->idCount++] = line->line.io->id;
-		} else if (line->type == IO && line->line.io->type == IO_PRINT) {
-		    line->use->ids[line->def->idCount++] = line->line.io->id;
-		} else if (line->type == UASS) {
-		    line->def->ids[line->def->idCount++] = line->line.uass->lid;
-			line->use->ids[line->use->idCount++] = line->line.uass->rid;
-		} else if (line->type == COND_JUMP) {
-		    line->use->ids[line->use->idCount++] = line->line.condJump->lid;
-		    line->use->ids[line->use->idCount++] = line->line.condJump->rid;
-		}
+		computeUseDefSets(line);
 	}
 }
 
@@ -2067,6 +2055,7 @@ void secondParseTAC(line_list_t *lineList) {
 }
 
 void computeOutSet(line_t *line) {
+	line->out->idCount = 0;
 	line_t *nextLine;
     for (int i = 0; i < line->next->lineCount; i++) {
 		nextLine = line->next->lines[i];
@@ -2075,6 +2064,7 @@ void computeOutSet(line_t *line) {
 }
 
 void computeInSet(line_t *line) {
+	line->in->idCount = 0;
     combineSets(line->in, line->use);
 	id_list_t *outDefDiff = diffSets(line->out, line->def);
     combineSets(line->in, outDefDiff);
@@ -2119,5 +2109,68 @@ void printSet(id_list_t *idList) {
     for (int i = 0; i < idList->idCount; i++)
 		printf("%s ", idList->ids[i]->value);
     printf("\n");
+}
+
+void optimiseTAC(line_t *line) {
+    if (removable(line)) {
+		deleteLine(line);
+		for (int i = 0; i < line->prev->lineCount; i++) {
+		    backProp(line->prev->lines[i]);
+		}
+	}
+	for (int i = 0; i < line->prev->lineCount; i++) {
+		optimiseTAC(line->prev->lines[i]);
+	}
+}
+
+bool removable(line_t *line) {
+    if (line->type != ASS && line->type != UASS)
+		return false;
+
+    identifier_t *defElement = line->def->ids[0];
+	for (int i = 0; i < line->out->idCount; i++)
+		if (line->out->ids[i] == defElement)
+		    return false;
+
+    return true;
+}
+
+void backProp(line_t *line) {
+	computeUseDefSets(line);
+	computeOutSet(line);
+	computeInSet(line);
+	for (int i = 0; i < line->prev->lineCount; i++)
+		backProp(line->prev->lines[i]);
+}
+
+void computeUseDefSets(line_t *line) {
+	line->use->idCount = 0;
+	line->def->idCount = 0;
+
+    if (line->type == ASS) {
+	    line->def->ids[line->def->idCount++] = line->line.ass->id;
+	    if (line->line.ass->exp->lType == IDENTIFIER)
+		    line->use->ids[line->use->idCount++] = line->line.ass->exp->lValue.id;
+	    if (line->line.ass->exp->rType == IDENTIFIER)
+		    line->use->ids[line->use->idCount++] = line->line.ass->exp->rValue.id;
+    } else if (line->type == IO && line->line.io->type == IO_READ) {
+	    line->def->ids[line->def->idCount++] = line->line.io->id;
+    } else if (line->type == IO && line->line.io->type == IO_PRINT) {
+	    line->use->ids[line->use->idCount++] = line->line.io->id;
+    } else if (line->type == UASS) {
+	    line->def->ids[line->def->idCount++] = line->line.uass->lid;
+	    line->use->ids[line->use->idCount++] = line->line.uass->rid;
+    } else if (line->type == COND_JUMP) {
+	    line->use->ids[line->use->idCount++] = line->line.condJump->lid;
+	    line->use->ids[line->use->idCount++] = line->line.condJump->rid;
+    }
+}
+
+void deleteLine(line_t *line) {
+    line->isDeleted = true;
+	line->in->idCount = 0;
+	line->out->idCount = 0;
+	line->use->idCount = 0;
+	line->def->idCount = 0;
 }
 
