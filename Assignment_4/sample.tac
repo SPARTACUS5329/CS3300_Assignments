@@ -1,13 +1,17 @@
-a = b + c
-d = a + 1
-d = b + 2
-if d < e goto L1
-f = d + e
-goto L2
-L1:
-f = e + 1
-L2:
-print f
-z = 19
-z = 29
-print z
+a = 1
+L1: 
+if a <= m goto L2
+a = a + 1
+goto L1
+L2: 
+b = a * 2
+c = b + 3
+d = c * 2
+L3: 
+if b > a goto L4
+b = b + 5
+goto L5
+L4: 
+b = b - 2
+L5: 
+print b

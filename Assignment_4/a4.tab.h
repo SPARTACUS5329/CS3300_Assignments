@@ -76,7 +76,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 25 "a4.y"
+#line 26 "a4.y"
 {
     int val;
 	identifier_t *id;

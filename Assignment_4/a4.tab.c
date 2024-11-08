@@ -113,6 +113,7 @@
 void yyerror(char *);
 char mytext[100];
 extern int yylex(void);
+extern FILE *yyin;
 int lineNumber = 1;
 
 program_t *program;
@@ -140,7 +141,7 @@ symbol_table_item_t *symbolTable[MAX_IDENTIFIERS];
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 25 "a4.y"
+#line 26 "a4.y"
 {
     int val;
 	identifier_t *id;
@@ -155,7 +156,7 @@ typedef union YYSTYPE
 	io_t *io;
 }
 /* Line 193 of yacc.c.  */
-#line 159 "a4.tab.c"
+#line 160 "a4.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -168,7 +169,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 172 "a4.tab.c"
+#line 173 "a4.tab.c"
 
 #ifdef short
 # undef short
@@ -462,10 +463,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    53,    53,    59,    75,    83,    90,    97,   104,   111,
-     119,   129,   138,   146,   154,   162,   170,   176,   185,   194,
-     195,   199,   209,   217,   225,   231,   240,   246,   261,   262,
-     263,   264
+       0,    54,    54,    60,    77,    85,    92,    99,   106,   113,
+     121,   131,   140,   148,   156,   164,   172,   178,   187,   196,
+     197,   201,   211,   219,   227,   233,   242,   248,   263,   264,
+     265,   266
 };
 #endif
 
@@ -1393,14 +1394,14 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 53 "a4.y"
+#line 54 "a4.y"
     {
 		program->lineList = (yyvsp[(1) - (1)].lineList);
 	;}
     break;
 
   case 3:
-#line 59 "a4.y"
+#line 60 "a4.y"
     {
 		(yyvsp[(2) - (2)].line)->prev = (line_list_t *)calloc(1, sizeof(line_list_t));
 		(yyvsp[(2) - (2)].line)->prev->lines = (line_t **)calloc(MAX_LINES, sizeof(line_t *));
@@ -1416,11 +1417,12 @@ yyreduce:
 		(yyvsp[(2) - (2)].line)->def->ids = (identifier_t **)calloc(MAX_IDENTIFIERS, sizeof(identifier_t *));
 
 		(yyvsp[(1) - (2)].lineList)->lines[(yyvsp[(1) - (2)].lineList)->lineCount++] = (yyvsp[(2) - (2)].line);
+		lineNumber++;
 	;}
     break;
 
   case 4:
-#line 75 "a4.y"
+#line 77 "a4.y"
     {
 		line_list_t *lineList = (line_list_t *)calloc(1, sizeof(line_list_t));
 		lineList->lines = (line_t **)calloc(MAX_LINES, sizeof(line_t *));
@@ -1429,7 +1431,7 @@ yyreduce:
     break;
 
   case 5:
-#line 83 "a4.y"
+#line 85 "a4.y"
     {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = ASS;
@@ -1440,7 +1442,7 @@ yyreduce:
     break;
 
   case 6:
-#line 90 "a4.y"
+#line 92 "a4.y"
     {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = UASS;
@@ -1451,7 +1453,7 @@ yyreduce:
     break;
 
   case 7:
-#line 97 "a4.y"
+#line 99 "a4.y"
     {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = COND_JUMP;
@@ -1462,7 +1464,7 @@ yyreduce:
     break;
 
   case 8:
-#line 104 "a4.y"
+#line 106 "a4.y"
     {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = UNCOND_JUMP;
@@ -1473,7 +1475,7 @@ yyreduce:
     break;
 
   case 9:
-#line 111 "a4.y"
+#line 113 "a4.y"
     {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = LABEL_DEF;
@@ -1485,7 +1487,7 @@ yyreduce:
     break;
 
   case 10:
-#line 119 "a4.y"
+#line 121 "a4.y"
     {
 		line_t *line = (line_t *)calloc(1, sizeof(line_t));
 		line->type = IO;
@@ -1496,7 +1498,7 @@ yyreduce:
     break;
 
   case 11:
-#line 129 "a4.y"
+#line 131 "a4.y"
     {
 		ass_t *ass = (ass_t *)calloc(1, sizeof(ass_t));
 		ass->id = (yyvsp[(1) - (3)].id);
@@ -1506,7 +1508,7 @@ yyreduce:
     break;
 
   case 12:
-#line 138 "a4.y"
+#line 140 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = IDENTIFIER;
@@ -1518,7 +1520,7 @@ yyreduce:
     break;
 
   case 13:
-#line 146 "a4.y"
+#line 148 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = IDENTIFIER;
@@ -1530,7 +1532,7 @@ yyreduce:
     break;
 
   case 14:
-#line 154 "a4.y"
+#line 156 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = NUMBER;
@@ -1542,7 +1544,7 @@ yyreduce:
     break;
 
   case 15:
-#line 162 "a4.y"
+#line 164 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = NUMBER;
@@ -1554,7 +1556,7 @@ yyreduce:
     break;
 
   case 16:
-#line 170 "a4.y"
+#line 172 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = IDENTIFIER;
@@ -1564,7 +1566,7 @@ yyreduce:
     break;
 
   case 17:
-#line 176 "a4.y"
+#line 178 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = NUMBER;
@@ -1574,7 +1576,7 @@ yyreduce:
     break;
 
   case 18:
-#line 185 "a4.y"
+#line 187 "a4.y"
     {
 		u_ass_t *ass = (u_ass_t *)calloc(1, sizeof(u_ass_t));
 		ass->lid = (yyvsp[(1) - (4)].id);
@@ -1584,7 +1586,7 @@ yyreduce:
     break;
 
   case 21:
-#line 199 "a4.y"
+#line 201 "a4.y"
     {
 		cond_jump_t *jump = (cond_jump_t *)calloc(1, sizeof(cond_jump_t));
 		jump->lid = (yyvsp[(2) - (6)].id);
@@ -1595,7 +1597,7 @@ yyreduce:
     break;
 
   case 22:
-#line 209 "a4.y"
+#line 211 "a4.y"
     {
 		uncond_jump_t *jump = (uncond_jump_t *)calloc(1, sizeof(uncond_jump_t));
 		jump->label = (yyvsp[(2) - (2)].id);
@@ -1604,7 +1606,7 @@ yyreduce:
     break;
 
   case 23:
-#line 217 "a4.y"
+#line 219 "a4.y"
     {
 		label_def_t *labelDef = (label_def_t *)calloc(1, sizeof(label_def_t));
 		labelDef->value = (yyvsp[(1) - (2)].id);
@@ -1613,7 +1615,7 @@ yyreduce:
     break;
 
   case 24:
-#line 225 "a4.y"
+#line 227 "a4.y"
     {
 		io_t *io = (io_t *)calloc(1, sizeof(io_t));
 		io->id = (yyvsp[(2) - (2)].id);
@@ -1623,7 +1625,7 @@ yyreduce:
     break;
 
   case 25:
-#line 231 "a4.y"
+#line 233 "a4.y"
     {
 		io_t *io = (io_t *)calloc(1, sizeof(io_t));
 		io->id = (yyvsp[(2) - (2)].id);
@@ -1633,14 +1635,14 @@ yyreduce:
     break;
 
   case 26:
-#line 240 "a4.y"
+#line 242 "a4.y"
     {
 		(yyval.val) = atoi(mytext);
 	;}
     break;
 
   case 27:
-#line 246 "a4.y"
+#line 248 "a4.y"
     {
 		symbol_table_item_t *item = searchSymbol(mytext, symbolTable);
 		identifier_t *id;
@@ -1657,7 +1659,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1661 "a4.tab.c"
+#line 1663 "a4.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1871,7 +1873,7 @@ yyreturn:
 }
 
 
-#line 267 "a4.y"
+#line 269 "a4.y"
 
 
 void yyerror(char *message) {
@@ -1884,19 +1886,60 @@ void error(char *message) {
 	exit(1);
 }
 
-int main(void) {
+int main(int argc, char *argv[]) {
+    if (argc != 3)
+        error("Incorrect input arguments");
+
+	const char *tacFileName = argv[1];
+	const char *queryFileName = argv[2];
+
+    FILE *tacFile = fopen(tacFileName, "r");
+    if (tacFile == NULL)
+        error("Error opening TAC file");
+
     program = (program_t *)calloc(1, sizeof(program_t));
+
+	yyin = tacFile;
     yyparse();
+	fclose(tacFile);
+
+    FILE *queryFile = fopen(queryFileName, "r");
+    if (queryFile == NULL)
+        error("Error opening query file");
+
+    int value;
+    while (fscanf(queryFile, "%d", &value) == 1)
+        program->queries[program->queryCount++] = value;
+
 	constructCFG(program->lineList);
 	// stringifyCFG(program->lineList->lines[0], program->lineList->lineCount);
-	firstParseTAC(program->lineList);
-	secondParseTAC(program->lineList);
+
+	firstPass(program->lineList);
+	secondPass(program->lineList);
+	fixupPass(program->lineList);
+
 	optimiseTAC(program->lineList->lines[program->lineList->lineCount - 1]);
-	for (int i = 0; i < program->lineList->lineCount; i++)
-		if (program->lineList->lines[i]->isDeleted)
-		    printf("Deleted %d\n", program->lineList->lines[i]->lineNumber);
+	// for (int i = 0; i < program->lineList->lineCount; i++) {
+		// if (program->lineList->lines[i]->isDeleted)
+		    // printf("Deleted %d\n", program->lineList->lines[i]->lineNumber);
+	// }
+
+	resolveQueries();
 
     return 0;
+}
+
+void resolveQueries() {
+	int query;
+	line_t *line;
+	for (int i = 0; i < program->queryCount; i++) {
+		query = program->queries[i];
+		line = program->lineList->lines[query - 1];
+		if (line->isDeleted)
+		    printf("Line removed in optimized TAC\n");
+		else
+		    printSet(line->out);
+	}
 }
 
 unsigned long hash(char *str) {
@@ -2030,7 +2073,7 @@ void stringifyCFG(line_t *root, int maxNodes) {
     free(visited);
 }
 
-void firstParseTAC(line_list_t *lineList) {
+void firstPass(line_list_t *lineList) {
 	line_t *line;
     for (int i = 0; i < lineList->lineCount; i++) {
 		line = lineList->lines[i];
@@ -2038,7 +2081,7 @@ void firstParseTAC(line_list_t *lineList) {
 	}
 }
 
-void secondParseTAC(line_list_t *lineList) {
+void secondPass(line_list_t *lineList) {
 	line_t *line;
 	bool printFound = false;
 	for (int i = lineList->lineCount - 1; i >= 0; i--) {
@@ -2051,6 +2094,21 @@ void secondParseTAC(line_list_t *lineList) {
 		printFound = true;
 		computeOutSet(line);
 		computeInSet(line);
+	}
+}
+
+void fixupPass(line_list_t *lineList) {
+	line_t *line;
+    for (int i = 0; i < lineList->lineCount; i++) {
+		line = lineList->lines[i];
+		if (line->type == COND_JUMP || line->type == UNCOND_JUMP) {
+		    computeOutSet(line);
+		    computeInSet(line);
+			for (int j = 0; j < line->prev->lineCount; j++) {
+				backProp(line->prev->lines[j]);
+				flushVisited();
+		    }
+		}
 	}
 }
 
@@ -2106,6 +2164,7 @@ id_list_t *diffSets(id_list_t *set1, id_list_t *set2) {
 }
 
 void printSet(id_list_t *idList) {
+	qsort(idList->ids, idList->idCount, sizeof(identifier_t *), compareLex);
     for (int i = 0; i < idList->idCount; i++)
 		printf("%s ", idList->ids[i]->value);
     printf("\n");
@@ -2116,11 +2175,17 @@ void optimiseTAC(line_t *line) {
 		deleteLine(line);
 		for (int i = 0; i < line->prev->lineCount; i++) {
 		    backProp(line->prev->lines[i]);
+			flushVisited();
 		}
 	}
 	for (int i = 0; i < line->prev->lineCount; i++) {
 		optimiseTAC(line->prev->lines[i]);
 	}
+}
+
+void flushVisited() {
+    for (int i = 0; i < program->lineList->lineCount; i++)
+		program->lineList->lines[i]->visited = false;
 }
 
 bool removable(line_t *line) {
@@ -2136,6 +2201,10 @@ bool removable(line_t *line) {
 }
 
 void backProp(line_t *line) {
+	if (line->visited)
+		return;
+
+	line->visited = true;
 	computeUseDefSets(line);
 	computeOutSet(line);
 	computeInSet(line);
@@ -2172,5 +2241,44 @@ void deleteLine(line_t *line) {
 	line->out->idCount = 0;
 	line->use->idCount = 0;
 	line->def->idCount = 0;
+
+	line_t *prevLine = line->prev->lines[0];
+	line_t *nextLine = line->next->lines[0];
+
+	if (prevLine != NULL) {
+		for (int i = 0; i < prevLine->next->lineCount; i++) {
+			if (prevLine->next->lines[i] != line)
+				continue;
+
+		    if (nextLine != NULL) {
+				prevLine->next->lines[i] = nextLine;
+		    } else {
+				prevLine->next->lines[i] = prevLine->next->lines[prevLine->next->lineCount - 1];
+				prevLine->next->lineCount--;
+		    }
+			break;
+		}
+	}
+
+	if (nextLine != NULL) {
+		for (int i = 0; i < nextLine->prev->lineCount; i++) {
+			if (nextLine->prev->lines[i] != line)
+				continue;
+
+		    if (prevLine != NULL) {
+				nextLine->prev->lines[i] = prevLine;
+		    } else {
+				nextLine->prev->lines[i] = nextLine->prev->lines[nextLine->prev->lineCount - 1];
+				nextLine->prev->lineCount--;
+		    }
+			break;
+		}
+	}
+}
+
+int compareLex(const void *a, const void *b) {
+    identifier_t *idA = *(identifier_t **)a;
+    identifier_t *idB = *(identifier_t **)b;
+    return strcmp(idA->value, idB->value);
 }
 

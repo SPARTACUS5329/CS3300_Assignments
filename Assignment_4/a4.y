@@ -8,6 +8,7 @@
 void yyerror(char *);
 char mytext[100];
 extern int yylex(void);
+extern FILE *yyin;
 int lineNumber = 1;
 
 program_t *program;
@@ -71,6 +72,7 @@ lines:
 		$2->def->ids = (identifier_t **)calloc(MAX_IDENTIFIERS, sizeof(identifier_t *));
 
 		$1->lines[$1->lineCount++] = $2;
+		lineNumber++;
 	}
 	| {
 		line_list_t *lineList = (line_list_t *)calloc(1, sizeof(line_list_t));
@@ -276,19 +278,60 @@ void error(char *message) {
 	exit(1);
 }
 
-int main(void) {
+int main(int argc, char *argv[]) {
+    if (argc != 3)
+        error("Incorrect input arguments");
+
+	const char *tacFileName = argv[1];
+	const char *queryFileName = argv[2];
+
+    FILE *tacFile = fopen(tacFileName, "r");
+    if (tacFile == NULL)
+        error("Error opening TAC file");
+
     program = (program_t *)calloc(1, sizeof(program_t));
+
+	yyin = tacFile;
     yyparse();
+	fclose(tacFile);
+
+    FILE *queryFile = fopen(queryFileName, "r");
+    if (queryFile == NULL)
+        error("Error opening query file");
+
+    int value;
+    while (fscanf(queryFile, "%d", &value) == 1)
+        program->queries[program->queryCount++] = value;
+
 	constructCFG(program->lineList);
 	// stringifyCFG(program->lineList->lines[0], program->lineList->lineCount);
-	firstParseTAC(program->lineList);
-	secondParseTAC(program->lineList);
+
+	firstPass(program->lineList);
+	secondPass(program->lineList);
+	fixupPass(program->lineList);
+
 	optimiseTAC(program->lineList->lines[program->lineList->lineCount - 1]);
-	for (int i = 0; i < program->lineList->lineCount; i++)
-		if (program->lineList->lines[i]->isDeleted)
-		    printf("Deleted %d\n", program->lineList->lines[i]->lineNumber);
+	// for (int i = 0; i < program->lineList->lineCount; i++) {
+		// if (program->lineList->lines[i]->isDeleted)
+		    // printf("Deleted %d\n", program->lineList->lines[i]->lineNumber);
+	// }
+
+	resolveQueries();
 
     return 0;
+}
+
+void resolveQueries() {
+	int query;
+	line_t *line;
+	for (int i = 0; i < program->queryCount; i++) {
+		query = program->queries[i];
+		line = program->lineList->lines[query - 1];
+		if (line->isDeleted)
+		    printf("Line removed in optimized TAC\n");
+		else
+		    printSet(line->out);
+	}
 }
 
 unsigned long hash(char *str) {
@@ -422,7 +465,7 @@ void stringifyCFG(line_t *root, int maxNodes) {
     free(visited);
 }
 
-void firstParseTAC(line_list_t *lineList) {
+void firstPass(line_list_t *lineList) {
 	line_t *line;
     for (int i = 0; i < lineList->lineCount; i++) {
 		line = lineList->lines[i];
@@ -430,7 +473,7 @@ void firstParseTAC(line_list_t *lineList) {
 	}
 }
 
-void secondParseTAC(line_list_t *lineList) {
+void secondPass(line_list_t *lineList) {
 	line_t *line;
 	bool printFound = false;
 	for (int i = lineList->lineCount - 1; i >= 0; i--) {
@@ -443,6 +486,21 @@ void secondParseTAC(line_list_t *lineList) {
 		printFound = true;
 		computeOutSet(line);
 		computeInSet(line);
+	}
+}
+
+void fixupPass(line_list_t *lineList) {
+	line_t *line;
+    for (int i = 0; i < lineList->lineCount; i++) {
+		line = lineList->lines[i];
+		if (line->type == COND_JUMP || line->type == UNCOND_JUMP) {
+		    computeOutSet(line);
+		    computeInSet(line);
+			for (int j = 0; j < line->prev->lineCount; j++) {
+				backProp(line->prev->lines[j]);
+				flushVisited();
+		    }
+		}
 	}
 }
 
@@ -498,6 +556,7 @@ id_list_t *diffSets(id_list_t *set1, id_list_t *set2) {
 }
 
 void printSet(id_list_t *idList) {
+	qsort(idList->ids, idList->idCount, sizeof(identifier_t *), compareLex);
     for (int i = 0; i < idList->idCount; i++)
 		printf("%s ", idList->ids[i]->value);
     printf("\n");
@@ -508,11 +567,17 @@ void optimiseTAC(line_t *line) {
 		deleteLine(line);
 		for (int i = 0; i < line->prev->lineCount; i++) {
 		    backProp(line->prev->lines[i]);
+			flushVisited();
 		}
 	}
 	for (int i = 0; i < line->prev->lineCount; i++) {
 		optimiseTAC(line->prev->lines[i]);
 	}
+}
+
+void flushVisited() {
+    for (int i = 0; i < program->lineList->lineCount; i++)
+		program->lineList->lines[i]->visited = false;
 }
 
 bool removable(line_t *line) {
@@ -528,6 +593,10 @@ bool removable(line_t *line) {
 }
 
 void backProp(line_t *line) {
+	if (line->visited)
+		return;
+
+	line->visited = true;
 	computeUseDefSets(line);
 	computeOutSet(line);
 	computeInSet(line);
@@ -564,4 +633,43 @@ void deleteLine(line_t *line) {
 	line->out->idCount = 0;
 	line->use->idCount = 0;
 	line->def->idCount = 0;
+
+	line_t *prevLine = line->prev->lines[0];
+	line_t *nextLine = line->next->lines[0];
+
+	if (prevLine != NULL) {
+		for (int i = 0; i < prevLine->next->lineCount; i++) {
+			if (prevLine->next->lines[i] != line)
+				continue;
+
+		    if (nextLine != NULL) {
+				prevLine->next->lines[i] = nextLine;
+		    } else {
+				prevLine->next->lines[i] = prevLine->next->lines[prevLine->next->lineCount - 1];
+				prevLine->next->lineCount--;
+		    }
+			break;
+		}
+	}
+
+	if (nextLine != NULL) {
+		for (int i = 0; i < nextLine->prev->lineCount; i++) {
+			if (nextLine->prev->lines[i] != line)
+				continue;
+
+		    if (prevLine != NULL) {
+				nextLine->prev->lines[i] = prevLine;
+		    } else {
+				nextLine->prev->lines[i] = nextLine->prev->lines[nextLine->prev->lineCount - 1];
+				nextLine->prev->lineCount--;
+		    }
+			break;
+		}
+	}
+}
+
+int compareLex(const void *a, const void *b) {
+    identifier_t *idA = *(identifier_t **)a;
+    identifier_t *idB = *(identifier_t **)b;
+    return strcmp(idA->value, idB->value);
 }

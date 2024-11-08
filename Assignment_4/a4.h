@@ -27,6 +27,8 @@ typedef enum { ASS, UASS, COND_JUMP, UNCOND_JUMP, LABEL_DEF, IO } line_e;
 
 typedef struct Program {
   line_list_t *lineList;
+  int queryCount;
+  int queries[MAX_LINES];
 } program_t;
 
 typedef struct LineList {
@@ -37,6 +39,7 @@ typedef struct LineList {
 typedef struct Line {
   line_e type;
   bool isDeleted;
+  bool visited;
   int lineNumber;
   union {
     ass_t *ass;
@@ -122,11 +125,15 @@ void optimiseTAC(line_t *line);
 void computeOutSet(line_t *line);
 void computeInSet(line_t *line);
 void combineSets(id_list_t *set1, id_list_t *set2);
-void firstParseTAC(line_list_t *lineList);
-void secondParseTAC(line_list_t *lineList);
+void firstPass(line_list_t *lineList);
+void secondPass(line_list_t *lineList);
+void fixupPass(line_list_t *lineList);
 id_list_t *diffSets(id_list_t *set1, id_list_t *set2);
 void printSet(id_list_t *idList);
 void computeUseDefSets(line_t *line);
 void backProp(line_t *line);
 bool removable(line_t *line);
 void deleteLine(line_t *line);
+int compareLex(const void *a, const void *b);
+void resolveQueries();
+void flushVisited();

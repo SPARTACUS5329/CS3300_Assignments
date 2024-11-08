@@ -1,0 +1,11 @@
+i = 0
+max = 5
+L1: 
+if i < max goto L2
+goto L5
+L2: 
+i = i + 1
+print i
+goto L1
+L5: 
+print i

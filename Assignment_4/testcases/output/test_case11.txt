@@ -1,0 +1,7 @@
+#empty-printSpace
+Line removed in optimized TAC
+x
+Line removed in optimized TAC
+y z
+x y z
+Line removed in optimized TAC

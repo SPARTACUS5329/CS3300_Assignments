@@ -1,0 +1,19 @@
+total = 0
+i = 1
+L1: 
+if i <= total goto L2
+temp = total + 5
+total = total + i
+i = i + 1
+goto L3
+L2: 
+print total
+L3: 
+if total >= i goto L4
+test = total - 1 
+total = total + 5
+goto L5
+L4: 
+total = total - 10
+L5: 
+print total

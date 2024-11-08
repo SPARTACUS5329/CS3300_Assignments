@@ -15,6 +15,8 @@ extern int lineNumber;
 "*"	{ return MULTIPLY; }
 "/"	{ return DIVIDE; }
 
+"=="	{ return COMPAR; }
+"!="	{ return COMPAR; }
 "<"	{ return COMPAR; }
 ">"	{ return COMPAR; }
 "<="	{ return COMPAR; }
@@ -33,8 +35,7 @@ extern int lineNumber;
 [0-9]+  { strcpy(mytext, yytext); return NUMBER_TOK; }
 [a-zA-Z_][a-zA-Z0-9_]*	{ strcpy(mytext, yytext); return IDENTIFIER_TOK; }
 
-[ \t]	{ }
-[\n]	{ lineNumber++; }
+[ \t\n]	{}
 
 .	{yyerror("unknown character");}
 %%

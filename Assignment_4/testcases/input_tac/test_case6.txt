@@ -1,0 +1,16 @@
+m = 1
+n = 2
+p = 3
+L1: 
+if m < n goto L2
+p = p + 1
+m = m + 2
+goto L1
+L2: 
+q = n + p
+if q > n goto L3
+q = q + 3
+L3: 
+print q
+print m
+print n
