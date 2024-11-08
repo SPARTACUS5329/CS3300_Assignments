@@ -1,0 +1,17 @@
+a = 15
+b = 10
+result = a - b
+L1: 
+if a > b goto L2
+result = result + 5
+goto L1
+L2: 
+print result
+L3: 
+if a < result goto L4
+a = a * 2
+goto L5
+L4: 
+b = b + 1
+L5: 
+print b

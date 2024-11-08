@@ -1,0 +1,10 @@
+a = 5
+b = 10
+L1: 
+if a < b goto L2
+a = a * 2
+goto L3
+L2: 
+a = a + 1
+L3: 
+print a

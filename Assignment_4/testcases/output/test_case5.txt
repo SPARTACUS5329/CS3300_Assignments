@@ -1,0 +1,3 @@
+a b result
+Line removed in optimized TAC
+ 

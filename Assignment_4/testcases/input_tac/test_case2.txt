@@ -1,0 +1,18 @@
+count = 0
+sum = 0
+L1: 
+if count < sum goto L2
+sum = sum + count
+count = count + 1
+goto L1
+L2: 
+avg = sum / count
+print sum
+print avg
+L3: 
+if count >= avg goto L4
+goto L5
+L4: 
+print avg
+L5: 
+print count

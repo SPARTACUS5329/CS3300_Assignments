@@ -1,0 +1,8 @@
+x = 10
+y = 20
+L1: 
+if x < y goto L2
+y = y - 5
+goto L1
+L2: 
+print y

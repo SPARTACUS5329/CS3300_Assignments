@@ -1,0 +1,22 @@
+x = 3
+y = 4
+z = 5
+L1: 
+if x < y goto L2
+z = z + x
+a = z + 2
+b = a * 3
+goto L3
+L2: 
+z = z - y
+a = z + 5
+L3: 
+print z
+L4: 
+if z > y goto L5
+goto L6
+L5: 
+x = x + 1
+L6: 
+z = 2 + y
+print z
