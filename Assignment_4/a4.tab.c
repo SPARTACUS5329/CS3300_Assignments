@@ -464,9 +464,9 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint16 yyrline[] =
 {
        0,    54,    54,    60,    77,    85,    92,    99,   106,   113,
-     121,   131,   140,   148,   156,   164,   172,   178,   187,   196,
-     197,   201,   211,   219,   227,   233,   242,   248,   263,   264,
-     265,   266
+     121,   131,   140,   149,   158,   167,   176,   183,   193,   202,
+     203,   207,   217,   225,   233,   239,   248,   254,   269,   270,
+     271,   272
 };
 #endif
 
@@ -1513,6 +1513,7 @@ yyreduce:
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = IDENTIFIER;
 		exp->rType = IDENTIFIER;
+		exp->isBinOp = true;
 		exp->lValue.id = (yyvsp[(1) - (3)].id);
 		exp->rValue.id = (yyvsp[(3) - (3)].id);
 		(yyval.exp) = exp;
@@ -1520,11 +1521,12 @@ yyreduce:
     break;
 
   case 13:
-#line 148 "a4.y"
+#line 149 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = IDENTIFIER;
 		exp->rType = NUMBER;
+		exp->isBinOp = true;
 		exp->lValue.id = (yyvsp[(1) - (3)].id);
 		exp->rValue.val = (yyvsp[(3) - (3)].val);
 		(yyval.exp) = exp;
@@ -1532,11 +1534,12 @@ yyreduce:
     break;
 
   case 14:
-#line 156 "a4.y"
+#line 158 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = NUMBER;
 		exp->rType = IDENTIFIER;
+		exp->isBinOp = true;
 		exp->lValue.val = (yyvsp[(1) - (3)].val);
 		exp->rValue.id = (yyvsp[(3) - (3)].id);
 		(yyval.exp) = exp;
@@ -1544,11 +1547,12 @@ yyreduce:
     break;
 
   case 15:
-#line 164 "a4.y"
+#line 167 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = NUMBER;
 		exp->rType = NUMBER;
+		exp->isBinOp = true;
 		exp->lValue.val = (yyvsp[(1) - (3)].val);
 		exp->rValue.val = (yyvsp[(3) - (3)].val);
 		(yyval.exp) = exp;
@@ -1556,27 +1560,29 @@ yyreduce:
     break;
 
   case 16:
-#line 172 "a4.y"
+#line 176 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = IDENTIFIER;
+		exp->isBinOp = false;
 		exp->lValue.id = (yyvsp[(1) - (1)].id);
 		(yyval.exp) = exp;
 	;}
     break;
 
   case 17:
-#line 178 "a4.y"
+#line 183 "a4.y"
     {
 		exp_t *exp = (exp_t *)calloc(1, sizeof(exp_t));
 		exp->lType = NUMBER;
+		exp->isBinOp = false;
 		exp->lValue.val = (yyvsp[(1) - (1)].val);
 		(yyval.exp) = exp;
 	;}
     break;
 
   case 18:
-#line 187 "a4.y"
+#line 193 "a4.y"
     {
 		u_ass_t *ass = (u_ass_t *)calloc(1, sizeof(u_ass_t));
 		ass->lid = (yyvsp[(1) - (4)].id);
@@ -1586,7 +1592,7 @@ yyreduce:
     break;
 
   case 21:
-#line 201 "a4.y"
+#line 207 "a4.y"
     {
 		cond_jump_t *jump = (cond_jump_t *)calloc(1, sizeof(cond_jump_t));
 		jump->lid = (yyvsp[(2) - (6)].id);
@@ -1597,7 +1603,7 @@ yyreduce:
     break;
 
   case 22:
-#line 211 "a4.y"
+#line 217 "a4.y"
     {
 		uncond_jump_t *jump = (uncond_jump_t *)calloc(1, sizeof(uncond_jump_t));
 		jump->label = (yyvsp[(2) - (2)].id);
@@ -1606,7 +1612,7 @@ yyreduce:
     break;
 
   case 23:
-#line 219 "a4.y"
+#line 225 "a4.y"
     {
 		label_def_t *labelDef = (label_def_t *)calloc(1, sizeof(label_def_t));
 		labelDef->value = (yyvsp[(1) - (2)].id);
@@ -1615,7 +1621,7 @@ yyreduce:
     break;
 
   case 24:
-#line 227 "a4.y"
+#line 233 "a4.y"
     {
 		io_t *io = (io_t *)calloc(1, sizeof(io_t));
 		io->id = (yyvsp[(2) - (2)].id);
@@ -1625,7 +1631,7 @@ yyreduce:
     break;
 
   case 25:
-#line 233 "a4.y"
+#line 239 "a4.y"
     {
 		io_t *io = (io_t *)calloc(1, sizeof(io_t));
 		io->id = (yyvsp[(2) - (2)].id);
@@ -1635,14 +1641,14 @@ yyreduce:
     break;
 
   case 26:
-#line 242 "a4.y"
+#line 248 "a4.y"
     {
 		(yyval.val) = atoi(mytext);
 	;}
     break;
 
   case 27:
-#line 248 "a4.y"
+#line 254 "a4.y"
     {
 		symbol_table_item_t *item = searchSymbol(mytext, symbolTable);
 		identifier_t *id;
@@ -1659,7 +1665,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1663 "a4.tab.c"
+#line 1669 "a4.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1873,7 +1879,7 @@ yyreturn:
 }
 
 
-#line 269 "a4.y"
+#line 275 "a4.y"
 
 
 void yyerror(char *message) {
@@ -1917,12 +1923,9 @@ int main(int argc, char *argv[]) {
 	firstPass(program->lineList);
 	secondPass(program->lineList);
 	fixupPass(program->lineList);
+	flushVisited();
 
 	optimiseTAC(program->lineList->lines[program->lineList->lineCount - 1]);
-	// for (int i = 0; i < program->lineList->lineCount; i++) {
-		// if (program->lineList->lines[i]->isDeleted)
-		    // printf("Deleted %d\n", program->lineList->lines[i]->lineNumber);
-	// }
 
 	resolveQueries();
 
@@ -2021,7 +2024,9 @@ void constructCFG(line_list_t *lineList) {
 		    break;
 		case UNCOND_JUMP:
 			item = searchSymbol(line->line.uncondJump->label->value, labelTable);
-			line->next->lines[line->next->lineCount++] = (line_t *) item->data;
+			nextLine = (line_t *)item->data;
+			line->next->lines[line->next->lineCount++] = nextLine;
+			nextLine->prev->lines[nextLine->prev->lineCount++] = line;
 		    break;
 		case LABEL_DEF:
 			if (nextLine != NULL) {
@@ -2139,8 +2144,9 @@ void combineSets(id_list_t *set1, id_list_t *set2) {
 				break;
 			}
 		}
-		if (!elementFound)
+		if (!elementFound) {
 		    set1->ids[set1->idCount++] = id;
+		}
 	}
 }
 
@@ -2171,6 +2177,10 @@ void printSet(id_list_t *idList) {
 }
 
 void optimiseTAC(line_t *line) {
+	if (line->optimised)
+		return;
+
+	line->optimised = true;
     if (removable(line)) {
 		deleteLine(line);
 		for (int i = 0; i < line->prev->lineCount; i++) {
@@ -2220,7 +2230,7 @@ void computeUseDefSets(line_t *line) {
 	    line->def->ids[line->def->idCount++] = line->line.ass->id;
 	    if (line->line.ass->exp->lType == IDENTIFIER)
 		    line->use->ids[line->use->idCount++] = line->line.ass->exp->lValue.id;
-	    if (line->line.ass->exp->rType == IDENTIFIER)
+	    if (line->line.ass->exp->isBinOp && line->line.ass->exp->rType == IDENTIFIER)
 		    line->use->ids[line->use->idCount++] = line->line.ass->exp->rValue.id;
     } else if (line->type == IO && line->line.io->type == IO_READ) {
 	    line->def->ids[line->def->idCount++] = line->line.io->id;
