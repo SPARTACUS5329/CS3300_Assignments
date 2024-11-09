@@ -317,7 +317,14 @@ int main(int argc, char *argv[]) {
 	fixupPass(program->lineList);
 	flushVisited();
 
-	optimiseTAC(program->lineList->lines[program->lineList->lineCount - 1]);
+	// optimiseTAC(program->lineList->lines[program->lineList->lineCount - 1]);
+
+	char *outFileName = strrchr(tacFileName, '/');
+	outFileName++;
+
+	FILE *outFile = freopen(outFileName, "w", stdout);
+	if (outFile == NULL)
+		error("Error opening file");
 
 	resolveQueries();
 
@@ -565,7 +572,7 @@ void printSet(id_list_t *idList) {
 	qsort(idList->ids, idList->idCount, sizeof(identifier_t *), compareLex);
     for (int i = 0; i < idList->idCount; i++)
 		printf("%s ", idList->ids[i]->value);
-    printf("\n");
+    printf(" \n");
 }
 
 void optimiseTAC(line_t *line) {

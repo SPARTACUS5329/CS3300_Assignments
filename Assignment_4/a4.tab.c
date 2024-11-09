@@ -1925,7 +1925,7 @@ int main(int argc, char *argv[]) {
 	fixupPass(program->lineList);
 	flushVisited();
 
-	optimiseTAC(program->lineList->lines[program->lineList->lineCount - 1]);
+	// optimiseTAC(program->lineList->lines[program->lineList->lineCount - 1]);
 
 	resolveQueries();
 
